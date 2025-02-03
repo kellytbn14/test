@@ -1,3 +1,53 @@
-Install-Package Microsoft.Owin
-Install-Package Microsoft.Owin.Security.Cookies
-Install-Package Microsoft.Owin.Security.OpenIdConnect
+<appSettings>
+    <add key="oidc:Authority" value="https://{tuProveedorOIDC}" />
+    <add key="oidc:ClientId" value="{tuClientId}" />
+    <add key="oidc:ClientSecret" value="{tuClientSecret}" />
+    <add key="oidc:RedirectUrl" value="https://tuapp.com/signin-oidc" />
+</appSettings>
+
+
+using Microsoft.Owin;
+using Owin;
+
+[assembly: OwinStartup(typeof(WebApplication1.Startup))]
+namespace WebApplication1
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            ConfigureAuth(app);
+        }
+
+        private void ConfigureAuth(IAppBuilder app)
+        {
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = "Cookies",
+                LoginPath = new PathString("/Login.aspx")
+            });
+
+            app.UseOpenIdConnectAuthentication(new Microsoft.Owin.Security.OpenIdConnect.OpenIdConnectAuthenticationOptions
+            {
+                Authority = System.Configuration.ConfigurationManager.AppSettings["oidc:Authority"],
+                ClientId = System.Configuration.ConfigurationManager.AppSettings["oidc:ClientId"],
+                ClientSecret = System.Configuration.ConfigurationManager.AppSettings["oidc:ClientSecret"],
+                RedirectUri = System.Configuration.ConfigurationManager.AppSettings["oidc:RedirectUrl"],
+                ResponseType = "code",
+                Scope = "openid profile email",
+                SignInAsAuthenticationType = "Cookies",
+                UseTokenLifetime = true
+            });
+        }
+    }
+}
+
+
+<asp:LoginView runat="server">
+    <AnonymousTemplate>
+        <a href="Login.aspx">Login</a>
+    </AnonymousTemplate>
+    <LoggedInTemplate>
+        <a href="Logout.aspx">Logout</a>
+    </LoggedInTemplate>
+</asp:LoginView>
