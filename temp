@@ -1,3 +1,48 @@
-I'm exploring the possibility of implementing OIDC in a Web Forms app with .NET Framework 4.7.2. The usual approach from .NET Core doesn’t work because .NET Framework doesn’t support OIDC directly, so I’m using OWIN. I set up a local OIDC test server and a test app to authenticate. Still working on it.
+using System;
+using System.Web;
+using System.Web.UI;
 
-OWIN is a way to handle authentication and other middleware in .NET Framework. I’m using it because the usual OIDC approach from .NET Core doesn’t work in Web Forms.
+namespace OIDC.NETFramework
+{
+    public partial class Callback : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // 1️⃣ Verificar si hubo error en la autenticación
+            string error = Request.QueryString["error"];
+            if (!string.IsNullOrEmpty(error))
+            {
+                Response.Write("Error en autenticación: " + error);
+                return;
+            }
+
+            // 2️⃣ Obtener parámetros de la respuesta OIDC
+            string code = Request.QueryString["code"];
+            string idToken = Request.QueryString["id_token"];
+            string state = Request.QueryString["state"];
+
+            // 3️⃣ Validar el 'state' para prevenir ataques CSRF
+            string expectedState = Session["oidc_state"] as string;
+            if (string.IsNullOrEmpty(state) || state != expectedState)
+            {
+                Response.Write("Error: El parámetro 'state' no coincide. Posible ataque CSRF.");
+                return;
+            }
+
+            // 4️⃣ Si recibimos 'code', podemos intercambiarlo por tokens (Authorization Code Flow)
+            if (!string.IsNullOrEmpty(code))
+            {
+                Response.Write("Código de autorización recibido: " + code);
+                // Aquí debes hacer una solicitud HTTP al token endpoint para obtener access_token y id_token
+                // (Necesitas un método para hacer un POST a `token_uri`).
+            }
+
+            // 5️⃣ Si ya recibimos el 'id_token', significa que el usuario está autenticado
+            if (!string.IsNullOrEmpty(idToken))
+            {
+                Response.Write("ID Token recibido, autenticación exitosa.");
+                // Aquí puedes decodificar el id_token y extraer la información del usuario.
+            }
+        }
+    }
+}
