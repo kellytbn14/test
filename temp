@@ -207,3 +207,7 @@ public void SignOutUser()
     // Cerrar sesión y eliminar la cookie
     authManager.SignOut("Cookies");
 }
+
+
+<button id="logoutButton" runat="server" class="btn btn-danger" OnClick="LogoutButton_Click">Logout</button>
+
