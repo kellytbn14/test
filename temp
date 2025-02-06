@@ -166,3 +166,22 @@ try
                 {
                     Response.Write("Error en la solicitud del token: " + ex.Message);
                 }
+
+
+
+
+protected void SignInUser(string userName, string idToken)
+{
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, userName),
+        new Claim("id_token", idToken) // Guardar ID Token si es necesario
+    };
+
+    var identity = new ClaimsIdentity(claims, "Cookies");
+
+    var ctx = HttpContext.Current.GetOwinContext();
+    var authManager = ctx.Authentication;
+
+    authManager.SignIn(new AuthenticationProperties { IsPersistent = true }, identity);
+}
