@@ -197,3 +197,13 @@ curl -X POST https://tu-idp.com/token \
   -d "scope=openid" \
   -d "redirect_uri=https://localhost:44333/oidc/callback"
 
+
+
+public void SignOutUser()
+{
+    var ctx = HttpContext.Current.GetOwinContext();
+    var authManager = ctx.Authentication;
+
+    // Cerrar sesión y eliminar la cookie
+    authManager.SignOut("Cookies");
+}
