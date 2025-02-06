@@ -49,4 +49,17 @@ namespace OIDC.NETFramework
 
 
 <EnableAutoLaunch>false</EnableAutoLaunch>
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (User.Identity.IsAuthenticated)
+    {
+        var claimsIdentity = (ClaimsIdentity)User.Identity;
+        var idToken = claimsIdentity.FindFirst("id_token")?.Value;
+
+        if (idToken != null)
+        {
+            Response.Write("ID Token: " + idToken);
+        }
+    }
+}
 
