@@ -46,3 +46,7 @@ namespace OIDC.NETFramework
         }
     }
 }
+
+
+<EnableAutoLaunch>false</EnableAutoLaunch>
+
