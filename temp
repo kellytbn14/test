@@ -120,3 +120,12 @@ namespace OIDC.NETFramework
     }
 }
 
+
+curl -X POST "https://wam-ist.cloud.bns/sso/oauth2/bns/access_token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=authorization_code" \
+     -d "client_id=HRSSORefresh" \
+     -d "client_secret=36567bd2-666e-491c-a511-5028eb7a4f13" \
+     -d "code=TU_AUTH_CODE" \
+     -d "redirect_uri=https://localhost:44333/oidc/callback"
+
