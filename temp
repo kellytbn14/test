@@ -185,3 +185,15 @@ protected void SignInUser(string userName, string idToken)
 
     authManager.SignIn(new AuthenticationProperties { IsPersistent = true }, identity);
 }
+
+
+
+curl -X POST https://tu-idp.com/token \
+  -d "grant_type=password" \
+  -d "client_id=tu-client-id" \
+  -d "client_secret=tu-client-secret" \
+  -d "username=usuario@ejemplo.com" \
+  -d "password=contraseña-del-usuario" \
+  -d "scope=openid" \
+  -d "redirect_uri=https://localhost:44333/oidc/callback"
+
