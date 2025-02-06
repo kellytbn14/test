@@ -63,3 +63,60 @@ protected void Page_Load(object sender, EventArgs e)
     }
 }
 
+
+
+
+
+using System;
+using System.Collections.Specialized;
+using System.Net;
+using System.Text;
+using System.Web;
+using Newtonsoft.Json.Linq;
+
+namespace OIDC.NETFramework
+{
+    public partial class Callback : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            string code = Request.QueryString["code"];
+            if (string.IsNullOrEmpty(code))
+            {
+                Response.Write("Error: No se recibió el código de autorización.");
+                return;
+            }
+
+            string tokenUrl = "https://wam-ist.cloud.bns/sso/oauth2/bns/access_token";
+            using (WebClient client = new WebClient())
+            {
+                var postData = new NameValueCollection();
+                postData["grant_type"] = "authorization_code";
+                postData["client_id"] = "HRSSORefresh";
+                postData["client_secret"] = "36567bd2-666e-491c-a511-5028eb7a4f13";
+                postData["code"] = code;
+                postData["redirect_uri"] = "https://localhost:44333/oidc/callback";
+
+                byte[] responseBytes = client.UploadValues(tokenUrl, "POST", postData);
+                string responseString = Encoding.UTF8.GetString(responseBytes);
+                JObject tokenResponse = JObject.Parse(responseString);
+
+                string idToken = tokenResponse["id_token"]?.ToString();
+                string accessToken = tokenResponse["access_token"]?.ToString();
+
+                if (string.IsNullOrEmpty(idToken))
+                {
+                    Response.Write("Error: No se recibió un ID Token.");
+                    return;
+                }
+
+                // Guardar en sesión para validar autenticación
+                Session["id_token"] = idToken;
+                Session["access_token"] = accessToken;
+
+                Response.Redirect("Default.aspx");
+            }
+        }
+    }
+}
+
