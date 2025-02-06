@@ -153,3 +153,16 @@ using (var client = new HttpClient())
     Response.Write(responseString); // Para ver la respuesta del servidor
 }
 
+
+
+try
+                {
+                    HttpResponseMessage response = client.PostAsync(tokenUrl, content).Result;
+                    string responseString = response.Content.ReadAsStringAsync().Result;
+
+                    Response.Write(responseString); // Verifica si recibes el access_token
+                }
+                catch (Exception ex)
+                {
+                    Response.Write("Error en la solicitud del token: " + ex.Message);
+                }
