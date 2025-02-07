@@ -1,4 +1,47 @@
 
+using System;
+using System.Configuration;
+using Microsoft.Owin;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+
+public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        string clientId = ConfigurationManager.AppSettings["WamClientId"];
+        string tenantId = ConfigurationManager.AppSettings["WamTenantId"];
+        string authority = ConfigurationManager.AppSettings["WamAuthority"];
+        string redirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+
+        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(tenantId) || 
+            string.IsNullOrEmpty(authority) || string.IsNullOrEmpty(redirectUri))
+        {
+            throw new Exception("Faltan configuraciones en web.config");
+        }
+
+        app.UseCookieAuthentication(new CookieAuthenticationOptions
+        {
+            AuthenticationType = "Cookies"
+        });
+
+        app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+        {
+            ClientId = clientId,
+            Authority = authority,
+            RedirectUri = redirectUri,
+            ResponseType = "code id_token",
+            Scope = "openid profile email",
+            SignInAsAuthenticationType = "Cookies",
+            UseTokenLifetime = false,
+            SaveTokens = true
+        });
+    }
+}
+        int expirationMinutes = int.TryParse(ConfigurationManager.AppSettings["AuthCookieExpirationMinutes"], out int minutes) ? minutes : 30;
+
+
 <configuration>
   <appSettings>
     <add key="WamClientId" value="tu-client-id" />
