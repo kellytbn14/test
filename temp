@@ -1,3 +1,38 @@
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ClientId = ConfigurationManager.AppSettings["ClientId"],
+    Authority = ConfigurationManager.AppSettings["Authority"],
+    RedirectUri = ConfigurationManager.AppSettings["RedirectUri"],
+    ResponseType = "code",  // Se usa "code" en lugar de "id_token"
+    Scope = "openid profile",
+    SignInAsAuthenticationType = "Cookies",
+    UseTokenLifetime = false,
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        AuthorizationCodeReceived = async context =>
+        {
+            var code = context.Code;
+
+            // Intercambiar el código por tokens (Acceso y Refresh Token)
+            var tokenClient = new HttpClient();
+            var tokenResponse = await tokenClient.PostAsync(ConfigurationManager.AppSettings["TokenEndpoint"], 
+                new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    { "client_id", ConfigurationManager.AppSettings["ClientId"] },
+                    { "client_secret", ConfigurationManager.AppSettings["ClientSecret"] },
+                    { "code", code },
+                    { "redirect_uri", ConfigurationManager.AppSettings["RedirectUri"] },
+                    { "grant_type", "authorization_code" }
+                }));
+
+            var tokenResult = await tokenResponse.Content.ReadAsStringAsync();
+            // Procesar tokens aquí (acceso, refresh, etc.)
+        }
+    }
+});
+
+
+
 using System;
 using System.Web;
 
