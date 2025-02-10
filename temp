@@ -1,3 +1,42 @@
+public class AuthPage : System.Web.UI.Page
+{
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e); // Llamar a la implementación base de OnInit
+
+        if (!HttpContext.Current.User.Identity.IsAuthenticated)
+        {
+            // Mostrar un mensaje en la consola del navegador
+            ClientScript.RegisterStartupScript(this.GetType(), "consoleLog", "console.log('[AuthPage] No autenticado! Redirigiendo...');", true);
+
+            // Redirigir al login
+            Response.Redirect("~/Login.aspx", true);
+            
+            // IMPORTANTE: Detener la ejecución de la página
+            Context.ApplicationInstance.CompleteRequest();
+        }
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e); // Llamar a la implementación base de OnLoad
+
+        // Si el usuario ya está autenticado, obtener el token
+        var identity = (ClaimsIdentity)HttpContext.Current.User.Identity;
+        var idTokenClaim = identity.FindFirst("id.token");
+
+        if (idTokenClaim != null)
+        {
+            string idToken = idTokenClaim.Value;
+
+            // Mostrar el ID Token en la consola del navegador
+            ClientScript.RegisterStartupScript(this.GetType(), "consoleLogId", $"console.log('ID Token: {idToken}');", true);
+        }
+    }
+}
+
+
+
 if (this is System.Web.UI.Page)
 {
     Response.Write("ESOP_Landing efectivamente hereda de Page");
