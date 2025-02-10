@@ -1,3 +1,7 @@
+ClientScript.RegisterStartupScript(this.GetType(), "consoleLog",
+                $"console.log('ID Token: {idToken}');", true);
+
+
 ClientScript.RegisterStartupScript(this.GetType(), "consoleLog", "console.log('Mensaje desde el servidor');", true);
 
 
