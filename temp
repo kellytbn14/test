@@ -1,3 +1,10 @@
+if (this is System.Web.UI.Page)
+{
+    Response.Write("ESOP_Landing efectivamente hereda de Page");
+}
+
+
+
 EnableViewState="true"
 
  AutoEventWireup="true"
