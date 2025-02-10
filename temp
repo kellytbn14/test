@@ -1,3 +1,27 @@
+public void Configuration(IAppBuilder app)
+{
+    // Configurar autenticación con cookies
+    app.UseCookieAuthentication(new CookieAuthenticationOptions
+    {
+        AuthenticationType = CookieAuthenticationDefaults.AuthenticationType
+    });
+
+    // Configurar autenticación con OpenID Connect
+    app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+    {
+        ClientId = "tu-client-id",
+        Authority = "https://wam-ist.cloud.bns:443/sso/oauth2/bns",
+        RedirectUri = "https://tu-app/callback",
+        ResponseType = OpenIdConnectResponseType.CodeIdToken,
+        SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType
+    });
+}
+
+
+app.UseCookieAuthentication(new CookieAuthenticationOptions());
+
+
+
 https://wam-ist.cloud.bns/sso/oauth2/bns/.well-known/openid-configuration
 
 2️⃣ Si WAM no tiene metadatos, configura manualmente los endpoints:
