@@ -1,3 +1,66 @@
+public void ConfigureAuth(IAppBuilder app)
+{
+    app.UseCookieAuthentication(new CookieAuthenticationOptions
+    {
+        AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+        LoginPath = new PathString("/Auth/Logout.aspx"), // Esto NO es el login, sino la página de error
+        ExpireTimeSpan = TimeSpan.FromMinutes(30),
+        SlidingExpiration = true
+    });
+
+    app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+    {
+        Authority = "https://tu-wam-provider.com/",
+        ClientId = "tu-client-id",
+        RedirectUri = "https://tu-app.com/signin-oidc",
+        ResponseType = OpenIdConnectResponseType.CodeIdToken,
+        Scope = "openid profile",
+        SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+        SaveTokens = true,
+        Notifications = new OpenIdConnectAuthenticationNotifications
+        {
+            AuthenticationFailed = context =>
+            {
+                context.HandleResponse();
+                context.Response.Redirect("/Auth/Logout.aspx"); // Redirige a la página de error si falla la autenticación
+                return Task.CompletedTask;
+            }
+        }
+    });
+}
+
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!User.Identity.IsAuthenticated)
+    {
+        HttpContext.Current.GetOwinContext().Authentication.Challenge(
+            new AuthenticationProperties { RedirectUri = "/" },
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+    }
+    else
+    {
+        Response.Redirect("~/Default.aspx");
+    }
+}
+
+
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (Request.IsAuthenticated)
+    {
+        HttpContext.Current.GetOwinContext().Authentication.SignOut(
+            CookieAuthenticationDefaults.AuthenticationType,
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+    }
+
+    Response.Redirect("~/Auth/ForceLogin.aspx"); // Vuelve a redirigir al login
+}
+
+
+
+
 HttpContext.Current.GetOwinContext().Authentication.Challenge(
                 new AuthenticationProperties { RedirectUri = Request.Url.ToString() },
                 OpenIdConnectAuthenticationDefaults.AuthenticationType
