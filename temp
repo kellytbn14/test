@@ -1,3 +1,15 @@
+var identity = (ClaimsIdentity)HttpContext.Current.User.Identity;
+var idTokenClaim = identity.FindFirst("id_token");
+
+if (idTokenClaim != null)
+{
+    string idToken = idTokenClaim.Value;
+    Console.WriteLine("ID Token: " + idToken);
+}
+
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ClientId = ConfigurationManager.AppSettings["ClientId"],
