@@ -1,3 +1,50 @@
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Logout.aspx.cs" Inherits="TuProyecto.Logout" %>
+
+<!DOCTYPE html>
+<html lang="es">
+<head runat="server">
+    <meta charset="utf-8" />
+    <title>No Autenticado</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .container { max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+        h2 { color: red; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>¡Acceso no permitido!</h2>
+        <p>No tienes una sesión activa. Por favor, inicia sesión para continuar.</p>
+        <button onclick="window.location.href='Default.aspx'">Volver a la Página Principal</button>
+    </div>
+</body>
+</html>
+
+using System;
+using System.Web;
+using System.Web.UI;
+
+namespace TuProyecto
+{
+    public partial class Logout : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // Cerrar sesión
+            Session.Clear();  // Elimina todas las variables de sesión
+            Session.Abandon(); // Finaliza la sesión actual
+            HttpContext.Current.User = null; // Borra la identidad del usuario
+            
+            // Redirigir al Login después de 5 segundos
+            Response.AppendHeader("Refresh", "5;url=Login.aspx");
+        }
+    }
+}
+
+
+
 public class AuthPage : System.Web.UI.Page
 {
     protected override void OnInit(EventArgs e)
