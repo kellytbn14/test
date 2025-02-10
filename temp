@@ -1,3 +1,8 @@
+EnableViewState="true"
+
+ AutoEventWireup="true"
+
+
 SecurityTokenValidated = context =>
 {
     var identity = (ClaimsIdentity)context.AuthenticationTicket.Identity;
