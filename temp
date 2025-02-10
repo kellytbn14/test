@@ -1,3 +1,21 @@
+SecurityTokenValidated = context =>
+{
+    var identity = (ClaimsIdentity)context.AuthenticationTicket.Identity;
+
+    // Obtener el id_token desde el contexto
+    var idToken = context.ProtocolMessage.IdToken;
+
+    if (!string.IsNullOrEmpty(idToken))
+    {
+        // Agregar el id_token como un claim
+        identity.AddClaim(new Claim("id_token", idToken));
+    }
+
+    return Task.CompletedTask;
+}
+
+
+
 ClientScript.RegisterStartupScript(this.GetType(), "consoleLog",
                 $"console.log('ID Token: {idToken}');", true);
 
