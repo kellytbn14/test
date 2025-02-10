@@ -1,3 +1,10 @@
+HttpContext.Current.GetOwinContext().Authentication.Challenge(
+                new AuthenticationProperties { RedirectUri = Request.Url.ToString() },
+                OpenIdConnectAuthenticationDefaults.AuthenticationType
+            );
+
+
+
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Logout.aspx.cs" Inherits="TuProyecto.Logout" %>
 
 <!DOCTYPE html>
