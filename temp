@@ -1,3 +1,29 @@
+https://wam-ist.cloud.bns/sso/oauth2/bns/.well-known/openid-configuration
+
+2️⃣ Si WAM no tiene metadatos, configura manualmente los endpoints:
+
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ClientId = "tu-cliente-id",
+    Authority = "https://wam-ist.cloud.bns/sso/oauth2/bns",
+    RedirectUri = "https://tu-aplicacion.com/signin-oidc",
+    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+    Scope = "openid profile",
+    TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false
+    },
+    Configuration = new OpenIdConnectConfiguration
+    {
+        AuthorizationEndpoint = "https://wam-ist.cloud.bns/sso/oauth2/bns/authorize",
+        TokenEndpoint = "https://wam-ist.cloud.bns/sso/oauth2/bns/token",
+        UserInfoEndpoint = "https://wam-ist.cloud.bns/sso/oauth2/bns/userinfo"
+    }
+});
+
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ClientId = "tu-cliente-id",
