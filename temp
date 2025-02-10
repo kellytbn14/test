@@ -1,3 +1,6 @@
+ClientScript.RegisterStartupScript(this.GetType(), "consoleLog", "console.log('Mensaje desde el servidor');", true);
+
+
 var identity = (ClaimsIdentity)HttpContext.Current.User.Identity;
 var idTokenClaim = identity.FindFirst("id_token");
 
