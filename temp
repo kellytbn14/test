@@ -1,3 +1,90 @@
+public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        string clientid = ConfigurationManager.AppSettings["WamClientId"];
+        string secret = ConfigurationManager.AppSettings["WamClientSecret"];
+        string authority = ConfigurationManager.AppSettings["WamAuthority"];
+        string redirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+        string responseType = ConfigurationManager.AppSettings["WamResponseType"];
+        string postlogoutRedirectUri = ConfigurationManager.AppSettings["PostLogoutRedirectUri"];
+
+        int expireTimeSpan = int.TryParse(ConfigurationManager.AppSettings["ExpireTimeSpan"], out int minutes) ? minutes : 30;
+
+        if (string.IsNullOrEmpty(clientid) || string.IsNullOrEmpty(secret) || string.IsNullOrEmpty(authority) || string.IsNullOrEmpty(redirectUri) || string.IsNullOrEmpty(responseType))
+        {
+            throw new Exception("Missing settings in Web.config");
+        }
+
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        IdentityModelEventSource.ShowPII = true;
+
+        app.UseCookieAuthentication(new CookieAuthenticationOptions
+        {
+            AuthenticationType = "Cookies",
+            ExpireTimeSpan = TimeSpan.FromMinutes(expireTimeSpan),
+            SlidingExpiration = true,
+            LoginPath = new PathString("/Auth/Login.aspx"), // ✅ CORREGIDO
+        });
+
+        app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+        {
+            ClientId = clientid,
+            ClientSecret = secret,
+            Authority = authority,
+            RedirectUri = redirectUri,
+            ResponseType = responseType, // Asegurar que sea "code id_token"
+            Scope = "openid",
+            SignInAsAuthenticationType = "Cookies",
+            SaveTokens = true,
+            PostLogoutRedirectUri = postlogoutRedirectUri,
+
+            Notifications = new OpenIdConnectAuthenticationNotifications
+            {
+                SecurityTokenValidated = context =>
+                {
+                    var identity = (ClaimsIdentity)context.AuthenticationTicket.Identity;
+                    var idToken = context.ProtocolMessage.IdToken;
+
+                    if (!string.IsNullOrEmpty(idToken))
+                    {
+                        identity.AddClaim(new Claim("id.token", idToken));
+                    }
+
+                    return Task.CompletedTask;
+                },
+                AuthorizationCodeReceived = async context =>
+                {
+                    var code = context.Code;
+                    var tokenClient = new HttpClient();
+                    var tokenResponse = await tokenClient.PostAsync(ConfigurationManager.AppSettings["TokenEndpoint"],
+                        new FormUrlEncodedContent(new Dictionary<string, string>
+                        {
+                            {"client_id", clientid },
+                            {"client_secret", secret },
+                            { "code", code },
+                            { "redirect_uri", redirectUri },
+                            { "grant_type", "authorization_code" }, // ✅ CORREGIDO
+                        }));
+                    var tokenResult = await tokenResponse.Content.ReadAsStringAsync();
+
+                    // ✅ IMPORTANTE: Guardar la sesión
+                    var authenticationManager = context.OwinContext.Authentication;
+                    authenticationManager.SignIn(new AuthenticationProperties(), context.AuthenticationTicket.Identity);
+                },
+                AuthenticationFailed = context =>
+                {
+                    context.HandleResponse();
+                    context.Response.Redirect("/Auth/Logout.aspx");
+                    return Task.CompletedTask;
+                }
+            },
+        });
+    }
+}
+
+
+
 public void ConfigureAuth(IAppBuilder app)
 {
     app.UseCookieAuthentication(new CookieAuthenticationOptions
