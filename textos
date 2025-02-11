@@ -1,1 +1,11 @@
+feat(auth): Configure OWIN authentication middleware with OIDC and cookies  
+
+- Implemented OWIN authentication pipeline using OpenID Connect (OIDC).  
+- Added `UseCookieAuthentication` to manage user sessions with cookies.  
+- Configured `LoginPath` to `/Auth/Login.aspx` for redirecting unauthenticated users.  
+- Set `ExpireTimeSpan` to 30 minutes to enhance session security.  
+- Ensured `SignInAsAuthenticationType` is properly set to prevent OWIN middleware order issues.  
+
+This update improves authentication flow by integrating OIDC with cookie-based authentication in the OWIN pipeline.  
+
 Today, I’m continuing the OIDC implementation in ESOP. I’ll probably deploy to the development environment today for testing.
