@@ -1,3 +1,16 @@
+using Microsoft.Owin.Security;
+using System.Security.Claims;
+
+var user = HttpContext.Current.GetOwinContext().Authentication.User;
+if (user.Identity.IsAuthenticated)
+{
+    string userName = user.Identity.Name; // Nombre del usuario autenticado
+    string email = user.FindFirst(ClaimTypes.Email)?.Value; // Correo electrónico
+    string userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value; // ID del usuario
+    string role = user.FindFirst(ClaimTypes.Role)?.Value; // Rol del usuario (si está disponible)
+}
+
+
 <add key="serilog:using:Debug" value="Serilog.Sinks.Debug"/>
 <add key="serilog:write-to:Debug"/>
 
