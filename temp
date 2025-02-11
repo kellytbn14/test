@@ -1,7 +1,12 @@
 <add key="serilog:using:Debug" value="Serilog.Sinks.Debug"/>
 <add key="serilog:write-to:Debug"/>
 
+HttpContext.Current.GetOwinContext().Authentication.SignOut(
+        CookieAuthenticationDefaults.AuthenticationType, 
+        OpenIdConnectAuthenticationDefaults.AuthenticationType
+    );
 
+    Response.Redirect("~/Auth/Login.aspx");
 
 
 public void Configuration(IAppBuilder app)
