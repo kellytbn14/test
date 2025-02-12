@@ -1,4 +1,19 @@
- string errorMessage = context.Failure != null ? context.Failure.Message : "No failure message";
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ...
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        RedirectToIdentityProvider = context =>
+        {
+            // Forzar nuevo nonce
+            context.ProtocolMessage.Nonce = Guid.NewGuid().ToString();
+            return Task.CompletedTask;
+        }
+    }
+});
+
+
+string errorMessage = context.Failure != null ? context.Failure.Message : "No failure message";
     LoggingLogHelper.Log($"[Startup] AuthenticationFailed: {errorMessage}", environment: "", level: LoggingLogHelper.LogLevel.Debug);
  
 string user = context.Principal?.Identity?.Name ?? "Usuario no autenticado";
