@@ -1,4 +1,49 @@
-   LogHelper.Log($"[Auth] Authentication Failed!", level: LogHelper.LogLevel.Error);
+app.UseCookieAuthentication(new CookieAuthenticationOptions
+{
+    AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+    SlidingExpiration = true, // 🔄 Renueva el tiempo de expiración con cada solicitud
+    ExpireTimeSpan = TimeSpan.FromMinutes(60), // ⏳ Expira en 60 minutos
+    CookieSecure = CookieSecureOption.Always, // 🔐 Solo permite cookies en HTTPS
+    CookieHttpOnly = true, // 🛑 Previene acceso a la cookie desde JavaScript
+    CookieSameSite = SameSiteMode.None, // ⚠️ Permite compartir cookies entre sitios (si necesario)
+    CookiePath = "/", // 📍 Asegura que se almacene correctamente la cookie
+    LoginPath = new PathString("/Auth/Login.aspx"), // 🔄 Ruta de login si la sesión expira
+    LogoutPath = new PathString("/Auth/Logout.aspx") // 🚪 Ruta de logout
+});
+
+AuthenticationFailed = context =>
+{
+    LogHelper.Log($"[Auth] Authentication Failed: {context.Exception.Message}", level: LogHelper.LogLevel.Error);
+    LogHelper.Log($"[Auth] Full Exception: {context.Exception}", level: LogHelper.LogLevel.Debug);
+    
+    // Registrar más detalles sobre el contexto
+    if (context.ProtocolMessage != null)
+    {
+        LogHelper.Log($"[Auth] Protocol Message: {context.ProtocolMessage}", level: LogHelper.LogLevel.Debug);
+    }
+
+    return Task.CompletedTask;
+},
+
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    AuthenticationMode = AuthenticationMode.Passive,
+    ClientId = ConfigurationManager.AppSettings["ClientId"],
+    Authority = ConfigurationManager.AppSettings["Authority"],
+    RedirectUri = ConfigurationManager.AppSettings["RedirectUri"],
+    ResponseType = OpenIdConnectResponseType.IdToken,
+    UseTokenLifetime = false, // ⏳ Evita que la autenticación dependa solo del token
+    TokenValidationParameters = new TokenValidationParameters
+    {
+        RequireNonce = true, // ✅ Asegura que el nonce se usa correctamente
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true
+    }
+});
+
+
+LogHelper.Log($"[Auth] Authentication Failed!", level: LogHelper.LogLevel.Error);
     LogHelper.Log($"Exception: {context.Exception}", level: LogHelper.LogLevel.Error);
     LogHelper.Log($"ProtocolMessage: {context.ProtocolMessage?.ToString()}", level: LogHelper.LogLevel.Error);
     LogHelper.Log($"Request.Path: {context.Request?.Path}", level: LogHelper.LogLevel.Error);
