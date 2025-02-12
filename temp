@@ -1,3 +1,13 @@
+AuthenticationFailed = context =>
+{
+    string contextData = JsonConvert.SerializeObject(context, Formatting.Indented);
+    LogHelper.Log($"[Auth] Authentication Failed Context: {contextData}", level: LogHelper.LogLevel.Error);
+
+    return Task.CompletedTask;
+};
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ...
