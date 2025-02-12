@@ -1,3 +1,10 @@
+<system.webServer>
+    <modules runAllManagedModulesForAllRequests="true">
+        <add name="Owin" type="Microsoft.Owin.Host.SystemWeb.OwinHttpModule, Microsoft.Owin.Host.SystemWeb" />
+    </modules>
+</system.webServer>
+
+
 using Microsoft.Owin.Security;
 using System.Security.Claims;
 
