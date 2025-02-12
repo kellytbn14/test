@@ -1,3 +1,27 @@
+ string errorMessage = context.Failure != null ? context.Failure.Message : "No failure message";
+    LoggingLogHelper.Log($"[Startup] AuthenticationFailed: {errorMessage}", environment: "", level: LoggingLogHelper.LogLevel.Debug);
+ 
+string user = context.Principal?.Identity?.Name ?? "Usuario no autenticado";
+    LoggingLogHelper.Log($"[Startup] AuthenticationFailed - Usuario: {user}", environment: "", level: LoggingLogHelper.LogLevel.Debug);
+
+if (context.Principal != null)
+    {
+        foreach (var claim in context.Principal.Claims)
+        {
+            LoggingLogHelper.Log($"[Startup] Claim: {claim.Type} - {claim.Value}", environment: "", level: LoggingLogHelper.LogLevel.Debug);
+        }
+    }
+    else
+    {
+        LoggingLogHelper.Log("[Startup] No se recibieron claims", environment: "", level: LoggingLogHelper.LogLevel.Debug);
+    }
+
+var headers = context.Request.Headers;
+    foreach (var header in headers)
+    {
+        LoggingLogHelper.Log($"[Startup] Header: {header.Key} - {header.Value}", environment: "", level: LoggingLogHelper.LogLevel.Debug);
+    }
+
 app.UseCookieAuthentication(new CookieAuthenticationOptions
 {
     AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
