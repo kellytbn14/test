@@ -1,3 +1,9 @@
+   LogHelper.Log($"[Auth] Authentication Failed!", level: LogHelper.LogLevel.Error);
+    LogHelper.Log($"Exception: {context.Exception}", level: LogHelper.LogLevel.Error);
+    LogHelper.Log($"ProtocolMessage: {context.ProtocolMessage?.ToString()}", level: LogHelper.LogLevel.Error);
+    LogHelper.Log($"Request.Path: {context.Request?.Path}", level: LogHelper.LogLevel.Error);
+    LogHelper.Log($"RedirectUri: {context.Options?.RedirectUri}", level: LogHelper.LogLevel.Error);
+
 AuthenticationFailed = context =>
 {
     string contextData = JsonConvert.SerializeObject(context, Formatting.Indented);
