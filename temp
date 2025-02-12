@@ -1,3 +1,23 @@
+app.UseCookieAuthentication(new CookieAuthenticationOptions
+{
+    AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+    ExpireTimeSpan = TimeSpan.FromMinutes(30),
+
+    Events = new CookieAuthenticationEvents
+    {
+        OnRedirectToLogin = context =>
+        {
+            // URL de WAM obtenida de configuración
+            string wamRedirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+            
+            // Redirigir al usuario a WAM si no está autenticado
+            context.Response.Redirect(wamRedirectUri);
+            return Task.CompletedTask;
+        }
+    }
+});
+
+
 <system.webServer>
     <modules runAllManagedModulesForAllRequests="true">
         <add name="Owin" type="Microsoft.Owin.Host.SystemWeb.OwinHttpModule, Microsoft.Owin.Host.SystemWeb" />
