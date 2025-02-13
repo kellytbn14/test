@@ -1,3 +1,8 @@
+CookieSameSite = Microsoft.Owin.SameSiteMode.None,
+CookieSecure = CookieSecureOption.Always,
+CookieSameSite = Microsoft.Owin.SameSiteMode.Lax, // O usar "Strict"
+
+
 MessageReceived = context =>
 {
     var cookies = context.OwinContext.Request.Cookies;
