@@ -1,3 +1,16 @@
+if (context.Exception.Message.Contains("IDX21323"))
+    {
+        context.Response.Redirect("/error?message=nonce_error");
+    }
+    else
+    {
+        context.Response.Redirect("/error?message=" + Uri.EscapeDataString(context.Exception.Message));
+    }
+
+            context.Response.Redirect("/error?message=" + Uri.EscapeDataString(context.Exception.Message));
+
+
+
 if (!tokenResponse.IsSuccessStatusCode)
         {
             // Loguear el error si falla la solicitud del token
