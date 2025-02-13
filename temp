@@ -1,3 +1,14 @@
+MessageReceived = context =>
+{
+    var cookies = context.OwinContext.Request.Cookies;
+    foreach (var cookie in cookies)
+    {
+        Console.WriteLine($"[MessageReceived] Cookie: {cookie.Key} = {cookie.Value}");
+    }
+    return Task.CompletedTask;
+},
+
+
 if (context.Exception.Message.Contains("IDX21323"))
     {
         context.Response.Redirect("/error?message=nonce_error");
