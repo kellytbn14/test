@@ -1,3 +1,22 @@
+RedirectToIdentityProvider = context =>
+{
+    string nonce = Guid.NewGuid().ToString("N");
+
+    context.OwinContext.Response.Cookies.Append(
+        "OpenIdConnect.nonce." + nonce,
+        nonce,
+        new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None
+        });
+
+    context.ProtocolMessage.Nonce = nonce;
+    return Task.CompletedTask;
+};
+
+
 CookieSameSite = Microsoft.Owin.SameSiteMode.None,
 CookieSecure = CookieSecureOption.Always,
 CookieSameSite = Microsoft.Owin.SameSiteMode.Lax, // O usar "Strict"
