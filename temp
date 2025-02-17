@@ -1,3 +1,13 @@
+var authManager = context.OwinContext.Authentication;
+
+            // Verificar si la cookie sigue existiendo
+            if (!context.OwinContext.Request.Cookies.ContainsKey(".AspNet.Cookies"))
+            {
+                // Si la cookie no existe, forzar autenticación con WAM
+                context.HandleResponse();
+                context.Response.Redirect(context.Options.Authority); // Redirige a WAM
+            }
+
 Notifications = new OpenIdConnectAuthenticationNotifications
 {
     SecurityTokenValidated = async context =>
