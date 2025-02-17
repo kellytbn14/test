@@ -1,3 +1,32 @@
+Notifications = new OpenIdConnectAuthenticationNotifications
+{
+    SecurityTokenValidated = async context =>
+    {
+        var identity = new ClaimsIdentity(context.AuthenticationTicket.Identity.Claims,
+            CookieAuthenticationDefaults.AuthenticationType);
+
+        var authManager = context.OwinContext.Authentication;
+
+        if (context.OwinContext.Authentication.User.Identity.IsAuthenticated)
+        {
+            // Si el usuario está autenticado, renovar la cookie
+            authManager.SignIn(new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddMinutes(30) // Renueva cookie
+            }, identity);
+        }
+        else
+        {
+            // Si no hay autenticación, forzar logout
+            authManager.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            context.HandleResponse();
+            context.Response.Redirect("/Account/Login"); // Redirigir al login
+        }
+    }
+}
+
+
 options.Events.OnRedirectToIdentityProvider = context =>
 {
     var nonce = Guid.NewGuid().ToString(); 
