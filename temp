@@ -1,3 +1,36 @@
+SecurityTokenValidated = async context =>
+{
+    var authManager = context.OwinContext.Authentication;
+
+    // Extraer el ID token y verificar si realmente está llegando
+    string idToken = context.ProtocolMessage.IdToken;
+    if (string.IsNullOrEmpty(idToken))
+    {
+        context.HandleResponse();
+        context.Response.Redirect("/Error?message=No ID Token");
+        return;
+    }
+
+    // Crear lista de Claims
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown"),
+        new Claim("idtoken", idToken)
+    };
+
+    // Crear una nueva identidad con las claims y el esquema de autenticación correcto
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationType);
+
+    // Iniciar sesión con cookies
+    authManager.SignIn(new AuthenticationProperties
+    {
+        IsPersistent = true,
+        ExpiresUtc = DateTime.UtcNow.AddMinutes(10) // Puedes ajustar el tiempo de expiración
+    }, identity);
+}
+
+
+
 var authManager = context.OwinContext.Authentication;
 
             // Verificar si la cookie sigue existiendo
