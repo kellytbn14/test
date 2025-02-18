@@ -9,3 +9,5 @@ feat(auth): Configure OWIN authentication middleware with OIDC and cookies
 This update improves authentication flow by integrating OIDC with cookie-based authentication in the OWIN pipeline.  
 
 Today, I’m continuing the OIDC implementation in ESOP. I’ll probably deploy to the development environment today for testing.
+
+https://docs.google.com/document/d/1__0lsM1RITsn4uEozqG1CXpyOZuC15NeeptW74G8-sc/edit?usp=sharing
