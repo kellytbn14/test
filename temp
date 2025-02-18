@@ -1,3 +1,23 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>MyAuthLibrary</id> <!-- Nombre de tu librería -->
+    <version>1.0.0</version> <!-- Versión del paquete -->
+    <authors>Tu Nombre o Tu Empresa</authors>
+    <owners>Tu Nombre o Tu Empresa</owners>
+    <description>Una librería de autenticación personalizada usando Owin y OpenID Connect</description>
+    <copyright>Copyright 2025</copyright>
+    <dependencies>
+      <!-- Puedes agregar dependencias si las tiene -->
+    </dependencies>
+  </metadata>
+  <files>
+    <!-- Archivos que quieres incluir en el paquete -->
+    <file src="bin\Release\MyAuthLibrary.dll" target="lib\net45" /> <!-- Cambia las rutas según tu proyecto -->
+  </files>
+</package>
+
+
 SecurityTokenValidated = async context =>
 {
     var authManager = context.OwinContext.Authentication;
