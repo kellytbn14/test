@@ -1,4 +1,77 @@
 using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace OidcAuthLib
+{
+    public class AuthHelper
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public AuthHelper(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+
+        public async Task AuthenticateUser()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null) return;
+
+            if (!httpContext.User.Identity.IsAuthenticated)
+            {
+                await RedirectToLogin();
+                return;
+            }
+
+            var identity = (ClaimsIdentity)httpContext.User.Identity;
+            var idTokenClaim = identity.FindFirst("id_token");
+
+            string userName = identity.Name;
+            string email = identity.FindFirst(ClaimTypes.Email)?.Value;
+            string userId = identity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string role = identity.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (idTokenClaim != null)
+            {
+                string idToken = idTokenClaim.Value;
+            }
+        }
+
+        public async Task RedirectToLogin()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            if (httpContext == null) return;
+
+            var redirectUri = "/"; // Define tu RedirectUri
+
+            await httpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = redirectUri });
+
+            httpContext.Response.StatusCode = 401;
+        }
+    }
+
+    public static class AuthServiceExtensions
+    {
+        public static void AddAuthServices(this IServiceCollection services)
+        {
+            services.AddHttpContextAccessor();
+            services.AddScoped<AuthHelper>();
+        }
+    }
+}
+
+
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
