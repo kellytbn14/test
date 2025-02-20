@@ -1,0 +1,59 @@
+using System;
+using System.IO;
+using PgpCore;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main()
+    {
+        Console.Write("Ingrese el texto a encriptar: ");
+        string inputText = Console.ReadLine();
+        
+        string publicKey = GetPublicKeyFromWCM();
+        string privateKey = GetPrivateKeyFromWCM();
+        string passphrase = "TuPassphrase"; // Opcional si la clave privada tiene una contraseña
+        
+        string encryptedText = await EncryptText(inputText, publicKey);
+        Console.WriteLine("Texto Encriptado:\n" + encryptedText);
+        
+        string decryptedText = await DecryptText(encryptedText, privateKey, passphrase);
+        Console.WriteLine("Texto Desencriptado:\n" + decryptedText);
+    }
+
+    static string GetPublicKeyFromWCM()
+    {
+        // Aquí iría la lógica para obtener la clave pública desde el Windows Credential Manager
+        return "ClavePúblicaFalsa";
+    }
+
+    static string GetPrivateKeyFromWCM()
+    {
+        // Aquí iría la lógica para obtener la clave privada desde el Windows Credential Manager
+        return "ClavePrivadaFalsa";
+    }
+
+    static async Task<string> EncryptText(string text, string publicKey)
+    {
+        using (var pgp = new PGP())
+        using (var inputStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text)))
+        using (var outputStream = new MemoryStream())
+        using (var keyStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(publicKey)))
+        {
+            await pgp.EncryptStreamAsync(inputStream, outputStream, keyStream);
+            return Convert.ToBase64String(outputStream.ToArray());
+        }
+    }
+
+    static async Task<string> DecryptText(string encryptedText, string privateKey, string passphrase)
+    {
+        using (var pgp = new PGP())
+        using (var inputStream = new MemoryStream(Convert.FromBase64String(encryptedText)))
+        using (var outputStream = new MemoryStream())
+        using (var keyStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(privateKey)))
+        {
+            await pgp.DecryptStreamAsync(inputStream, outputStream, keyStream, passphrase);
+            return System.Text.Encoding.UTF8.GetString(outputStream.ToArray());
+        }
+    }
+}
