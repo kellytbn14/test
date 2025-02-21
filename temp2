@@ -1,3 +1,24 @@
+using System;
+using System.Linq;
+using Meziantou.Framework.Win32;
+
+class Program
+{
+    static void Main()
+    {
+        string appName = "MyApp";
+        var credentials = CredentialManager.EnumerateCredentials()
+            .Where(c => c.ApplicationName.StartsWith(appName))
+            .OrderBy(c => c.ApplicationName)
+            .ToList();
+
+        string fullKey = string.Concat(credentials.Select(c => c.Secret));
+        
+        Console.WriteLine("Clave reconstruida:\n" + fullKey);
+    }
+}
+
+
 using Meziantou.Framework.Win32;
 using System;
 using System.Text;
