@@ -1,3 +1,19 @@
+using Serilog;
+
+public static class LoggerFactory
+{
+    public static readonly ILogger Logger;
+
+    static LoggerFactory()
+    {
+        Logger = new LoggerConfiguration()
+            .WriteTo.File("C:\\Logs\\mibiblioteca-log.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+    }
+}
+
+
+
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
