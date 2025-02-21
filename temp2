@@ -1,3 +1,51 @@
+using Meziantou.Framework.Win32;
+using System;
+using System.Text;
+
+public class CredentialManagerHelper
+{
+    public static void SaveKeyInFragments(string applicationName, string key, int fragmentSize = 2000)
+    {
+        int totalFragments = (int)Math.Ceiling((double)key.Length / fragmentSize);
+
+        for (int i = 0; i < totalFragments; i++)
+        {
+            string fragment = key.Substring(i * fragmentSize, Math.Min(fragmentSize, key.Length - i * fragmentSize));
+            string fragmentName = $"{applicationName}_Part{i}";
+
+            CredentialManager.WriteCredential(
+                applicationName: fragmentName,
+                userName: "fragment",
+                secret: fragment,
+                comment: $"Part {i + 1} of {totalFragments}",
+                persistence: CredentialPersistence.LocalMachine);
+        }
+    }
+}
+
+public class CredentialManagerHelper
+{
+    public static string RetrieveKeyFromFragments(string applicationName)
+    {
+        StringBuilder keyBuilder = new StringBuilder();
+        int partIndex = 0;
+
+        while (true)
+        {
+            string fragmentName = $"{applicationName}_Part{partIndex}";
+            var credential = CredentialManager.ReadCredential(fragmentName);
+
+            if (credential == null) break; // Termina si no encuentra más fragmentos
+
+            keyBuilder.Append(credential.Password);
+            partIndex++;
+        }
+
+        return keyBuilder.ToString();
+    }
+}
+
+
 using System;
 using System.IO;
 using PgpCore;
