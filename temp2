@@ -1,3 +1,76 @@
+public static Dictionary<string, string> BuildPartitionedLongCredential(string name, string secret)
+{
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        throw new ArgumentException("El nombre de la credencial no puede estar vacío o ser nulo.", nameof(name));
+    }
+
+    if (string.IsNullOrEmpty(secret))
+    {
+        throw new ArgumentException("El secreto no puede estar vacío o ser nulo.", nameof(secret));
+    }
+
+    var partitions = new Dictionary<string, string>();
+    int totalFragments = (int)Math.Ceiling((double)secret.Length / MAX_SECRET_LENGTH);
+
+    for (int i = 0; i < totalFragments; i++)
+    {
+        string fragment = secret.Substring(i * MAX_SECRET_LENGTH, Math.Min(MAX_SECRET_LENGTH, secret.Length - i * MAX_SECRET_LENGTH));
+        string fragmentName = $"{name}_part{i}";
+        partitions[fragmentName] = fragment;
+    }
+
+    return partitions;
+}
+
+public static void CreateCredentialFromFile(string name, string userName, string filePath)
+{
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        throw new ArgumentException("El nombre de la credencial no puede estar vacío o ser nulo.", nameof(name));
+    }
+
+    if (string.IsNullOrWhiteSpace(userName))
+    {
+        throw new ArgumentException("El nombre de usuario no puede estar vacío o ser nulo.", nameof(userName));
+    }
+
+    if (string.IsNullOrWhiteSpace(filePath))
+    {
+        throw new ArgumentException("La ruta del archivo no puede estar vacía o ser nula.", nameof(filePath));
+    }
+
+    if (!File.Exists(filePath))
+    {
+        throw new FileNotFoundException($"El archivo especificado no existe: {filePath}");
+    }
+
+    string secret;
+    try
+    {
+        secret = File.ReadAllText(filePath);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Error al leer el archivo: {ex.Message}");
+        throw;
+    }
+
+    if (string.IsNullOrEmpty(secret))
+    {
+        Console.Error.WriteLine("El archivo está vacío. No se crearán credenciales.");
+        return;
+    }
+
+    var credentialFragments = BuildPartitionedLongCredential(name, secret);
+
+    foreach (var entry in credentialFragments)
+    {
+        CreateCredential(entry.Key, userName, entry.Value);
+    }
+}
+
+
 public static string ReadCredential(string name)
 {
     if (string.IsNullOrWhiteSpace(name))
