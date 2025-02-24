@@ -1,3 +1,63 @@
+public static void CreateCredential(string name, string userName, string secret)
+{
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        throw new ArgumentException("The credential name cannot be empty or null.", nameof(name));
+    }
+
+    if (string.IsNullOrWhiteSpace(userName))
+    {
+        throw new ArgumentException("Username cannot be empty or null.", nameof(userName));
+    }
+
+    if (string.IsNullOrEmpty(secret))
+    {
+        throw new ArgumentException("The secret cannot be empty or null.", nameof(secret));
+    }
+
+    try
+    {
+        if (secret.Length > MAX_SECRET_LENGTH)
+        {
+            Console.WriteLine($"The secret exceeds {MAX_SECRET_LENGTH} characters. Splitting into fragments...");
+            var credentialFragments = BuildPartitionedLongCredential(name, secret);
+
+            foreach (var entry in credentialFragments)
+            {
+                WriteCredentialSafely(entry.Key, userName, entry.Value);
+            }
+        }
+        else
+        {
+            WriteCredentialSafely(name, userName, secret);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Error creating credential '{name}': {ex.Message}");
+    }
+}
+
+private static void WriteCredentialSafely(string name, string userName, string secret)
+{
+    try
+    {
+        CredentialManager.WriteCredential(
+            applicationName: name,
+            userName: userName,
+            secret: secret,
+            persistence: CredentialPersistence.LocalMachine
+        );
+
+        Console.WriteLine($"Credential '{name}' created successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Failed to create credential '{name}': {ex.Message}");
+    }
+}
+
+
 public static Dictionary<string, string> BuildPartitionedLongCredential(string name, string secret)
 {
     if (string.IsNullOrWhiteSpace(name))
