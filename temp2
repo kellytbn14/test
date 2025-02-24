@@ -1,3 +1,15 @@
+public static class ValidationHelper
+{
+    public static void ValidateNotNullOrWhiteSpace(string value, string paramName, string errorMessage = null)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(errorMessage ?? $"{paramName} cannot be empty or null.", paramName);
+        }
+    }
+}
+
+
 public static void CreateCredential(string name, string userName, string secret)
 {
     if (string.IsNullOrWhiteSpace(name))
