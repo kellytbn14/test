@@ -1,5 +1,75 @@
 using System;
 using System.CommandLine;
+using System.CommandLine.NamingConventionBinder;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task<int> Main(string[] args)
+    {
+        var rootCommand = BuildRootCommand();
+        return await rootCommand.InvokeAsync(args);
+    }
+
+    private static RootCommand BuildRootCommand()
+    {
+        var rootCommand = new RootCommand("Aplicación CLI para encriptar y desencriptar");
+
+        rootCommand.AddCommand(BuildEncryptCommand());
+        rootCommand.AddCommand(BuildDecryptCommand());
+
+        return rootCommand;
+    }
+
+    private static Command BuildEncryptCommand()
+    {
+        var nameVarArgument = new Argument<string>("namevar", "Nombre de la variable");
+        var textArgument = new Argument<string>("texto", "Texto a encriptar");
+
+        var encryptCommand = new Command("encrypt", "Encripta un texto")
+        {
+            nameVarArgument,
+            textArgument
+        };
+
+        encryptCommand.Handler = CommandHandler.Create<string, string>(CommandHandlers.Encrypt);
+
+        return encryptCommand;
+    }
+
+    private static Command BuildDecryptCommand()
+    {
+        var nameVarArgument = new Argument<string>("namevar", "Nombre de la variable");
+
+        var decryptCommand = new Command("decrypt", "Desencripta un texto")
+        {
+            nameVarArgument
+        };
+
+        decryptCommand.Handler = CommandHandler.Create<string>(CommandHandlers.Decrypt);
+
+        return decryptCommand;
+    }
+}
+
+static class CommandHandlers
+{
+    public static void Encrypt(string namevar, string texto)
+    {
+        Console.WriteLine($"🔒 Encriptando '{texto}' con la variable '{namevar}'...");
+        // Aquí puedes agregar la lógica real de encriptación.
+    }
+
+    public static void Decrypt(string namevar)
+    {
+        Console.WriteLine($"🔓 Desencriptando con la variable '{namevar}'...");
+        // Aquí puedes agregar la lógica real de desencriptación.
+    }
+}
+
+
+using System;
+using System.CommandLine;
 using System.Threading.Tasks;
 
 class Program
