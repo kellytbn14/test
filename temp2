@@ -1,6 +1,5 @@
 using System;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using System.Threading.Tasks;
 
 class Program
@@ -8,7 +7,7 @@ class Program
     static async Task<int> Main(string[] args)
     {
         // Crear comandos
-        var rootCommand = new RootCommand("Aplicación de consola para encriptar y desencriptar");
+        var rootCommand = new RootCommand("Aplicación CLI para encriptar y desencriptar");
 
         var encryptCommand = new Command("encrypt", "Encripta un texto")
         {
@@ -16,22 +15,25 @@ class Program
             new Argument<string>("texto", "Texto a encriptar")
         };
 
-        encryptCommand.Handler = CommandHandler.Create<string, string>((namevar, texto) =>
-        {
-            Console.WriteLine($"🔒 Encriptando '{texto}' con la variable '{namevar}'...");
-            // Aquí iría la lógica de encriptación
-        });
-
         var decryptCommand = new Command("decrypt", "Desencripta un texto")
         {
             new Argument<string>("namevar", "Nombre de la variable")
         };
 
-        decryptCommand.Handler = CommandHandler.Create<string>((namevar) =>
+        // Asignar manejadores de comandos con SetHandler()
+        encryptCommand.SetHandler((namevar, texto) =>
+        {
+            Console.WriteLine($"🔒 Encriptando '{texto}' con la variable '{namevar}'...");
+            // Aquí iría la lógica de encriptación
+        }, 
+        encryptCommand.Arguments[0], encryptCommand.Arguments[1]);
+
+        decryptCommand.SetHandler((namevar) =>
         {
             Console.WriteLine($"🔓 Desencriptando usando '{namevar}'...");
             // Aquí iría la lógica de desencriptación
-        });
+        }, 
+        decryptCommand.Arguments[0]);
 
         rootCommand.AddCommand(encryptCommand);
         rootCommand.AddCommand(decryptCommand);
