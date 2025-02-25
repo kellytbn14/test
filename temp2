@@ -1,3 +1,43 @@
+public class CryptoManager
+{
+    private readonly IWCMService _wcmService;
+    private readonly IPGPEncryptionService _pgpEncryptionService;
+
+    public CryptoManager(IWCMService wcmService, IPGPEncryptionService pgpEncryptionService)
+    {
+        _wcmService = wcmService ?? throw new ArgumentNullException(nameof(wcmService));
+        _pgpEncryptionService = pgpEncryptionService ?? throw new ArgumentNullException(nameof(pgpEncryptionService));
+    }
+
+    public async Task<string> DecryptTextAsync(string encryptedText)
+    {
+        if (string.IsNullOrWhiteSpace(encryptedText))
+            throw new ArgumentException("El texto encriptado no puede estar vacío.", nameof(encryptedText));
+
+        // Leer credenciales
+        string passphrase = _wcmService.ReadCredential("passphrase");
+        string privateKey = _wcmService.ReadCredential("privateKey");
+
+        // Validar credenciales
+        if (string.IsNullOrWhiteSpace(passphrase) || string.IsNullOrWhiteSpace(privateKey))
+            throw new InvalidOperationException("No se encontraron las credenciales necesarias para desencriptar.");
+
+        // Desencriptar
+        try
+        {
+            return await _pgpEncryptionService.DecryptText(encryptedText, privateKey, passphrase);
+        }
+        catch (Exception ex)
+        {
+            // Aquí podrías usar un logger en lugar de Console.WriteLine
+            Console.WriteLine($"Error al desencriptar: {ex.Message}");
+            throw;
+        }
+    }
+}
+
+
+
 public static class ValidationHelper
 {
     public static void ValidateNotNullOrWhiteSpace(string value, string paramName, string errorMessage = null)
