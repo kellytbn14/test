@@ -1,3 +1,8 @@
+
+
+Crypto-PGP CLI is a tool for encrypting and decrypting text using PGP Core. It also allows storing and retrieving credentials from Windows Credential Manager (WCM).
+
+
 feat(auth): Configure OWIN authentication middleware with OIDC and cookies  
 
 - Implemented OWIN authentication pipeline using OpenID Connect (OIDC).  
