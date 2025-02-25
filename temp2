@@ -6,6 +6,52 @@ class Program
 {
     static async Task<int> Main(string[] args)
     {
+        var rootCommand = new RootCommand("Aplicación CLI para encriptar y desencriptar");
+
+        // Definir argumentos explícitos
+        var nameVarArgument = new Argument<string>("namevar", "Nombre de la variable");
+        var textArgument = new Argument<string>("texto", "Texto a encriptar");
+
+        var encryptCommand = new Command("encrypt", "Encripta un texto")
+        {
+            nameVarArgument,
+            textArgument
+        };
+
+        var decryptCommand = new Command("decrypt", "Desencripta un texto")
+        {
+            nameVarArgument
+        };
+
+        // Asignar manejadores correctamente
+        encryptCommand.SetHandler((string namevar, string texto) =>
+        {
+            Console.WriteLine($"🔒 Encriptando '{texto}' con la variable '{namevar}'...");
+            // Lógica de encriptación aquí
+        }, nameVarArgument, textArgument);
+
+        decryptCommand.SetHandler((string namevar) =>
+        {
+            Console.WriteLine($"🔓 Desencriptando usando '{namevar}'...");
+            // Lógica de desencriptación aquí
+        }, nameVarArgument);
+
+        rootCommand.AddCommand(encryptCommand);
+        rootCommand.AddCommand(decryptCommand);
+
+        return await rootCommand.InvokeAsync(args);
+    }
+}
+
+
+using System;
+using System.CommandLine;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task<int> Main(string[] args)
+    {
         // Crear comandos
         var rootCommand = new RootCommand("Aplicación CLI para encriptar y desencriptar");
 
