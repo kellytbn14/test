@@ -1,5 +1,61 @@
 using System;
 using System.CommandLine;
+
+public static Command BuildCreateCredentialCommand()
+{
+    var appName = new Argument<string>("appName", "Credential Name");
+    var userName = new Argument<string>("userName", "User name");
+
+    var command = new Command("create-credential", "Create a credential in WCM")
+    {
+        appName,
+        userName
+    };
+
+    command.SetHandler((string app, string user) =>
+    {
+        Console.Write("🔒 Enter Secret Password: ");
+        string secret = ReadPassword();
+
+        Console.WriteLine("\n✅ Credential received. Processing...");
+        CommandHandlers.CreateCredentialOnWCM(app, user, secret);
+    }, appName, userName);
+
+    return command;
+}
+
+// Función para leer la contraseña sin mostrar caracteres en la consola
+private static string ReadPassword()
+{
+    string password = "";
+    ConsoleKeyInfo key;
+
+    do
+    {
+        key = Console.ReadKey(true);
+
+        if (key.Key == ConsoleKey.Enter)
+            break;
+
+        if (key.Key == ConsoleKey.Backspace && password.Length > 0)
+        {
+            password = password[..^1];
+            Console.Write("\b \b"); // Borra el último carácter en pantalla
+        }
+        else if (!char.IsControl(key.KeyChar))
+        {
+            password += key.KeyChar;
+            Console.Write("*"); // Muestra asteriscos en lugar de caracteres reales
+        }
+
+    } while (true);
+
+    return password;
+}
+
+
+using System;
+using System.CommandLine;
 using System.CommandLine.NamingConventionBinder;
 using System.Threading.Tasks;
 
