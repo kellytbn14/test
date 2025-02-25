@@ -1,3 +1,47 @@
+using System;
+using System.CommandLine;
+using System.CommandLine.NamingConventionBinder;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task<int> Main(string[] args)
+    {
+        // Crear comandos
+        var rootCommand = new RootCommand("Aplicación de consola para encriptar y desencriptar");
+
+        var encryptCommand = new Command("encrypt", "Encripta un texto")
+        {
+            new Argument<string>("namevar", "Nombre de la variable"),
+            new Argument<string>("texto", "Texto a encriptar")
+        };
+
+        encryptCommand.Handler = CommandHandler.Create<string, string>((namevar, texto) =>
+        {
+            Console.WriteLine($"🔒 Encriptando '{texto}' con la variable '{namevar}'...");
+            // Aquí iría la lógica de encriptación
+        });
+
+        var decryptCommand = new Command("decrypt", "Desencripta un texto")
+        {
+            new Argument<string>("namevar", "Nombre de la variable")
+        };
+
+        decryptCommand.Handler = CommandHandler.Create<string>((namevar) =>
+        {
+            Console.WriteLine($"🔓 Desencriptando usando '{namevar}'...");
+            // Aquí iría la lógica de desencriptación
+        });
+
+        rootCommand.AddCommand(encryptCommand);
+        rootCommand.AddCommand(decryptCommand);
+
+        // Ejecutar el parser de argumentos
+        return await rootCommand.InvokeAsync(args);
+    }
+}
+
+
 string base64Text = Convert.ToBase64String(Encoding.UTF8.GetBytes(pgpEncryptedText));
 
 string pgpEncryptedText = Encoding.UTF8.GetString(Convert.FromBase64String(base64Text));
