@@ -1,3 +1,18 @@
+using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+{
+    WindowsImpersonationContext context = identity.Impersonate();
+
+    try
+    {
+        CredentialManager.WriteCredential("appName", "userName", "password", CredentialPersistence.Enterprise);
+    }
+    finally
+    {
+        context.Undo();
+    }
+}
+
+
 public static Command ReadCredentialCommand()
 {
     var appName = new Argument<string>("appName", "Credential Name");
