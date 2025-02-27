@@ -1,3 +1,35 @@
+public static void ReadCredentialFromWCM(string name, bool isFragment)
+{
+    try
+    {
+        using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
+        {
+            WindowsImpersonationContext context = identity.Impersonate();
+            try
+            {
+                Credential credential = CredentialManager.ReadCredential(name);
+                if (credential != null)
+                {
+                    Console.WriteLine(credential.Password);
+                }
+                else
+                {
+                    Console.WriteLine($"Credential not found: {name}");
+                }
+            }
+            finally
+            {
+                context.Undo();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error reading credential: {ex.Message}");
+    }
+}
+
+
 using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
 {
     WindowsImpersonationContext context = identity.Impersonate();
