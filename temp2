@@ -1,3 +1,9 @@
+command.SetHandler((string name) =>
+{
+    CommandHandlers.ReadCredentialFromWCM(name, false);
+}, appName);
+
+
 using System;
 using System.CommandLine;
 
