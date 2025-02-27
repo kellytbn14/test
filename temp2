@@ -1,4 +1,27 @@
 using System;
+
+namespace MiConsolaApp
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("¡Hola, mundo!");
+
+            Console.WriteLine("Escribe tu nombre:");
+            string nombre = Console.ReadLine();
+            
+            Console.WriteLine($"Hola, {nombre}");
+
+            // Esperar que el usuario presione una tecla para salir
+            Console.WriteLine("Presiona cualquier tecla para salir...");
+            Console.ReadKey();
+        }
+    }
+}
+
+
+using System;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
