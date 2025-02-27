@@ -13,6 +13,68 @@ public class CredentialHelper
         int dwLogonProvider,
         out IntPtr phToken);
 
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool CloseHandle(IntPtr hObject);
+
+    public static void WriteCredentialWithImpersonation(string name, string userName, string secret, string impersonateUser, string domain, string impersonatePassword)
+    {
+        IntPtr userToken = IntPtr.Zero;
+
+        try
+        {
+            bool logged = LogonUser(impersonateUser, domain, impersonatePassword, 2, 0, out userToken);
+            if (!logged)
+            {
+                int error = Marshal.GetLastWin32Error();
+                throw new Exception($"Impersonation failed with error code: {error}");
+            }
+
+            using (WindowsIdentity identity = new WindowsIdentity(userToken))
+            {
+                Console.WriteLine($"Impersonated User: {identity.Name}");
+
+                // Aquí va la lógica para escribir la credencial
+                CredentialManager.WriteCredential(
+                    applicationName: name,
+                    userName: userName,
+                    secret: secret,
+                    persistence: CredentialPersistence.LocalMachine
+                );
+
+                Console.WriteLine($"Credential '{name}' created successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to create credential: {ex.Message}");
+        }
+        finally
+        {
+            if (userToken != IntPtr.Zero)
+            {
+                CloseHandle(userToken);
+                Console.WriteLine("Impersonation undone");
+            }
+        }
+    }
+}
+
+
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+
+public class CredentialHelper
+{
+    [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern bool LogonUser(
+        string lpszUsername,
+        string lpszDomain,
+        string lpszPassword,
+        int dwLogonType,
+        int dwLogonProvider,
+        out IntPtr phToken);
+
     [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
     private extern static bool CloseHandle(IntPtr handle);
 
