@@ -1,3 +1,24 @@
+public static Command ReadCredentialCommand()
+{
+    var appName = new Argument<string>("appName", "Credential Name");
+
+    var partitionedOption = new Option<bool>("-p", "Read partitioned credential");
+
+    var command = new Command("read-credential", "Read WCM credential")
+    {
+        partitionedOption,
+        appName
+    };
+
+    command.SetHandler((bool isPartitioned, string name) =>
+    {
+        CommandHandlers.ReadCredentialFromWCM(name, isPartitioned);
+    }, partitionedOption, appName);
+
+    return command;
+}
+
+
 command.SetHandler((string name) =>
 {
     CommandHandlers.ReadCredentialFromWCM(name, false);
