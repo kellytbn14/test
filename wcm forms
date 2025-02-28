@@ -1,3 +1,41 @@
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <main>
+        <div class="container">
+            <!-- Formulario de Creación -->
+            <div class="form-box">
+                <h3>Crear Usuario</h3>
+                <label for="txtNombre">Nombre:</label>
+                <asp:TextBox ID="txtNombre" runat="server"></asp:TextBox>
+                <br /><br />
+
+                <label for="txtUsername">Username:</label>
+                <asp:TextBox ID="txtUsername" runat="server"></asp:TextBox>
+                <br /><br />
+
+                <label for="txtSecret">Secret:</label>
+                <asp:TextBox ID="txtSecret" runat="server" TextMode="Password"></asp:TextBox>
+                <br /><br />
+
+                <asp:Button ID="btnCrear" runat="server" Text="Crear" OnClick="btnCrear_Click" />
+            </div>
+
+            <!-- Formulario de Búsqueda -->
+            <div class="form-box">
+                <h3>Buscar Usuario</h3>
+                <label for="txtBuscarNombre">Nombre:</label>
+                <asp:TextBox ID="txtBuscarNombre" runat="server"></asp:TextBox>
+                <br /><br />
+
+                <asp:Button ID="btnBuscar" runat="server" Text="Buscar" OnClick="btnBuscar_Click" />
+                <br /><br />
+
+                <asp:Label ID="lblResultado" runat="server" ForeColor="Blue"></asp:Label>
+            </div>
+        </div>
+    </main>
+</asp:Content>
+
+
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MiProyecto.Default" %>
 
 <!DOCTYPE html>
