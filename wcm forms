@@ -1,3 +1,104 @@
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <main class="container mt-5">
+        <div class="row">
+            <!-- Formulario de Creación -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Crear Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="txtNombre" class="form-label">Nombre:</label>
+                            <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txtUsername" class="form-label">Username:</label>
+                            <asp:TextBox ID="txtUsername" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <div class="mb-3">
+                            <asp:CheckBox ID="chkEsArchivo" runat="server" AutoPostBack="true" Text=" Es un archivo" OnCheckedChanged="chkEsArchivo_CheckedChanged" CssClass="form-check-input" />
+                            <label for="chkEsArchivo" class="form-check-label">Es un archivo</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label id="lblSecret" class="form-label" for="txtSecret">Digite el Secret:</label>
+                            <asp:TextBox ID="txtSecret" runat="server" CssClass="form-control" TextMode="Password"></asp:TextBox>
+                        </div>
+
+                        <asp:Button ID="btnCrear" runat="server" Text="Crear" CssClass="btn btn-success w-100" OnClick="btnCrear_Click" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Búsqueda -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Buscar Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="txtBuscarNombre" class="form-label">Nombre:</label>
+                            <asp:TextBox ID="txtBuscarNombre" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <asp:Button ID="btnBuscar" runat="server" Text="Buscar" CssClass="btn btn-primary w-100" OnClick="btnBuscar_Click" />
+                        <br /><br />
+
+                        <asp:Label ID="lblResultado" runat="server" CssClass="form-text text-muted"></asp:Label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</asp:Content>
+
+
+using System;
+using System.Web.UI;
+
+namespace MiProyecto
+{
+    public partial class Default : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+        }
+
+        protected void btnCrear_Click(object sender, EventArgs e)
+        {
+            // Lógica para guardar usuario en base de datos o sesión
+        }
+
+        protected void btnBuscar_Click(object sender, EventArgs e)
+        {
+            // Lógica para buscar usuario y mostrar en lblResultado
+        }
+
+        protected void chkEsArchivo_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkEsArchivo.Checked)
+            {
+                lblSecret.Text = "Digite el FilePath:";
+                txtSecret.TextMode = TextBoxMode.SingleLine; // Permitir texto normal para FilePath
+            }
+            else
+            {
+                lblSecret.Text = "Digite el Secret:";
+                txtSecret.TextMode = TextBoxMode.Password; // Volver a modo contraseña
+            }
+        }
+    }
+}
+
+
+
+
+
+
 <%@ Page Title="Formulario" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MiProyecto.Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
