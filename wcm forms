@@ -1,5 +1,66 @@
 <%@ Page Title="Formulario" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MiProyecto.Default" %>
 
+<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <main class="container mt-5">
+        <div class="row">
+            <!-- Formulario de Creación -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Crear Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="txtNombre" class="form-label">Nombre:</label>
+                            <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txtUsername" class="form-label">Username:</label>
+                            <asp:TextBox ID="txtUsername" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="txtSecret" class="form-label">Secret:</label>
+                            <asp:TextBox ID="txtSecret" runat="server" CssClass="form-control" TextMode="Password"></asp:TextBox>
+                        </div>
+
+                        <asp:Button ID="btnCrear" runat="server" Text="Crear" CssClass="btn btn-success w-100" OnClick="btnCrear_Click" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Búsqueda -->
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Buscar Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="txtBuscarNombre" class="form-label">Nombre:</label>
+                            <asp:TextBox ID="txtBuscarNombre" runat="server" CssClass="form-control"></asp:TextBox>
+                        </div>
+
+                        <asp:Button ID="btnBuscar" runat="server" Text="Buscar" CssClass="btn btn-primary w-100" OnClick="btnBuscar_Click" />
+                        <br /><br />
+
+                        <asp:Label ID="lblResultado" runat="server" CssClass="form-text text-muted"></asp:Label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</asp:Content>
+
+
+
+
+
+
+
+<%@ Page Title="Formulario" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MiProyecto.Default" %>
+
 <asp:Content ID="HeadContent" ContentPlaceHolderID="HeadContent" runat="server">
     <style>
         .container {
