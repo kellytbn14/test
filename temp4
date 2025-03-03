@@ -1,3 +1,12 @@
+<asp:Panel ID="divContainer" runat="server" Visible="false">
+    <div class="alert alert-info">
+        Este contenido se oculta con un booleano en el servidor.
+    </div>
+</asp:Panel>
+
+
+
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
