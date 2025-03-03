@@ -1,3 +1,5 @@
+ @CrossOrigin(origins = "http://localhost:6001") 
+
 spring:
   web:
     cors:
