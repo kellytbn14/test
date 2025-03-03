@@ -1,4 +1,69 @@
- @CrossOrigin(origins = "http://localhost:6001") 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        String policy = "default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                + "connect-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; "
+                + "font-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self';";
+
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Habilitar CORS
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(policy))
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            .csrf(AbstractHttpConfigurer::disable) // Deshabilitar CSRF
+            .addFilterBefore(new SecureRedirectAuthenticationFilter(
+                    "/api/v1/login/saml", secureRedirectService.allowedOrigins.redirectLink),
+                    UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(request -> request
+                .requestMatchers("/javax.faces.resource/**").hasRole("ADMIN")
+                .requestMatchers("/swagger-ui.html").hasRole("ADMIN")
+                .requestMatchers("/swagger-resources/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/monitoring").hasRole("ADMIN")
+                .requestMatchers("/webjars/**").hasRole("ADMIN")
+                .requestMatchers("/v2/api-docs").hasRole("ADMIN")
+                .requestMatchers("/configuration/w").permitAll()
+                .requestMatchers("/actuator/health/**").permitAll()
+                .requestMatchers("/start/**").permitAll()
+                .requestMatchers("/actuator/info/**").permitAll()
+                .requestMatchers("/api/v1/**").hasRole("USER")
+                .anyRequest().fullyAuthenticated()
+            );
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:6001")); // Origen permitido
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true); // Permitir credenciales (si es necesario)
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+}
+
+
+@CrossOrigin(origins = "http://localhost:6001") 
 
 spring:
   web:
