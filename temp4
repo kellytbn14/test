@@ -1,3 +1,9 @@
+
+
+curl -X POST "http://localhost:8080/api/v1/login/saml" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "empXML=<VALOR_DEL_XML>"
+
 <asp:Panel ID="divContainer" runat="server" Visible="false">
     <div class="alert alert-info">
         Este contenido se oculta con un booleano en el servidor.
