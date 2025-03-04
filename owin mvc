@@ -1,3 +1,22 @@
+protected void Application_PostAuthenticateRequest(object sender, EventArgs e)
+{
+    var owinContext = HttpContext.Current.GetOwinContext();
+    if (owinContext.Authentication.User != null && owinContext.Authentication.User.Identity.IsAuthenticated)
+    {
+        HttpContext.Current.User = owinContext.Authentication.User;
+    }
+}
+
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    if (!HttpContext.Current.User?.Identity?.IsAuthenticated ?? true)
+    {
+        // NO reemplazar HttpContext.User aquí, solo redirigir si es necesario
+        AuthHelper.RedirectToWAM();
+    }
+}
+
+
 protected void Application_BeginRequest(object sender, EventArgs e)
 {
     if (!HttpContext.Current.User.Identity.IsAuthenticated)
