@@ -1,0 +1,47 @@
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    if (!HttpContext.Current.User.Identity.IsAuthenticated)
+    {
+        AuthHelper.RedirectToWAM(); // Llama a tu método que redirige a WAM
+    }
+}
+
+public class RequireAuthenticationFilter : AuthorizeAttribute
+{
+    protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+    {
+        if (!filterContext.HttpContext.User.Identity.IsAuthenticated)
+        {
+            AuthHelper.RedirectToWAM(); // Redirige a WAM si el usuario no está autenticado
+        }
+        else
+        {
+            base.HandleUnauthorizedRequest(filterContext);
+        }
+    }
+}
+
+public class FilterConfig
+{
+    public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+    {
+        filters.Add(new RequireAuthenticationFilter()); // Aplica autenticación a toda la app
+        filters.Add(new HandleErrorAttribute());
+    }
+}
+
+public static void RedirectToWAM()
+{
+    try
+    {
+        string redirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+
+        HttpContext.Current.Response.Clear();
+        HttpContext.Current.Response.Redirect(redirectUri, true);
+        HttpContext.Current.ApplicationInstance.CompleteRequest();
+    }
+    catch (Exception ex)
+    {
+        throw new InvalidOperationException("Error en la redirección a WAM: " + ex.Message);
+    }
+}
