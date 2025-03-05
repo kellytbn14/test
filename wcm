@@ -1,0 +1,30 @@
+using System;
+using System.Net;
+using AdysTech.CredentialManager;
+
+public class CredentialHelper
+{
+    public static void SaveCredential(string target, string user, string password)
+    {
+        var credential = new NetworkCredential(user, password);
+        var savedCredential = CredentialManager.SaveCredentials(target, credential);
+
+        if (savedCredential != null)
+        {
+            Console.WriteLine($"✅ Credencial guardada con éxito para '{target}'.");
+        }
+        else
+        {
+            Console.WriteLine("❌ Error al guardar la credencial.");
+        }
+    }
+}
+
+// Ejemplo de uso
+class Program
+{
+    static void Main()
+    {
+        CredentialHelper.SaveCredential("MiAplicacion", "usuario123", "miPasswordSegura");
+    }
+}
