@@ -1,3 +1,55 @@
+public static class AuthConfig
+{
+    public static void ConfigureAuth(IAppBuilder app, string clientId, string clientSecret, string baseUrl, string redirectUri)
+    {
+        AuthProperties.ClientId = clientId;
+        AuthProperties.ClientSecret = clientSecret;
+        AuthProperties.BaseUrl = baseUrl;
+        AuthProperties.RedirectUri = redirectUri;
+
+        app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+
+        app.UseCookieAuthentication(new CookieAuthenticationOptions
+        {
+            AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+            CookieSameSite = SameSiteMode.None
+        });
+
+        app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+        {
+            ClientId = AuthProperties.ClientId,
+            ClientSecret = AuthProperties.ClientSecret,
+            Authority = AuthProperties.BaseUrl,
+            RedirectUri = AuthProperties.RedirectUri,
+            ResponseType = OpenIdConnectResponseType.CodeIdToken,
+            SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType
+        });
+    }
+
+    public static void UseAuthenticationMiddleware(IAppBuilder app)
+    {
+        app.Use(async (context, next) =>
+        {
+            if (!context.Authentication.User.Identity.IsAuthenticated)
+            {
+                string redirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+
+                context.Authentication.Challenge(new AuthenticationProperties
+                {
+                    RedirectUri = redirectUri
+                }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
+
+                context.Response.StatusCode = 401;
+                return;
+            }
+
+            await next();
+        });
+    }
+}
+
+
+
 public class Startup
 {
     public void Configuration(IAppBuilder app)
