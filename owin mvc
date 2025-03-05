@@ -1,3 +1,47 @@
+public class Startup
+{
+    public void Configuration(IAppBuilder app)
+    {
+        app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+
+        app.UseCookieAuthentication(new CookieAuthenticationOptions
+        {
+            AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+            CookieSameSite = SameSiteMode.None
+        });
+
+        app.Use(async (context, next) =>
+        {
+            if (!context.Authentication.User.Identity.IsAuthenticated)
+            {
+                string redirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+
+                context.Authentication.Challenge(new AuthenticationProperties
+                {
+                    RedirectUri = redirectUri
+                }, OpenIdConnectAuthenticationDefaults.AuthenticationType);
+
+                context.Response.StatusCode = 401;
+                return;
+            }
+
+            await next();
+        });
+
+        app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+        {
+            ClientId = "tu-client-id",
+            Authority = "https://tu-idp.com",
+            RedirectUri = "https://tuapp.com/signin-oidc",
+            ResponseType = "code id_token",
+            UseTokenLifetime = true,
+            SignInAsAuthenticationType = CookieAuthenticationDefaults.AuthenticationType
+        });
+    }
+}
+
+
+
 protected void Application_BeginRequest(object sender, EventArgs e)
 {
     try
