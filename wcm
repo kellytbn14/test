@@ -1,3 +1,54 @@
+# Configurar la contraseña larga
+$PasswordLarga = "AquíVaTuContraseñaSuperLarga..."  # Reemplazar con la contraseña real
+$UserName = "MiUsuario"
+$TargetBase = "IIS_PGP_KEYS_CREDENTIALS"
+$MaxLength = 2000  # Máximo permitido por fragmento
+
+# Dividir la contraseña en partes
+$Parts = [System.Collections.ArrayList]::new()
+for ($i = 0; $i -lt $PasswordLarga.Length; $i += $MaxLength) {
+    $EndIndex = [Math]::Min($i + $MaxLength, $PasswordLarga.Length)
+    $Parts.Add($PasswordLarga.Substring($i, $EndIndex - $i)) | Out-Null
+}
+
+# Guardar cada parte en Credential Manager
+$Index = 1
+foreach ($Part in $Parts) {
+    $CredTarget = "$TargetBase`_Part$Index"
+    $SecurePassword = ConvertTo-SecureString $Part -AsPlainText -Force
+    $Credential = New-Object System.Management.Automation.PSCredential ($UserName, $SecurePassword)
+
+    New-StoredCredential -Target $CredTarget -Credential $Credential -Type Generic -Persist LocalMachine
+    Write-Host "Guardado: $CredTarget"
+    
+    $Index++
+}
+
+Write-Host "✅ Contraseña dividida y almacenada en Credential Manager."
+
+$TargetBase = "IIS_PGP_KEYS_CREDENTIALS"
+$Index = 1
+$PasswordRecuperada = ""
+
+while ($true) {
+    $CredTarget = "$TargetBase`_Part$Index"
+    $StoredCred = Get-StoredCredential -Target $CredTarget
+
+    if ($StoredCred -eq $null) {
+        break  # No hay más partes
+    }
+
+    $PasswordRecuperada += $StoredCred.Password
+    $Index++
+}
+
+Write-Host "🔓 Contraseña reconstruida: $PasswordRecuperada"
+
+
+
+
+
+
 Install-Module -Name CredentialManager -Force -AllowClobber
 
 $cred = New-Object PSCredential("MiUsuario", (ConvertTo-SecureString "MiContraseña" -AsPlainText -Force))
