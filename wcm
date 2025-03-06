@@ -1,3 +1,8 @@
+runas /user:"MiServidor\UsuarioAppPool" cmd
+cmdkey /add:MiAplicacion /user:MiUsuario /pass:MiContraseña
+cmdkey /list
+
+
 using System;
 using System.Net;
 using AdysTech.CredentialManager;
