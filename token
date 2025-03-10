@@ -1,3 +1,47 @@
+ /// <summary>
+    /// Verifica si el usuario está autenticado en OWIN.
+    /// </summary>
+    public static bool IsUserAuthenticated()
+    {
+        return HttpContext.Current.GetOwinContext().Authentication.User.Identity.IsAuthenticated;
+    }
+
+    /// <summary>
+    /// Obtiene el ID Token desde los claims del usuario autenticado.
+    /// </summary>
+    public static string GetIdToken()
+    {
+        if (!IsUserAuthenticated()) return null;
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("id_token")?.Value;
+    }
+
+    /// <summary>
+    /// Obtiene el Access Token desde los claims del usuario autenticado.
+    /// </summary>
+    public static string GetAccessToken()
+    {
+        if (!IsUserAuthenticated()) return null;
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("access_token")?.Value;
+    }
+
+    /// <summary>
+    /// Verifica si hay un ID Token válido.
+    /// </summary>
+    public static bool HasValidIdToken()
+    {
+        return !string.IsNullOrEmpty(GetIdToken());
+    }
+
+    /// <summary>
+    /// Verifica si hay un Access Token válido.
+    /// </summary>
+    public static bool HasValidAccessToken()
+    {
+        return !string.IsNullOrEmpty(GetAccessToken());
+    }
+
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
