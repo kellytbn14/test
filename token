@@ -1,0 +1,33 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Web;
+
+public partial class Default : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        string idToken = HttpContext.Current.GetOwinContext().Authentication.User.FindFirst("id_token")?.Value;
+
+        if (!string.IsNullOrEmpty(idToken))
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(idToken);
+
+            // Obtener el "sub" (ID del usuario)
+            var userId = token.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+            // Obtener el "locale" (Idioma del usuario)
+            var userLocale = token.Claims.FirstOrDefault(c => c.Type == "locale")?.Value;
+
+            // Mostrar los valores en la página
+            lblUserId.Text = userId ?? "ID de usuario no encontrado";
+            lblUserLocale.Text = userLocale ?? "Idioma no encontrado";
+        }
+        else
+        {
+            lblUserId.Text = "ID Token no disponible.";
+            lblUserLocale.Text = "Idioma no disponible.";
+        }
+    }
+}
