@@ -1,3 +1,37 @@
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ClientId = AuthProperties.ClientId,
+    ClientSecret = AuthProperties.ClientSecret,
+    Authority = AuthProperties.BaseUrl,
+    RedirectUri = AuthProperties.RedirectUri,
+    ResponseType = OpenIdConnectResponseType.CodeIdToken,
+    Scope = "openid profile email",
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        SecurityTokenValidated = context =>
+        {
+            var idToken = context.ProtocolMessage.IdToken;
+            var accessToken = context.ProtocolMessage.AccessToken;
+
+            if (!string.IsNullOrEmpty(idToken))
+            {
+                var claimsIdentity = context.AuthenticationTicket.Identity;
+                claimsIdentity.AddClaim(new System.Security.Claims.Claim("id_token", idToken));
+            }
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                var claimsIdentity = context.AuthenticationTicket.Identity;
+                claimsIdentity.AddClaim(new System.Security.Claims.Claim("access_token", accessToken));
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+});
+
+
+
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
