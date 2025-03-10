@@ -1,3 +1,79 @@
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Web;
+
+public static class TokenHelper
+{
+    /// <summary>
+    /// Obtiene el ID Token desde los claims del usuario autenticado.
+    /// </summary>
+    public static string GetIdToken()
+    {
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("id_token")?.Value;
+    }
+
+    /// <summary>
+    /// Obtiene el Access Token desde los claims del usuario autenticado.
+    /// </summary>
+    public static string GetAccessToken()
+    {
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("access_token")?.Value;
+    }
+
+    /// <summary>
+    /// Decodifica el ID Token y obtiene el valor de un claim específico.
+    /// </summary>
+    public static string GetClaimFromIdToken(string claimType)
+    {
+        string idToken = GetIdToken();
+        if (string.IsNullOrEmpty(idToken))
+            return null;
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(idToken);
+
+        return token.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+    }
+
+    /// <summary>
+    /// Obtiene el ID único del usuario (sub).
+    /// </summary>
+    public static string GetUserId()
+    {
+        return GetClaimFromIdToken("sub");
+    }
+
+    /// <summary>
+    /// Obtiene el nombre del usuario.
+    /// </summary>
+    public static string GetUserName()
+    {
+        return GetClaimFromIdToken("name");
+    }
+
+    /// <summary>
+    /// Obtiene el correo del usuario.
+    /// </summary>
+    public static string GetUserEmail()
+    {
+        return GetClaimFromIdToken("email");
+    }
+
+    /// <summary>
+    /// Obtiene el idioma (locale) del usuario.
+    /// </summary>
+    public static string GetUserLocale()
+    {
+        return GetClaimFromIdToken("locale");
+    }
+}
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ClientId = AuthProperties.ClientId,
