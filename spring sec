@@ -1,0 +1,25 @@
+@Override
+public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+
+    log.info("*** CustomAuthenticationSuccessHandler ***");
+
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    // Obtener el token JWT de la autenticación
+    String token = ((OidcUser) authentication.getPrincipal()).getIdToken().getTokenValue();
+
+    // Configurar la cookie con el Access Token
+    Cookie cookie = new Cookie("access_token", token);
+    cookie.setHttpOnly(true); // Evita acceso desde JavaScript
+    cookie.setSecure(true);   // Solo en HTTPS
+    cookie.setPath("/");      // Disponible en todo el dominio
+    cookie.setDomain(".frontend.com"); // Permitir que el frontend React lo use
+    response.addCookie(cookie);
+
+    // Redirigir según el rol del usuario
+    if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+        response.sendRedirect("/admin");
+    } else {
+        response.sendRedirect("https://frontend.com/home");
+    }
+}
