@@ -1,3 +1,49 @@
+import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class JSessionIdCookieFilter implements Filter {
+
+    @Value("${app.frontend.domain}") // 🔹 Asegúrate de definir esto en application.properties o application.yml
+    private String frontendDomain;
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        chain.doFilter(request, response);
+
+        if (response instanceof HttpServletResponse httpResponse) {
+            Cookie jsessionCookie = new Cookie("JSESSIONID", null);
+            jsessionCookie.setHttpOnly(true);
+            jsessionCookie.setSecure(true);
+            jsessionCookie.setPath("/");
+            jsessionCookie.setDomain(frontendDomain); // 🔹 Asigna el dominio del frontend
+            jsessionCookie.setMaxAge(60 * 60); // 🔹 Expira en 1 hora
+            httpResponse.addCookie(jsessionCookie);
+        }
+    }
+}
+
+
+import org.springframework.security.web.session.SessionManagementFilter;
+
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http, JSessionIdCookieFilter jSessionIdCookieFilter) throws Exception {
+    http
+        .addFilterBefore(jSessionIdCookieFilter, SessionManagementFilter.class) // 🔹 Agrega el filtro antes de la gestión de sesiones
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
+
+    return http.build();
+}
+
+
+
+
 response.getHeaderNames().forEach(header ->
         log.info("   📤 {}: {}", header, response.getHeader(header))
     );
