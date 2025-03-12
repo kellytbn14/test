@@ -1,3 +1,30 @@
+const express = require('express');
+const request = require('request');
+
+const app = express();
+const PORT = 4000;
+
+app.get('/callback', (req, res) => {
+    console.log('Interceptando redirección desde QA...');
+    const queryParams = req.originalUrl.split('?')[1] || '';
+    const localUrl = `http://localhost:3000/callback?${queryParams}`;
+    console.log(`Redirigiendo a: ${localUrl}`);
+
+    request(localUrl, (error, response, body) => {
+        if (error) {
+            console.error('Error al reenviar:', error);
+            return res.status(500).send('Error en la redirección.');
+        }
+        res.send(body);
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor puente corriendo en http://localhost:${PORT}`);
+});
+
+
+
 package com.bos.unison.wfsextapi.controller;
 
 import jakarta.servlet.http.Cookie;
