@@ -1,3 +1,58 @@
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    @GetMapping("/token")
+    public ResponseEntity<?> getAccessToken(HttpServletRequest request) {
+        // Obtener TODAS las cookies y loguearlas
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            log.warn("❌ No se encontraron cookies en la solicitud.");
+            return ResponseEntity.status(401).body("{\"error\": \"No cookies found\"}");
+        }
+
+        // Log de todas las cookies recibidas
+        for (Cookie cookie : cookies) {
+            log.info("📝 Cookie recibida: {} = {}", cookie.getName(), cookie.getValue());
+        }
+
+        // Buscar la cookie "access_token"
+        Optional<Cookie> accessTokenCookie = Arrays.stream(cookies)
+                .filter(cookie -> "access_token".equals(cookie.getName()))
+                .findFirst();
+
+        if (accessTokenCookie.isPresent()) {
+            String token = accessTokenCookie.get().getValue();
+            log.info("✅ Access Token encontrado en la cookie.");
+            return ResponseEntity.ok().body("{\"access_token\": \"" + token + "\"}");
+        } else {
+            log.warn("⚠️ No se encontró la cookie access_token.");
+            return ResponseEntity.status(401).body("{\"error\": \"No token found\"}");
+        }
+    }
+}
+
+
+//esto es para quitar el jsession id
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/auth/token").authenticated() // Solo usuarios autenticados pueden obtener el token
+            .requestMatchers("/admin/**").authenticated()  // Admin requiere autenticación
+            .anyRequest().permitAll()
+        )
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Permite sesiones solo si son necesarias
+        )
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+
+    return http.build();
+}
+
+
 const express = require('express');
 const request = require('request');
 
