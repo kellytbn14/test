@@ -1,3 +1,14 @@
+ Collection<String> headers = response.getHeaders("Set-Cookie");
+    if (!headers.isEmpty()) {
+        log.info("🔹 Cookies enviadas en la respuesta:");
+        for (String header : headers) {
+            log.info("   🍪 Set-Cookie: {}", header);
+        }
+    } else {
+        log.warn("⚠️ No se encontraron cookies en la respuesta.");
+    }
+
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
