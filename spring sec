@@ -1,4 +1,9 @@
- Collection<String> headers = response.getHeaders("Set-Cookie");
+response.getHeaderNames().forEach(header ->
+        log.info("   📤 {}: {}", header, response.getHeader(header))
+    );
+
+
+Collection<String> headers = response.getHeaders("Set-Cookie");
     if (!headers.isEmpty()) {
         log.info("🔹 Cookies enviadas en la respuesta:");
         for (String header : headers) {
