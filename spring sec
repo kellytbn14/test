@@ -1,3 +1,16 @@
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    return http
+        .oauth2Login(login -> login
+            .redirectionEndpoint(endpoint -> endpoint.baseUri("/oauth2/callback"))
+            .userInfoEndpoint(userInfo -> userInfo.oidcUserService(new OidcUserService()))
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .build();
+}
+
+
+
 implementation 'org.springframework.session:spring-session-core:3.1.2'
 
 
