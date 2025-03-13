@@ -1,3 +1,41 @@
+package com.bns.unison.wfsextapi.security;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class JSessionIdCookieFilter implements Filter {
+
+    @Value("${app.frontend.domain}") // 🔹 Definir el dominio en application.properties
+    private String frontendDomain;
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        chain.doFilter(request, response); // 🔹 Continúa con el procesamiento de la solicitud
+
+        if (response instanceof HttpServletResponse httpResponse) {
+            for (Cookie cookie : httpResponse.getCookies()) {
+                if ("JSESSIONID".equals(cookie.getName())) { // 🔹 Sobreescribimos solo JSESSIONID
+                    cookie.setDomain(frontendDomain);
+                    cookie.setPath("/");
+                    cookie.setHttpOnly(true);
+                    cookie.setSecure(true);
+                    cookie.setMaxAge(60 * 60); // 🔹 Expira en 1 hora
+                    httpResponse.addCookie(cookie);
+                }
+            }
+        }
+    }
+}
+
+
+
+
 import jakarta.servlet.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
