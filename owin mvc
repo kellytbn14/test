@@ -1,3 +1,76 @@
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ClientId = AuthProperties.ClientId,
+    ClientSecret = AuthProperties.ClientSecret,
+    Authority = AuthProperties.BaseUrl,
+    RedirectUri = AuthProperties.RedirectUri,
+    CookieManager = new SystemWebCookieManager(),
+    SaveTokens = true, // <--- Guarda los tokens en la sesión de autenticación
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        AuthenticationFailed = OnAuthenticationFailed,
+        SecurityTokenValidated = OnSecurityTokenValidated
+    }
+});
+
+private static async Task OnSecurityTokenValidated(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+{
+    var identity = context.AuthenticationTicket.Identity;
+    
+    // Puedes agregar claims personalizados si es necesario
+    identity.AddClaim(new System.Security.Claims.Claim("id_token", context.ProtocolMessage.IdToken));
+
+    context.AuthenticationTicket = new AuthenticationTicket(identity, context.AuthenticationTicket.Properties);
+}
+
+
+app.UseCookieAuthentication(new CookieAuthenticationOptions
+{
+    AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+    LoginPath = new PathString("/Account/Login"),
+    ExpireTimeSpan = TimeSpan.FromMinutes(60),
+    SlidingExpiration = true,
+    CookieSameSite = SameSiteMode.Lax, // Ajusta esto si hay problemas con cookies en navegadores modernos
+    CookieHttpOnly = true,
+    CookieSecure = CookieSecureOption.Always
+});
+
+
+public static void UseAuthenticationMiddleware(IAppBuilder app)
+{
+    app.Use(async (context, next) =>
+    {
+        var owinContext = context.Get<IOwinContext>();
+        var user = owinContext.Authentication.User;
+        bool isAuthenticated = user?.Identity != null && user.Identity.IsAuthenticated;
+
+        if (!isAuthenticated)
+        {
+            // Solo desafía si no estamos ya en un intento de autenticación
+            if (!context.Request.Path.Value.Contains("/signin-oidc"))
+            {
+                owinContext.Authentication.Challenge(
+                    new AuthenticationProperties { RedirectUri = AuthProperties.RedirectUri },
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType
+                );
+
+                context.Response.StatusCode = 401;
+                return;
+            }
+        }
+
+        await next();
+    });
+}
+
+
+
+
+
+
+
+
+
 public static class AuthConfig
 {
     public static void ConfigureAuth(IAppBuilder app, string clientId, string clientSecret, string baseUrl, string redirectUri)
