@@ -1,3 +1,128 @@
+1️⃣ Configurar UseCookieAuthentication Correctamente
+Si OWIN no guarda la sesión, el usuario siempre parecerá "No autenticado". Asegúrate de que UseCookieAuthentication esté configurado así en Startup.cs:
+
+app.UseCookieAuthentication(new CookieAuthenticationOptions
+{
+    AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+    ExpireTimeSpan = System.TimeSpan.FromMinutes(60),
+    SlidingExpiration = true,
+    CookieHttpOnly = true,
+    CookieSecure = CookieSecureOption.Always,
+    CookieSameSite = SameSiteMode.Lax,
+    LoginPath = new PathString("/signin-oidc"),  // 🔹 Esto ayuda a OWIN a reconocer la sesión
+});
+}
+
+2️⃣ Forzar OWIN a Validar el Token de WAM
+Si SecurityTokenValidated nunca se ejecuta, significa que el token de autenticación de WAM no está siendo leído correctamente. Vamos a forzarlo:
+
+📝 SecurityTokenValidated - Forzar la Sesión
+SecurityTokenValidated = context =>
+{
+    var identity = context.AuthenticationTicket.Identity;
+
+    Debug.WriteLine("✅ OWIN: Token de seguridad validado.");
+    Debug.WriteLine($"🔹 Usuario autenticado: {identity.Name}");
+
+    // 🔹 Agregar manualmente un Claim para que OWIN reconozca la sesión
+    identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, identity.Name ?? "Unknown"));
+
+    // 🔹 Guardar manualmente la sesión en OWIN
+    context.AuthenticationTicket = new AuthenticationTicket(identity, context.AuthenticationTicket.Properties);
+    return Task.CompletedTask;
+};
+
+
+3️⃣ Revisar las Cookies para Ver si WAM Está Autenticando
+Si OWIN sigue sin reconocer la sesión, revisemos si WAM realmente está creando cookies.
+
+📝 Startup.cs - Verificar si WAM Está Creando Cookies
+app.Use(async (context, next) =>
+{
+    Debug.WriteLine("🔹 Revisando Cookies de WAM...");
+    foreach (var cookie in context.Request.Cookies)
+    {
+        Debug.WriteLine($"🍪 Cookie detectada: {cookie.Key} = {cookie.Value}");
+    }
+    await next.Invoke();
+});
+
+4️⃣ Capturar y Pasar el Token de WAM a OWIN
+Si WAM ya autenticó al usuario pero OWIN no lo reconoce, podemos capturar el token y pasarlo manualmente a OWIN.
+
+📝 UseAuthenticationMiddleware - Capturar el Token de WAM
+public static void UseAuthenticationMiddleware(IAppBuilder app)
+{
+    app.Use(async (context, next) =>
+    {
+        var user = HttpContext.Current.User;
+        bool isAuthenticated = user?.Identity != null && user.Identity.IsAuthenticated;
+
+        Debug.WriteLine($"✅ Middleware - IsAuthenticated: {isAuthenticated}");
+
+        // 🔹 Si ya está autenticado en WAM pero OWIN no lo reconoce, forzamos la autenticación
+        if (isAuthenticated && !context.Authentication.User.Identity.IsAuthenticated)
+        {
+            Debug.WriteLine("🔹 WAM ya autenticó al usuario. Forzando autenticación en OWIN.");
+
+            var identity = user.Identity as System.Security.Claims.ClaimsIdentity;
+            if (identity != null)
+            {
+                context.Authentication.SignIn(new AuthenticationProperties { IsPersistent = true }, identity);
+            }
+        }
+
+        await next.Invoke();
+    });
+}
+
+
+---------------------------------------------------------------------------------------------------------
+
+3️⃣ Configurar OWIN para Interceptar HRAdminPortal
+📌 Ahora tenemos que hacer que OWIN escuche la respuesta de autenticación en la URL de HRAdminPortal.
+
+🔹 Modifica Global.asax.cs para capturar la autenticación en HRAdminPortal
+
+protected void Application_BeginRequest()
+{
+    var requestPath = HttpContext.Current.Request.Url.AbsolutePath;
+
+    Debug.WriteLine($"📌 Verificando ruta de autenticación: {requestPath}");
+
+    if (requestPath.Contains("/hrpassiis/HRAdminPortal"))
+    {
+        Debug.WriteLine("✅ Detectada URL de autenticación de WAM, procesando login en OWIN.");
+        
+        HttpContext.Current.GetOwinContext().Authentication.Challenge(
+            new AuthenticationProperties { RedirectUri = "/" }, 
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+    }
+}
+
+
+4️⃣ Verificar si OWIN Recibe el Token
+📌 Si OWIN no recibe el token, revisa si está en la cabecera HTTP.
+
+🔹 Agrega este código en Startup.cs para imprimir los headers HTTP:
+
+4️⃣ Verificar si OWIN Recibe el Token
+📌 Si OWIN no recibe el token, revisa si está en la cabecera HTTP.
+
+🔹 Agrega este código en Startup.cs para imprimir los headers HTTP:
+
+
+---------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
 🔥 Paso 3: Confirmar que OWIN Está Procesando Solicitudes
 📌 OWIN a veces no ejecuta el middleware en ASP.NET MVC si no está configurado correctamente.
 
