@@ -1,3 +1,32 @@
+public override void OnActionExecuting(ActionExecutingContext filterContext)
+{
+    var requestPath = HttpContext.Current.Request.Path;
+
+    // No ejecutar autenticación en la página de retorno de OIDC
+    if (requestPath.StartsWith("/signin-oidc", System.StringComparison.OrdinalIgnoreCase))
+    {
+        return;
+    }
+
+    var user = HttpContext.Current.User;
+
+    Debug.WriteLine($"IsAuthenticated: {user?.Identity?.IsAuthenticated}");
+    
+    if (user == null || !user.Identity.IsAuthenticated)
+    {
+        Debug.WriteLine("🔴 Usuario no autenticado. Redirigiendo a login...");
+        
+        HttpContext.Current.GetOwinContext().Authentication.Challenge(
+            new AuthenticationProperties { RedirectUri = HttpContext.Current.Request.Url.ToString() },
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+
+        filterContext.Result = new HttpUnauthorizedResult();
+    }
+}
+
+
+
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Web;
