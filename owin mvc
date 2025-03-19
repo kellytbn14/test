@@ -1,3 +1,65 @@
+using System.Diagnostics;
+using System.Security.Claims;
+using System.Web;
+using System.Web.Mvc;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.OpenIdConnect;
+
+namespace MyMvcApp.Filters
+{
+    public class AutoLoginFilter : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var context = HttpContext.Current;
+            var user = context.User;
+            var requestPath = context.Request.Path;
+
+            Debug.WriteLine("====== USER INFO ======");
+            Debug.WriteLine($"IsAuthenticated: {user?.Identity?.IsAuthenticated}");
+            Debug.WriteLine($"Current URL: {context.Request.Url}");
+
+            // 🔹 Evita redirigir si estamos en el callback de autenticación
+            if (requestPath.StartsWith("/signin-oidc", System.StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.WriteLine("🟢 Callback de OIDC detectado. No redirigir.");
+                return;
+            }
+
+            // 🔹 Si el usuario ya está autenticado, no hacemos nada
+            if (user != null && user.Identity.IsAuthenticated)
+            {
+                Debug.WriteLine("✅ Usuario autenticado. Continuando...");
+                return;
+            }
+
+            Debug.WriteLine("🔴 Usuario no autenticado.");
+
+            // 🔹 Si ya intentó autenticarse y sigue sin éxito, evitar loop
+            if (context.Session["AuthAttempt"] != null)
+            {
+                Debug.WriteLine("🔄 Se detectó un loop de autenticación. Mostrando error.");
+                filterContext.Result = new RedirectResult("/Account/LoginError");
+                return;
+            }
+
+            // 🔹 Guardar en sesión que estamos intentando autenticarnos
+            context.Session["AuthAttempt"] = "true";
+
+            // 🔹 Redirigir al login
+            Debug.WriteLine("🔹 Redirigiendo a login...");
+            context.GetOwinContext().Authentication.Challenge(
+                new AuthenticationProperties { RedirectUri = context.Request.Url.ToString() },
+                OpenIdConnectAuthenticationDefaults.AuthenticationType
+            );
+
+            filterContext.Result = new HttpUnauthorizedResult();
+        }
+    }
+}
+
+
+
 app.UseCookieAuthentication(new CookieAuthenticationOptions
 {
     AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
