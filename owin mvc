@@ -1,3 +1,121 @@
+🔥 Paso 3: Confirmar que OWIN Está Procesando Solicitudes
+📌 OWIN a veces no ejecuta el middleware en ASP.NET MVC si no está configurado correctamente.
+
+🔹 Modifica Startup.cs y agrega esto:
+
+app.Use(async (context, next) =>
+{
+    Debug.WriteLine($"➡ OWIN Middleware ejecutando: {context.Request.Path}");
+    await next.Invoke();
+});
+
+1️⃣ Deshabilitar el Challenge Infinito en RedirectToIdentityProvider
+Actualmente, cada vez que OWIN verifica la autenticación y no encuentra sesión, hace un nuevo challenge. Vamos a detener ese comportamiento si ya se ha autenticado una vez.
+
+📝 Startup.cs - Modifica RedirectToIdentityProvider
+
+Notifications = new OpenIdConnectAuthenticationNotifications
+{
+    RedirectToIdentityProvider = context =>
+    {
+        Debug.WriteLine("🔹 OWIN: Enviando solicitud de autenticación a WAM...");
+
+        // 🔹 Evitar redirección infinita
+        if (context.Request.Uri.AbsolutePath.Contains("/signin-oidc") && context.Request.User.Identity.IsAuthenticated)
+        {
+            Debug.WriteLine("✅ Usuario ya autenticado, omitiendo nuevo challenge.");
+            context.HandleResponse();
+            return Task.CompletedTask;
+        }
+
+        return Task.CompletedTask;
+    },
+    MessageReceived = context =>
+    {
+        Debug.WriteLine("🔹 OWIN: Mensaje recibido de OIDC.");
+        return Task.CompletedTask;
+    },
+    SecurityTokenValidated = context =>
+    {
+        Debug.WriteLine("✅ OWIN: Token de seguridad validado.");
+        return Task.CompletedTask;
+    }
+}
+
+3️⃣ Forzar a OWIN a Leer la Sesión Desde WAM
+📌 Si el usuario ya está autenticado con WAM pero OWIN no lo detecta, debemos hacer que OWIN lea la sesión correctamente.
+
+📝 AutoLoginFilter.cs - Validar Si WAM Ya Autenticó
+
+public override void OnActionExecuting(ActionExecutingContext filterContext)
+{
+    var context = HttpContext.Current;
+    var user = context.User;
+
+    Debug.WriteLine("====== USER INFO ======");
+    Debug.WriteLine($"IsAuthenticated: {user?.Identity?.IsAuthenticated}");
+
+    // 🔹 Si el usuario ya tiene sesión con WAM, asegurarnos de que OWIN lo reconoce
+    if (user != null && user.Identity.IsAuthenticated)
+    {
+        Debug.WriteLine("✅ Usuario autenticado con WAM.");
+        return;
+    }
+
+    Debug.WriteLine("🔴 Usuario NO autenticado. Lanzando challenge...");
+
+    // 🔹 Evitar Challenge infinito en la misma sesión
+    if (context.Session["AuthAttempt"] != null)
+    {
+        Debug.WriteLine("🔄 Loop detectado. Mostrando error en lugar de redirigir.");
+        filterContext.Result = new RedirectResult("/Account/LoginError");
+        return;
+    }
+
+    context.Session["AuthAttempt"] = "true";
+
+    // 🔹 Lanzar Challenge
+    context.GetOwinContext().Authentication.Challenge(
+        new AuthenticationProperties { RedirectUri = context.Request.Url.ToString() },
+        OpenIdConnectAuthenticationDefaults.AuthenticationType
+    );
+
+    filterContext.Result = new HttpUnauthorizedResult();
+}
+
+
+4️⃣ Forzar WAM a Pasar el Token Correctamente
+📌 Si WAM no está pasando el token correctamente, debemos asegurarnos de que se envía en la cabecera HTTP.
+
+📝 Startup.cs - Forzar a WAM a Pasar el Token
+
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.ContainsKey("Authorization"))
+    {
+        Debug.WriteLine("🔹 Token de WAM detectado en la cabecera.");
+    }
+    else
+    {
+        Debug.WriteLine("⚠️ No hay token de WAM en la cabecera.");
+    }
+
+    await next.Invoke();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Web;
