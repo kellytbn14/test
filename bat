@@ -1,6 +1,31 @@
 @echo off
 setlocal
 
+:: Definir las carpetas
+set "carp1=C:\Ruta\De\Carp1"
+set "carp2=C:\Ruta\De\Carp2"
+
+:: Verificar si la carpeta de destino (carp1) existe y eliminar todo su contenido
+if exist "%carp1%" (
+    echo Eliminando archivos y subcarpetas dentro de %carp1%...
+    del /S /Q "%carp1%\*.*" 2>nul
+    for /D %%D in ("%carp1%\*") do rmdir /S /Q "%%D"
+) else (
+    echo La carpeta %carp1% no existe, se creará.
+    mkdir "%carp1%"
+)
+
+:: Copiar todos los archivos y subcarpetas de carp2 a carp1
+robocopy "%carp2%" "%carp1%" /E /R:3 /W:5
+
+echo Copia completada de %carp2% a %carp1%.
+pause
+
+
+
+@echo off
+setlocal
+
 :: Definir las carpetas de origen y destino
 set "origen=C:\Ruta\De\Origen"
 set "destino=C:\Ruta\De\Destino"
