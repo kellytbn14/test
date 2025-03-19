@@ -1,3 +1,120 @@
+using Microsoft.Owin;
+using Owin;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using System.Threading.Tasks;
+using System.Configuration;
+using System.Web.Helpers;
+
+[assembly: OwinStartup(typeof(MyMvcApp.Startup))]
+
+namespace MyMvcApp
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            // 🔹 1. Configurar autenticación basada en cookies
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+                ExpireTimeSpan = System.TimeSpan.FromMinutes(60),
+                SlidingExpiration = true
+            });
+
+            // 🔹 2. Configurar OpenID Connect para autenticación automática
+            app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+            {
+                ClientId = ConfigurationManager.AppSettings["OIDC:ClientId"],
+                Authority = ConfigurationManager.AppSettings["OIDC:Authority"],
+                RedirectUri = ConfigurationManager.AppSettings["OIDC:RedirectUri"],
+                ResponseType = "id_token",
+                Scope = "openid profile email",
+                SaveTokens = true,
+
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidAudience = ConfigurationManager.AppSettings["OIDC:ClientId"]
+                },
+
+                Notifications = new OpenIdConnectAuthenticationNotifications
+                {
+                    AuthenticationFailed = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect("/Error?message=" + context.Exception.Message);
+                        return Task.FromResult(0);
+                    }
+                }
+            });
+
+            // 🔹 3. Evitar problemas con antiforgery tokens en OWIN
+            AntiForgeryConfig.UniqueClaimTypeIdentifier = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+        }
+    }
+}
+
+using System.Web;
+using System.Web.Mvc;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.OpenIdConnect;
+
+namespace MyMvcApp.Filters
+{
+    public class AutoLoginFilter : ActionFilterAttribute
+    {
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            var user = HttpContext.Current.User;
+            
+            if (user == null || !user.Identity.IsAuthenticated)
+            {
+                // 🔹 Redirigir automáticamente al login si el usuario no está autenticado
+                HttpContext.Current.GetOwinContext().Authentication.Challenge(
+                    new AuthenticationProperties { RedirectUri = HttpContext.Current.Request.Url.ToString() },
+                    OpenIdConnectAuthenticationDefaults.AuthenticationType
+                );
+
+                // 🔹 Detener la ejecución de la acción actual
+                filterContext.Result = new HttpUnauthorizedResult();
+            }
+        }
+    }
+}
+
+using System.Web.Mvc;
+using MyMvcApp.Filters;
+
+namespace MyMvcApp.Controllers
+{
+    [AutoLoginFilter]  // ✅ Aplica el filtro de autenticación automática
+    public class HomeController : Controller
+    {
+        public ActionResult Index()
+        {
+            return View();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ClientId = AuthProperties.ClientId,
