@@ -1,3 +1,25 @@
+✅ 1. Activar System.Diagnostics para Ver Detalles
+Antes de hacer cambios, activa logs detallados de OWIN para ver qué está pasando.
+
+📌 Agrega esto en web.config:
+
+<system.diagnostics>
+    <sources>
+        <source name="System.IdentityModel.Tokens.Jwt" switchValue="Verbose">
+            <listeners>
+                <add name="JwtTrace" type="System.Diagnostics.TextWriterTraceListener" initializeData="c:\logs\jwt.log"/>
+            </listeners>
+        </source>
+        <source name="Microsoft.Owin" switchValue="Verbose">
+            <listeners>
+                <add name="OwinTrace" type="System.Diagnostics.TextWriterTraceListener" initializeData="c:\logs\owin.log"/>
+            </listeners>
+        </source>
+    </sources>
+</system.diagnostics>
+
+----------------------------------------------------------------------------------------------------------------------------------
+
 ✅ 3. Revisar las Cookies de Sesión
 Otro problema puede ser que la cookie de sesión no se esté estableciendo correctamente, haciendo que la app no "recuerde" que ya se autenticó.
 
