@@ -1,3 +1,39 @@
+✅ 3. Redirigir a WAM Solo Si No Hay id_token
+Para evitar que la app siga redirigiendo en un loop infinito, debemos asegurarnos de que solo se reenvíe a WAM cuando realmente no haya autenticación.
+
+📌 Modifica la lógica de redirección en Startup.cs:
+app.Use(async (context, next) =>
+{
+    var user = context.Authentication.User;
+
+    if (user == null || !user.Identity.IsAuthenticated)
+    {
+        System.Diagnostics.Debug.WriteLine("🔴 Usuario NO autenticado, verificando si hay id_token...");
+
+        // 🔹 Verificar si hay un id_token en la respuesta
+        var form = await context.Request.ReadFormAsync();
+        var idToken = form["id_token"];
+        
+        if (!string.IsNullOrEmpty(idToken))
+        {
+            System.Diagnostics.Debug.WriteLine($"🔹 id_token detectado: {idToken}");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine("🔴 Redirigiendo a WAM porque no hay sesión ni token.");
+            context.Authentication.Challenge(new AuthenticationProperties { RedirectUri = "/" }, "oidc");
+            return;
+        }
+    }
+
+    System.Diagnostics.Debug.WriteLine("✅ Usuario autenticado, continuando...");
+    await next();
+});
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
 ✅ 1. Activar System.Diagnostics para Ver Detalles
 Antes de hacer cambios, activa logs detallados de OWIN para ver qué está pasando.
 
