@@ -1,3 +1,24 @@
+@using (Html.BeginForm("ProcesarFormulario", "Home", FormMethod.Post))
+{
+    <label for="nombre">Nombre:</label>
+    @Html.TextBox("nombre", "", new { @class = "form-control", placeholder = "Ingresa tu nombre" })
+
+    <button type="submit" class="btn btn-primary mt-2">Enviar</button>
+}
+using System.Web.Mvc;
+
+public class HomeController : Controller
+{
+    [HttpPost]
+    public ActionResult ProcesarFormulario(string nombre)
+    {
+        ViewBag.Mensaje = "Hola, " + nombre;
+        return View("Resultado");
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 ✅ 3. Redirigir a WAM Solo Si No Hay id_token
 Para evitar que la app siga redirigiendo en un loop infinito, debemos asegurarnos de que solo se reenvíe a WAM cuando realmente no haya autenticación.
 
