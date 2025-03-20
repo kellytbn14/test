@@ -1,3 +1,37 @@
+✅ 3. Revisar las Cookies de Sesión
+Otro problema puede ser que la cookie de sesión no se esté estableciendo correctamente, haciendo que la app no "recuerde" que ya se autenticó.
+
+📌 Prueba forzando el almacenamiento de la cookie con UseCookieAuthentication:
+
+app.UseCookieAuthentication(new CookieAuthenticationOptions
+{
+    AuthenticationType = "Cookies",
+    ExpireTimeSpan = TimeSpan.FromMinutes(60),
+    SlidingExpiration = true, // 🔹 Mantiene la sesión activa si el usuario sigue navegando
+});
+
+
+✅ 2. Asegurar que el Middleware de Autenticación No Redirija de Nuevo
+Asegúrate de que la lógica de autenticación en Startup.cs solo redirija cuando realmente no haya sesión.
+
+📌 Modifica esta parte de Startup.cs para evitar el bucle:
+
+app.Use(async (context, next) =>
+{
+    var user = context.Authentication.User;
+
+    // 🔹 Solo redirigir a WAM si el usuario NO está autenticado
+    if (user == null || !user.Identity.IsAuthenticated)
+    {
+        context.Authentication.Challenge(new AuthenticationProperties { RedirectUri = "/" }, "oidc");
+        return;
+    }
+
+    await next();
+});
+----------------------------------------------------------------------------------------------------------------------------------
+     
+
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
