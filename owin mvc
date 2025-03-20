@@ -1,3 +1,64 @@
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+using System;
+using System.Configuration;
+
+[assembly: OwinStartup(typeof(MyApp.Startup))]
+
+namespace MyApp
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            // Usa Cookies para manejar la autenticación de OWIN
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = "Cookies"
+            });
+
+            // Configurar OpenID Connect con WAM
+            app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+            {
+                AuthenticationType = "oidc",
+                ClientId = ConfigurationManager.AppSettings["ClientId"],
+                Authority = ConfigurationManager.AppSettings["Authority"], // URL del WAM
+                RedirectUri = ConfigurationManager.AppSettings["RedirectUri"],
+                ResponseType = "code id_token",
+                Scope = "openid profile email",
+                SignInAsAuthenticationType = "Cookies",
+                UseTokenLifetime = false,
+
+                Notifications = new OpenIdConnectAuthenticationNotifications
+                {
+                    AuthenticationFailed = context =>
+                    {
+                        context.HandleResponse();
+                        return System.Threading.Tasks.Task.FromResult(0);
+                    }
+                }
+            });
+
+            // Redirige a la autenticación al iniciar la app (sin botón de login)
+            app.Use(async (context, next) =>
+            {
+                if (!context.Authentication.User.Identity.IsAuthenticated)
+                {
+                    context.Authentication.Challenge(new AuthenticationProperties { RedirectUri = "/" }, "oidc");
+                    return;
+                }
+                await next();
+            });
+        }
+    }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
 1️⃣ Configurar UseCookieAuthentication Correctamente
 Si OWIN no guarda la sesión, el usuario siempre parecerá "No autenticado". Asegúrate de que UseCookieAuthentication esté configurado así en Startup.cs:
 
