@@ -1,3 +1,18 @@
+using Microsoft.Extensions.Configuration;
+
+var builder = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+IConfiguration config = builder.Build();
+
+var apiKey = config["MiConfiguracion:ApiKey"];
+var url = config["MiConfiguracion:Url"];
+
+Console.WriteLine($"ApiKey: {apiKey}");
+Console.WriteLine($"URL: {url}");
+
+
 <ItemGroup>
   <None Update="appsettings.json">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
