@@ -1,3 +1,25 @@
+app.Use(async (context, next) =>
+{
+    await next.Invoke();
+
+    var headers = context.Response.Headers;
+    if (headers.ContainsKey("Set-Cookie"))
+    {
+        var cookies = headers.GetValues("Set-Cookie");
+        for (int i = 0; i < cookies.Length; i++)
+        {
+            if (cookies[i].Contains("AspNet.Cookies"))
+            {
+                cookies[i] = cookies[i].Replace("SameSite=Lax", "SameSite=None");
+                headers.Set("Set-Cookie", cookies[i]);
+            }
+        }
+    }
+});
+
+
+
+
 @using (Html.BeginForm("ProcesarFormulario", "Home", FormMethod.Post))
 {
     <label for="nombre">Nombre:</label>
