@@ -1,3 +1,25 @@
+<system.diagnostics>
+  <sources>
+    <source name="System.Net" switchValue="Verbose">
+      <listeners>
+        <add name="System.Net"/>
+      </listeners>
+    </source>
+    <source name="System.Net.Http" switchValue="Verbose">
+      <listeners>
+        <add name="System.Net"/>
+      </listeners>
+    </source>
+  </sources>
+  <sharedListeners>
+    <add name="System.Net"
+         type="System.Diagnostics.TextWriterTraceListener"
+         initializeData="network.log" />
+  </sharedListeners>
+  <trace autoflush="true" />
+</system.diagnostics>
+
+
 <configuration>
   <system.diagnostics>
     <sources>
