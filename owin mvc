@@ -1,3 +1,49 @@
+using Microsoft.Owin;
+using Microsoft.Owin.Logging;
+using Owin;
+using System.Diagnostics;
+
+[assembly: OwinStartup(typeof(YourNamespace.Startup))]
+
+namespace YourNamespace
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            app.SetLoggerFactory(new DebugLoggerFactory());
+
+            // Tu configuración OWIN
+        }
+    }
+
+    public class DebugLoggerFactory : ILoggerFactory
+    {
+        public ILogger Create(string name)
+        {
+            return new DebugLogger(name);
+        }
+    }
+
+    public class DebugLogger : ILogger
+    {
+        private readonly string _name;
+
+        public DebugLogger(string name)
+        {
+            _name = name;
+        }
+
+        public bool WriteCore(TraceEventType eventType, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+        {
+            Debug.WriteLine($"[{eventType}] {_name} - {formatter(state, exception)}");
+            return true;
+        }
+    }
+}
+
+
+
 <system.diagnostics>
   <sources>
     <source name="System.Net" switchValue="Verbose">
