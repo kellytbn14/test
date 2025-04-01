@@ -1,3 +1,31 @@
+<configuration>
+  <system.diagnostics>
+    <sources>
+      <source name="Microsoft.Owin" switchValue="Verbose">
+        <listeners>
+          <add name="OwinTrace" type="System.Diagnostics.TextWriterTraceListener"
+               initializeData="C:\logs\owin.log" />
+        </listeners>
+      </source>
+      <source name="Microsoft.Owin.Security" switchValue="Verbose">
+        <listeners>
+          <add name="OwinSecurityTrace" type="System.Diagnostics.TextWriterTraceListener"
+               initializeData="C:\logs\owin-security.log" />
+        </listeners>
+      </source>
+      <source name="System.IdentityModel.Tokens.Jwt" switchValue="Verbose">
+        <listeners>
+          <add name="JwtTrace" type="System.Diagnostics.TextWriterTraceListener"
+               initializeData="C:\logs\jwt.log" />
+        </listeners>
+      </source>
+    </sources>
+    <trace autoflush="true" />
+  </system.diagnostics>
+</configuration>
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     // Config básica...
