@@ -1,0 +1,19 @@
+public static class HrApiSecrets
+{
+    private static readonly Lazy<string> _clientId = new Lazy<string>(() =>
+    {
+        string keyVaultUri = ConfigurationManager.AppSettings["AKV.Uri"];
+        string keyClientId = ConfigurationManager.AppSettings["HRAPI.AKV.KeyWamClientId"];
+        return CryptoManager.GetAKVaultAsync(keyVaultUri, keyClientId).GetAwaiter().GetResult();
+    });
+
+    private static readonly Lazy<string> _clientSecret = new Lazy<string>(() =>
+    {
+        string keyVaultUri = ConfigurationManager.AppSettings["AKV.Uri"];
+        string keyClientSecret = ConfigurationManager.AppSettings["HRAPI.AKV.KeyWamClientSecret"];
+        return CryptoManager.GetAKVaultAsync(keyVaultUri, keyClientSecret).GetAwaiter().GetResult();
+    });
+
+    public static string ClientId => _clientId.Value;
+    public static string ClientSecret => _clientSecret.Value;
+}
