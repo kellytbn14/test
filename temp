@@ -1,3 +1,27 @@
+<configuration>
+  <system.diagnostics>
+    <switches>
+      <!-- Habilita todos los logs para Microsoft.Owin -->
+      <add name="Microsoft.Owin" value="Verbose" />
+    </switches>
+  </system.diagnostics>
+</configuration>
+
+<configuration>
+  ...
+
+  <system.diagnostics>
+    <switches>
+      <add name="Microsoft.Owin" value="Verbose" />
+      <add name="Microsoft.Owin.Security" value="Verbose" />
+      <add name="Microsoft.Owin.Security.OpenIdConnect" value="Verbose" />
+    </switches>
+  </system.diagnostics>
+
+  ...
+</configuration>
+
+
 var logger = app.CreateLogger("OWIN-Test");
 logger.WriteInformation("Log de prueba desde OWIN");
 
