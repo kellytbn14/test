@@ -1,3 +1,71 @@
+using Microsoft.Owin.Logging;
+using System;
+using System.Diagnostics;
+using Serilog;
+
+public class SerilogLogger : ILogger
+{
+    private readonly string _name;
+
+    public SerilogLogger(string name)
+    {
+        _name = name;
+    }
+
+    public bool WriteCore(TraceEventType eventType, int eventId, object state,
+        Exception exception, Func<object, Exception, string> formatter)
+    {
+        if (formatter == null) return false;
+
+        var message = formatter(state, exception);
+        if (string.IsNullOrWhiteSpace(message)) return false;
+
+        var logger = Log.ForContext("SourceContext", _name);
+
+        switch (eventType)
+        {
+            case TraceEventType.Critical:
+                logger.Fatal(exception, message);
+                break;
+            case TraceEventType.Error:
+                logger.Error(exception, message);
+                break;
+            case TraceEventType.Warning:
+                logger.Warning(exception, message);
+                break;
+            case TraceEventType.Information:
+                logger.Information(exception, message);
+                break;
+            case TraceEventType.Verbose:
+                logger.Verbose(exception, message);
+                break;
+            default:
+                logger.Debug(exception, message);
+                break;
+        }
+
+        return true;
+    }
+}
+
+public class SerilogLoggerFactory : ILoggerFactory
+{
+    public ILogger Create(string name)
+    {
+        return new SerilogLogger(name);
+    }
+}
+
+
+ app.SetLoggerFactory(new SerilogLoggerFactory());
+
+
+
+
+
+
+
+
 <?xml version="1.0" encoding="utf-8" ?>
 <Weavers>
   <Costura />
