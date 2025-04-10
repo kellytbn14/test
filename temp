@@ -1,3 +1,46 @@
+using System.Threading.Tasks;
+using Microsoft.Owin;
+
+public class RawOwinLoggerMiddleware : OwinMiddleware
+{
+    public RawOwinLoggerMiddleware(OwinMiddleware next) : base(next) { }
+
+    public override async Task Invoke(IOwinContext context)
+    {
+        // Log de entrada
+        LogHelper.Log($"[OWIN Raw] Incoming request: {context.Request.Method} {context.Request.Uri}",
+                      LogHelper.LogLevel.Debug);
+
+        foreach (var header in context.Request.Headers)
+        {
+            LogHelper.Log($"[OWIN Raw] Header: {header.Key} = {string.Join(",", header.Value)}",
+                          LogHelper.LogLevel.Debug);
+        }
+
+        await Next.Invoke(context);
+
+        // Log de salida
+        LogHelper.Log($"[OWIN Raw] Outgoing response: {context.Response.StatusCode}",
+                      LogHelper.LogLevel.Debug);
+
+        foreach (var header in context.Response.Headers)
+        {
+            LogHelper.Log($"[OWIN Raw] Response Header: {header.Key} = {string.Join(",", header.Value)}",
+                          LogHelper.LogLevel.Debug);
+        }
+    }
+}
+
+
+public void Configuration(IAppBuilder app)
+{
+    app.Use<RawOwinLoggerMiddleware>();
+
+    // Luego tu auth
+    ConfigureAuth(app);
+}
+
+
 <configuration>
   <system.diagnostics>
     <switches>
