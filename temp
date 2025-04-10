@@ -1,3 +1,7 @@
+var logger = app.CreateLogger("OWIN-Test");
+logger.WriteInformation("Log de prueba desde OWIN");
+
+
 using Microsoft.Owin.Logging;
 
 public class SerilogLoggerFactory : ILoggerFactory
