@@ -1,3 +1,13 @@
+<system.webServer>
+  <httpProtocol>
+    <customHeaders>
+      <add name="Connection" value="keep-alive" />
+    </customHeaders>
+  </httpProtocol>
+</system.webServer>
+
+
+
 using System.Threading.Tasks;
 using Microsoft.Owin;
 
