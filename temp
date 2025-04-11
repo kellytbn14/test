@@ -1,3 +1,30 @@
+app.Use(async (context, next) =>
+{
+    var request = context.Request;
+
+    // Solo intercepta el POST desde WAM con tokens
+    if (request.Path == new PathString("/hrpassiis/HRAdminPortal") &&
+        request.Method == "POST")
+    {
+        var form = await request.ReadFormAsync();
+
+        if (form.ContainsKey("id_token") || form.ContainsKey("code"))
+        {
+            // Redirige internamente a la ruta que OWIN sí procesará
+            context.Response.Redirect("/auth/callback");
+            return;
+        }
+    }
+
+    await next.Invoke();
+});
+
+
+CallbackPath = new PathString("/auth/callback")
+
+
+
+
 <system.webServer>
   <httpProtocol>
     <customHeaders>
