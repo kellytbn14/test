@@ -1,3 +1,22 @@
+<system.webServer>
+  <rewrite>
+    <rules>
+      <rule name="Set HTTPS">
+        <match url=".*" />
+        <conditions>
+          <add input="{HTTPS}" pattern="off" />
+        </conditions>
+        <serverVariables>
+          <set name="HTTPS" value="on" />
+        </serverVariables>
+        <action type="None" />
+      </rule>
+    </rules>
+  </rewrite>
+</system.webServer>
+
+
+
 app.Use(async (context, next) =>
 {
     var request = context.Request;
