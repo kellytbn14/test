@@ -1,3 +1,5 @@
+pero es que, el problema real es que la cookie no está quedando seteada, no es que el token no llegue no es nada de eso, en local la cookie sí se guarda, pero en iis no. en local funciona por el requireSSL = true, pongo eso en iis y no funciona. entonces el problema es por otro lado. ayudame investigando y analizando a fondo, por el lado de iis, porque si en local me funciona, es porque en el servidor falta algo, o hay algo relacionado con el codigo
+
 Calificación: 5
 
 Durante el año, completé el plan de competencias básicas asignadas por el sistema y lo envié dentro del plazo solicitado. Además, añadí dos competencias adicionales para fortalecer mis habilidades y seguir desarrollándome en mi rol. Considero importante mantenerme actualizado y alineado con las expectativas del área, por eso me esfuerzo en cumplir con estos requerimientos de manera proactiva.
