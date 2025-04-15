@@ -1,3 +1,54 @@
+RedirectToIdentityProvider = context =>
+{
+    var request = context.ProtocolMessage;
+
+    // 🔍 1. Tipo de solicitud
+    var type = request.RequestType; // Authentication o Logout
+    System.Diagnostics.Debug.WriteLine("🔁 Tipo de solicitud: " + type);
+
+    // 🔍 2. Valores enviados al servidor de autorización
+    System.Diagnostics.Debug.WriteLine("ClientId: " + request.ClientId);
+    System.Diagnostics.Debug.WriteLine("RedirectUri: " + request.RedirectUri);
+    System.Diagnostics.Debug.WriteLine("Scope: " + request.Scope);
+    System.Diagnostics.Debug.WriteLine("ResponseType: " + request.ResponseType);
+    System.Diagnostics.Debug.WriteLine("Nonce: " + request.Nonce);
+    System.Diagnostics.Debug.WriteLine("State: " + request.State);
+
+    // 🔍 3. URL completa que se va a invocar
+    System.Diagnostics.Debug.WriteLine("URL de redirección a WAM: " + request.CreateAuthenticationRequestUrl());
+
+    return Task.CompletedTask;
+}
+
+
+<system.diagnostics>
+  <trace autoflush="true">
+    <listeners>
+      <add name="myListener" type="System.Diagnostics.TextWriterTraceListener" initializeData="owin.log" />
+      <remove name="Default" />
+    </listeners>
+  </trace>
+</system.diagnostics>
+
+RedirectToIdentityProvider = context =>
+{
+    var protocolMessage = context.ProtocolMessage;
+
+    Console.WriteLine("🔁 RedirectToIdentityProvider activado");
+    Console.WriteLine("  - RequestType: " + protocolMessage.RequestType);
+    Console.WriteLine("  - ClientId: " + protocolMessage.ClientId);
+    Console.WriteLine("  - RedirectUri: " + protocolMessage.RedirectUri);
+    Console.WriteLine("  - Scope: " + protocolMessage.Scope);
+    Console.WriteLine("  - ResponseType: " + protocolMessage.ResponseType);
+    Console.WriteLine("  - State: " + protocolMessage.State);
+    Console.WriteLine("  - Nonce: " + protocolMessage.Nonce);
+    Console.WriteLine("  - Full URL: " + protocolMessage.CreateAuthenticationRequestUrl());
+
+    return Task.CompletedTask;
+}
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     ClientId = ConfigurationManager.AppSettings["oidc:clientId"],
