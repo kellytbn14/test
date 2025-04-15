@@ -1,11 +1,9 @@
-<system.diagnostics>
-  <trace autoflush="true">
-    <listeners>
-      <add name="owin" type="System.Diagnostics.TextWriterTraceListener" initializeData="owin-trace.log" />
-      <remove name="Default" />
-    </listeners>
-  </trace>
-</system.diagnostics>
+<appSettings>
+  <add key="Microsoft.Owin" value="Verbose" />
+  <add key="Microsoft.Owin.Security" value="Verbose" />
+  <add key="Microsoft.Owin.Security.OpenIdConnect" value="Verbose" />
+</appSettings>
+
 
 
 
