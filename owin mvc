@@ -1,3 +1,40 @@
+using Microsoft.Owin.Logging;
+using System;
+using System.Diagnostics;
+
+public class CustomLoggerFactory : ILoggerFactory
+{
+    public ILogger Create(string name)
+    {
+        return new CustomLogger(name);
+    }
+}
+
+public class CustomLogger : ILogger
+{
+    private readonly string _name;
+
+    public CustomLogger(string name)
+    {
+        _name = name;
+    }
+
+    public bool WriteCore(TraceEventType eventType, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+    {
+        if (formatter != null)
+        {
+            var message = formatter(state, exception);
+            Debug.WriteLine($"[{eventType}] {_name}: {message}");
+        }
+        return true;
+    }
+}
+
+
+ app.SetLoggerFactory(new CustomLoggerFactory());
+
+
+
 <appSettings>
   <add key="Microsoft.Owin" value="Verbose" />
   <add key="Microsoft.Owin.Security" value="Verbose" />
