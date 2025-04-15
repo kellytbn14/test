@@ -1,3 +1,61 @@
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    ClientId = ConfigurationManager.AppSettings["oidc:clientId"],
+    Authority = ConfigurationManager.AppSettings["oidc:authority"],
+    RedirectUri = ConfigurationManager.AppSettings["oidc:redirectUri"],
+    ResponseType = "code",
+    Scope = "openid profile email",
+    SignInAsAuthenticationType = "Cookies",
+
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        AuthorizationCodeReceived = async context =>
+        {
+            var code = context.ProtocolMessage.Code;
+
+            // Crea el cliente para el token endpoint
+            var tokenClient = new HttpClient();
+
+            var tokenRequest = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                { "grant_type", "authorization_code" },
+                { "code", code },
+                { "redirect_uri", ConfigurationManager.AppSettings["oidc:redirectUri"] },
+                { "client_id", ConfigurationManager.AppSettings["oidc:clientId"] },
+                { "client_secret", ConfigurationManager.AppSettings["oidc:clientSecret"] }
+            });
+
+            var tokenResponse = await tokenClient.PostAsync(
+                ConfigurationManager.AppSettings["oidc:tokenEndpoint"],
+                tokenRequest);
+
+            var content = await tokenResponse.Content.ReadAsStringAsync();
+            var tokenData = JsonConvert.DeserializeObject<JObject>(content);
+
+            var idToken = tokenData["id_token"].ToString();
+            var accessToken = tokenData["access_token"].ToString();
+
+            // Validar el token (aquí deberías usar Microsoft.IdentityModel.Tokens)
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(idToken);
+
+            // Crear identidad
+            var claims = token.Claims.ToList();
+            var identity = new ClaimsIdentity(claims, "Cookies");
+
+            context.OwinContext.Authentication.SignIn(new AuthenticationProperties
+            {
+                IsPersistent = true
+            }, identity);
+
+            // Indicar que ya se hizo el intercambio y no se haga automático
+            context.HandleCodeRedemption(idToken, accessToken);
+        }
+    }
+});
+
+
+
 public class PostWamAuthFilter : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext filterContext)
