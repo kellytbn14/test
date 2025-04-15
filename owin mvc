@@ -1,3 +1,48 @@
+public class PostWamAuthFilter : ActionFilterAttribute
+{
+    public override void OnActionExecuting(ActionExecutingContext filterContext)
+    {
+        var ctx = filterContext.HttpContext;
+
+        // Solo entra si el usuario no está autenticado
+        if (!ctx.User.Identity.IsAuthenticated)
+        {
+            var request = ctx.Request;
+            var code = request.QueryString["code"];
+            var idToken = request.QueryString["id_token"];
+
+            if (!string.IsNullOrEmpty(code) || !string.IsNullOrEmpty(idToken))
+            {
+                // Aquí deberías validar el token manualmente (o al menos loguearlo)
+                // Simulamos autenticación manual para el ejemplo:
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "wam-user"),
+                    new Claim(ClaimTypes.Name, "Usuario desde WAM"),
+                    new Claim("id_token", idToken ?? ""),
+                };
+
+                var identity = new ClaimsIdentity(claims, "Cookies");
+                var authManager = ctx.GetOwinContext().Authentication;
+
+                authManager.SignIn(new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    RedirectUri = "/Home"
+                }, identity);
+
+                // Redirige para que se aplique el nuevo contexto autenticado
+                filterContext.Result = new RedirectResult("/Home");
+            }
+        }
+
+        base.OnActionExecuting(filterContext);
+    }
+}
+
+
+
 using Microsoft.Owin;
 using Microsoft.Owin.Logging;
 using Owin;
