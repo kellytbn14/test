@@ -1,3 +1,17 @@
+public bool WriteCore(TraceEventType eventType, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+{
+    if (formatter != null)
+    {
+        var message = formatter(state, exception);
+        var logLine = $"[{DateTime.Now:HH:mm:ss}] [{eventType}] {_name}: {message}";
+
+        Debug.WriteLine(logLine); // Para ver en Visual Studio
+        File.AppendAllText(@"C:\Logs\owin.log", logLine + "\n"); // Para guardar en archivo
+    }
+    return true;
+}
+
+
 using Microsoft.Owin.Logging;
 using System;
 using System.Diagnostics;
