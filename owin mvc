@@ -1,3 +1,14 @@
+<system.diagnostics>
+  <trace autoflush="true">
+    <listeners>
+      <add name="owin" type="System.Diagnostics.TextWriterTraceListener" initializeData="owin-trace.log" />
+      <remove name="Default" />
+    </listeners>
+  </trace>
+</system.diagnostics>
+
+
+
 RedirectToIdentityProvider = context =>
 {
     var request = context.ProtocolMessage;
