@@ -1,3 +1,63 @@
+dotnet add package BouncyCastle
+
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+
+public static class ClientAssertionHelper
+{
+    public static string GenerateClientAssertionFromPem(string clientId, string tenantId, string pemFilePath)
+    {
+        var rsa = LoadRsaPrivateKeyFromPem(pemFilePath);
+        var rsaSecurityKey = new RsaSecurityKey(rsa);
+        var credentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
+
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var exp = now + 600;
+
+        var claims = new List<Claim>
+        {
+            new Claim("iss", clientId),
+            new Claim("sub", clientId),
+            new Claim("aud", $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token"),
+            new Claim("jti", Guid.NewGuid().ToString()),
+            new Claim("nbf", now.ToString(), ClaimValueTypes.Integer64),
+            new Claim("exp", exp.ToString(), ClaimValueTypes.Integer64)
+        };
+
+        var token = new JwtSecurityToken(
+            new JwtHeader(credentials),
+            new JwtPayload(claims)
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private static RSA LoadRsaPrivateKeyFromPem(string pemPath)
+    {
+        using (TextReader reader = new StreamReader(pemPath))
+        {
+            var pr = new PemReader(reader);
+            var keyPair = pr.ReadObject() as RsaPrivateCrtKeyParameters;
+            if (keyPair == null)
+                throw new Exception("No se pudo leer la clave privada del archivo .pem");
+
+            return DotNetUtilities.ToRSA(keyPair);
+        }
+    }
+}
+
+
+
+
+
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
