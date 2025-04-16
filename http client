@@ -10,6 +10,53 @@ public static class ClientAssertionHelper
 {
     public static string GenerateClientAssertionFromPem(string clientId, string tenantId, string privateKeyPath)
     {
+        // Leer clave privada desde archivo PEM
+        string privateKeyPem = File.ReadAllText(privateKeyPath);
+        RSA rsa = RSA.Create();
+        rsa.ImportFromPem(privateKeyPem.ToCharArray());
+
+        // Preparar credenciales de firma
+        var signingCredentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
+
+        // Tiempos
+        var now = DateTime.UtcNow;
+        var nowEpoch = new DateTimeOffset(now).ToUnixTimeSeconds();
+        var expEpoch = nowEpoch + 600; // 10 minutos de validez
+
+        // Crear claims esperados por Entra ID
+        var claims = new Dictionary<string, object>
+        {
+            { "aud", $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token" },
+            { "iss", clientId },
+            { "sub", clientId },
+            { "jti", Guid.NewGuid().ToString() },
+            { "nbf", nowEpoch },
+            { "exp", expEpoch }
+        };
+
+        // Construir token manualmente
+        var header = new JwtHeader(signingCredentials);
+        var payload = new JwtPayload(claims);
+        var token = new JwtSecurityToken(header, payload);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+}
+
+
+
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+
+public static class ClientAssertionHelper
+{
+    public static string GenerateClientAssertionFromPem(string clientId, string tenantId, string privateKeyPath)
+    {
         // Leer clave privada RSA desde archivo PEM
         string privateKeyPem = File.ReadAllText(privateKeyPath);
         RSA rsa = RSA.Create();
