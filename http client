@@ -1,4 +1,80 @@
 
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        // Configuración
+        string clientId = "TU-CLIENT-ID";
+        string tenantId = "TU-TENANT-ID"; // ej. 8ff33436-4701-4dad-b7d3-3462e99c6889
+        string certPath = @"C:\Ruta\A\clientassertioncert.pfx";
+        string certPassword = "contraseña123";
+        string scope = "api://hrapi/.default"; // o el scope de tu API
+
+        // 1. Cargar certificado
+        var cert = new X509Certificate2(certPath, certPassword,
+            X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet);
+
+        // 2. Crear JWT client assertion
+        string clientAssertion = GetSignedClientAssertion(cert, tenantId, clientId);
+
+        // 3. Preparar body del request
+        var tokenEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
+        var form = new Dictionary<string, string>
+        {
+            { "client_id", clientId },
+            { "scope", scope },
+            { "grant_type", "client_credentials" },
+            { "client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer" },
+            { "client_assertion", clientAssertion }
+        };
+
+        // 4. Enviar request
+        using var httpClient = new HttpClient();
+        var response = await httpClient.PostAsync(tokenEndpoint, new FormUrlEncodedContent(form));
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine($"Status: {response.StatusCode}");
+        Console.WriteLine("Response:");
+        Console.WriteLine(responseContent);
+    }
+
+    static string GetSignedClientAssertion(X509Certificate2 certificate, string tenantId, string clientId)
+    {
+        var tokenEndpoint = $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
+
+        var claims = new Dictionary<string, object>
+        {
+            { "aud", tokenEndpoint },
+            { "iss", clientId },
+            { "sub", clientId },
+            { "jti", Guid.NewGuid().ToString() }
+            // No necesitas "exp" ni "nbf", JsonWebTokenHandler los agrega automáticamente
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Claims = claims,
+            SigningCredentials = new X509SigningCredentials(certificate)
+        };
+
+        var handler = new JsonWebTokenHandler();
+        return handler.CreateToken(tokenDescriptor);
+    }
+}
+
+Microsoft.IdentityModel.JsonWebTokens
+
+
+
+
 $cert = New-SelfSignedCertificate `
   -Subject "CN=ClientAssertionCert" `
   -KeyAlgorithm RSA `
