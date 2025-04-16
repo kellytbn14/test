@@ -1,3 +1,50 @@
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+
+public static class ClientAssertionHelper
+{
+    public static string GenerateClientAssertionFromPem(string clientId, string tenantId, string privateKeyPath)
+    {
+        // Leer clave privada RSA desde archivo PEM
+        string privateKeyPem = File.ReadAllText(privateKeyPath);
+        RSA rsa = RSA.Create();
+        rsa.ImportFromPem(privateKeyPem.ToCharArray());
+
+        // Crear credenciales de firma
+        var signingCredentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256);
+
+        // Tiempos
+        var now = DateTime.UtcNow;
+        var expires = now.AddMinutes(10);
+
+        // Claims obligatorios
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.CreateJwtSecurityToken(
+            issuer: clientId,
+            audience: $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token",
+            subject: null,
+            notBefore: now,
+            expires: expires,
+            issuedAt: now,
+            signingCredentials: signingCredentials,
+            claims: new[]
+            {
+                new System.Security.Claims.Claim("sub", clientId),
+                new System.Security.Claims.Claim("jti", Guid.NewGuid().ToString())
+            }
+        );
+
+        return handler.WriteToken(token); // Este es tu client_assertion
+    }
+}
+
+
+
 
 using System;
 using System.Collections.Generic;
