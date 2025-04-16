@@ -1,3 +1,28 @@
+
+$cert = New-SelfSignedCertificate `
+  -Subject "CN=ClientAssertionCert" `
+  -KeyAlgorithm RSA `
+  -KeyLength 2048 `
+  -CertStoreLocation "Cert:\CurrentUser\My" `
+  -KeyExportPolicy Exportable `
+  -NotAfter (Get-Date).AddYears(1)
+
+
+$pwd = ConvertTo-SecureString -String "contraseña123" -Force -AsPlainText
+
+Export-PfxCertificate `
+  -Cert "Cert:\CurrentUser\My\$($cert.Thumbprint)" `
+  -FilePath "$env:USERPROFILE\Desktop\ClientAssertionCert.pfx" `
+  -Password $pwd
+
+
+dotnet dev-certs https --export-path "./clientassertioncert.pfx" --password "contraseña123"
+
+var cert = new X509Certificate2("ruta/clientassertioncert.pfx", "contraseña123");
+
+
+
+
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
