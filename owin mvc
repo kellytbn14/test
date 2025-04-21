@@ -1,3 +1,13 @@
+<system.webServer>
+  <modules runAllManagedModulesForAllRequests="true" />
+  <handlers>
+    <remove name="ExtensionlessUrlHandler-Integrated-4.0" />
+    <add name="Owin" verb="*" path="*" type="System.Web.HttpNotFoundHandler" resourceType="Unspecified" />
+  </handlers>
+</system.webServer>
+
+
+
 <modules runAllManagedModulesForAllRequests="true">
 
 
