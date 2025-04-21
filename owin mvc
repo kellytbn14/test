@@ -1,3 +1,62 @@
+public class RootController : Controller
+{
+    public ActionResult Index()
+    {
+        if (User.Identity.IsAuthenticated)
+        {
+            return RedirectToAction("Index", "MyHome");
+        }
+
+        // Forzar challenge si no está autenticado
+        HttpContext.GetOwinContext().Authentication.Challenge(
+            new AuthenticationProperties
+            {
+                RedirectUri = "/"
+            },
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+
+        return new HttpUnauthorizedResult();
+    }
+}
+
+
+
+routes.MapRoute(
+    name: "Default",
+    url: "",
+    defaults: new { controller = "Root", action = "Index" }
+);
+
+routes.MapRoute(
+    name: "Standard",
+    url: "{controller}/{action}/{id}",
+    defaults: new { controller = "MyHome", action = "Index", id = UrlParameter.Optional }
+);
+
+public class RouteConfig
+{
+    public static void RegisterRoutes(RouteCollection routes)
+    {
+        routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+        routes.MapRoute(
+            name: "MyHomeAlias",
+            url: "myhome/{action}/{id}",
+            defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+        );
+
+        routes.MapRoute(
+            name: "Default",
+            url: "{controller}/{action}/{id}",
+            defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+        );
+    }
+}
+
+
+
+
 public bool WriteCore(TraceEventType eventType, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
 {
     if (formatter != null)
