@@ -1,3 +1,7 @@
+<modules runAllManagedModulesForAllRequests="true">
+
+
+
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
