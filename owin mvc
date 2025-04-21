@@ -1,3 +1,17 @@
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.Value == "/" &&
+        context.Request.QueryString.HasValue &&
+        (context.Request.Query["id_token"] != null || context.Request.Query["code"] != null))
+    {
+        context.Response.Redirect("/signin-oidc" + context.Request.QueryString.Value);
+        return;
+    }
+
+    await next();
+});
+
+
 <system.webServer>
   <modules runAllManagedModulesForAllRequests="true" />
   <handlers>
