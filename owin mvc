@@ -1,3 +1,82 @@
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
+[assembly: OwinStartup(typeof(MyApp.Startup))]
+
+namespace MyApp
+{
+    public class Startup
+    {
+        public void Configuration(IAppBuilder app)
+        {
+            // Esto puede ayudarte si tienes problemas con SameSite en IIS
+            app.UseKentorOwinCookieSaver();
+
+            // Middleware de cookies (autenticación local)
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = "Cookies",
+                CookieSecure = CookieSecureOption.Always,
+                CookieSameSite = SameSiteMode.None,
+                CookieHttpOnly = true
+            });
+
+            // Middleware de OIDC
+            app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+            {
+                ClientId = "tu-client-id",
+                Authority = "https://tu-idp.com/", // Ejemplo: https://login.microsoftonline.com/tu-tenant-id/v2.0
+                RedirectUri = "https://tuapp.com/signin-oidc",
+                PostLogoutRedirectUri = "https://tuapp.com/",
+                ResponseType = OpenIdConnectResponseType.IdToken,
+                Scope = "openid profile",
+
+                SignInAsAuthenticationType = "Cookies",
+                UseTokenLifetime = false,
+
+                Notifications = new OpenIdConnectAuthenticationNotifications
+                {
+                    SecurityTokenValidated = context =>
+                    {
+                        // Aquí se genera la cookie
+                        var identity = (ClaimsIdentity)context.AuthenticationTicket.Identity;
+
+                        // Puedes agregar claims si necesitas
+                        identity.AddClaim(new Claim("app:customClaim", "value"));
+
+                        context.AuthenticationTicket = new AuthenticationTicket(identity, context.AuthenticationTicket.Properties);
+
+                        // Redirigir después del login (opcional)
+                        context.AuthenticationTicket.Properties.RedirectUri = "/Home/Welcome";
+
+                        return Task.CompletedTask;
+                    },
+
+                    AuthenticationFailed = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Redirect("/Error?message=" + context.Exception?.Message);
+                        return Task.CompletedTask;
+                    }
+                }
+            });
+
+            // Asegura que OWIN esté en el paso correcto del pipeline para escribir cookies
+            app.UseStageMarker(PipelineStage.Authenticate);
+        }
+    }
+}
+
+
+
+
 public class RootController : Controller
 {
     public ActionResult Index()
