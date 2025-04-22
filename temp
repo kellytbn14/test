@@ -1,3 +1,36 @@
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    // Config básica...
+    ClientId = "...",
+    Authority = "...",
+    RedirectUri = "https://tudominio/scotiaw", // valor por defecto
+
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        RedirectToIdentityProvider = context =>
+        {
+            var request = context.Request;
+
+            // Extraer la ruta del request actual
+            var path = request.Uri.AbsolutePath.ToLower();
+
+            if (path.Contains("/hrapp"))
+            {
+                context.ProtocolMessage.RedirectUri = "https://tudominio/hrapp";
+            }
+            else if (path.Contains("/scotiaw"))
+            {
+                context.ProtocolMessage.RedirectUri = "https://tudominio/scotiaw";
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+});
+
+
+
+
 <system.webServer>
   <rewrite>
     <rules>
