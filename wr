@@ -1,0 +1,2 @@
+Uninstall-Package EnterpriseLibrary.Common
+Install-Package EnterpriseLibrary.Common -Version 5.0.505
