@@ -1,3 +1,32 @@
+private static readonly object _lock = new object();
+
+private void SaveToFile(string message)
+{
+    lock (_lock)
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(DateTime.Now.ToString() + "\r\n");
+            sb.Append(message + "\r\n");
+
+            string filePath = this.LogFilePath.Replace("{Date}", DateTime.Now.ToString("yyyy-MM-dd"));
+
+            using (FileStream fs = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                sw.Write(sb.ToString());
+                sw.Flush();
+            }
+        }
+        catch (Exception e)
+        {
+            SendMail(e.Message);
+        }
+    }
+}
+
+
 Install-Package Unity.Interception -Version 2.1.505.0
 
 Install-Package Unity -Version 2.1.505.0
