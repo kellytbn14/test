@@ -1,3 +1,37 @@
+/// <summary>
+/// Handles the BeginRequest event for each incoming HTTP request.
+/// Based on the request URL, dynamically updates the authentication redirect URI
+/// used in the OAuth/OpenID Connect flow to point to the correct WAM (Web Access Manager) endpoint.
+/// 
+/// Reads route prefixes and redirect URIs from AppSettings configuration.
+/// This logic ensures the application redirects users to the appropriate authentication flow
+/// depending on the access path (e.g., HR Passport or Scotiaworld).
+/// </summary>
+/// <param name="sender">The source of the event.</param>
+/// <param name="e">The EventArgs instance containing the event data.</param>
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    var context = HttpContext.Current;
+    string path = context?.Request?.Url?.ToString();
+
+    if (path != null)
+    {
+        string appRoutePrefixHRPassport = ConfigurationManager.AppSettings["AppRoute_Prefix_HRPassport"];
+        string appRoutePrefixScotiaworld = ConfigurationManager.AppSettings["AppRoute_Prefix_Scotiaworld"];
+        string wamRedirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+        string wamScotiaWorldRedirectUri = ConfigurationManager.AppSettings["WamScotiaWorldRedirectUri"];
+
+        if (path.Contains(appRoutePrefixHRPassport))
+        {
+            AuthProperties.RedirectUri = wamRedirectUri;
+        }
+        else if (path.Contains(appRoutePrefixScotiaworld))
+        {
+            AuthProperties.RedirectUri = wamScotiaWorldRedirectUri;
+        }
+    }
+}
+
 
 /// <summary>
     /// Startup class responsible for configuring the authentication pipeline for the application.
