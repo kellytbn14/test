@@ -1,4 +1,26 @@
 /// <summary>
+/// Validates that the employee token (TokenEmpinfo) contains the required employee identifier (Sub).
+/// If the identifier is missing, sends an error message to the client and terminates the response.
+/// </summary>
+
+
+/// <summary>
+/// Validates that the retrieved employee information from HRAPI is not null and contains a valid employee number.
+/// If validation fails, sends an error message to the client and terminates the response.
+/// </summary>
+/// <param name="empinfo">The employee information response object to validate.</param>
+
+/// <summary>
+/// Determines the language code based on the employee's preferred language.
+/// Defaults to English if the preferred language is not set or unrecognized.
+/// </summary>
+/// <param name="empPreferredLanguage">The employee's preferred language as a string.</param>
+/// <returns>
+/// A language code string (e.g., "en" for English or "fr" for French).
+/// </returns>
+
+
+/// <summary>
 /// Retrieves employee information from the HRAPI service.
 /// 
 /// Initializes and configures HRAPI client properties from AppSettings and Azure Key Vault.
