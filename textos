@@ -1,4 +1,17 @@
 /// <summary>
+/// Retrieves basic employee information from the database based on the provided employee ID (empid).
+/// Connects to the appropriate environment-specific database, executes a query against the LWS_Emp_Basic table,
+/// and maps selected fields into an <see cref="Empinfo"/> object.
+/// 
+/// In case of a database connection or query error, writes an error message to the response and terminates the request.
+/// </summary>
+/// <param name="empid">The employee ID (ScotiaID) used to search for the employee's information in the database.</param>
+/// <returns>
+/// An <see cref="Empinfo"/> object containing selected employee details, or null if no record is found or an error occurs.
+/// </returns>
+
+
+/// <summary>
 /// Validates that the employee token (TokenEmpinfo) contains the required employee identifier (Sub).
 /// If the identifier is missing, sends an error message to the client and terminates the response.
 /// </summary>
