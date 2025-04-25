@@ -1,3 +1,21 @@
+
+/// <summary>
+    /// Startup class responsible for configuring the authentication pipeline for the application.
+    /// Initializes logging, retrieves configuration values, fetches secrets from Azure Key Vault,
+    /// and sets up OAuth and OpenID Connect authentication by redirecting users to WAM (Web Access Manager).
+    /// </summary>
+
+
+/// <summary>
+        /// Configures the OWIN middleware pipeline.
+        /// This includes setting up Serilog for logging, fetching authentication secrets from Key Vault,
+        /// and configuring OAuth/OIDC authentication through the external WAM provider.
+        /// 
+        /// It uses ASP.NET OWIN libraries to implement cookie-based authentication as part of the OAuth/OpenID Connect flow.
+        /// </summary>
+        /// <param name="app">The OWIN application builder used to configure middleware components.</param>
+
+
 pero es que, el problema real es que la cookie no está quedando seteada, no es que el token no llegue no es nada de eso, en local la cookie sí se guarda, pero en iis no. en local funciona por el requireSSL = true, pongo eso en iis y no funciona. entonces el problema es por otro lado. ayudame investigando y analizando a fondo, por el lado de iis, porque si en local me funciona, es porque en el servidor falta algo, o hay algo relacionado con el codigo
 
 Calificación: 5
