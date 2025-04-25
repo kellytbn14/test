@@ -1,4 +1,28 @@
 /// <summary>
+/// Provides a helper utility for structured logging using Serilog.
+/// Defines log levels and formats log messages consistently across the application.
+/// </summary>
+
+
+
+    /// <summary>
+    /// Defines the available log severity levels for application logging.
+    /// </summary>
+
+
+
+    /// <summary>
+    /// Logs a formatted message to Serilog based on the specified log level.
+    /// The message includes optional environment and identifier information for better traceability.
+    /// </summary>
+    /// <param name="message">The main log message to be recorded.</param>
+    /// <param name="environment">Optional. The environment or context where the log is generated (e.g., Development, Production).</param>
+    /// <param name="id">Optional. An identifier associated with the log entry, such as a request ID or operation ID.</param>
+    /// <param name="level">The severity level of the log. Defaults to Informational if not specified.</param>
+
+
+
+/// <summary>
 /// Retrieves basic employee information from the database based on the provided employee ID (empid).
 /// Connects to the appropriate environment-specific database, executes a query against the LWS_Emp_Basic table,
 /// and maps selected fields into an <see cref="Empinfo"/> object.
