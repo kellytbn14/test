@@ -1,4 +1,17 @@
 /// <summary>
+/// Provides access to secret configuration values stored in Azure Key Vault (AKV).
+/// Implements lazy initialization to ensure secrets are loaded only once and on demand.
+/// 
+/// Secrets retrieved include:
+/// - Client IDs and secrets for HRAPI and WAM authentication flows
+/// - The HRAPI private key in PEM format
+/// 
+/// Secrets are retrieved via CryptoManager and decoded if necessary (e.g., PEM key in Base64).
+/// Logging is used to trace secret loading operations and detect failures.
+/// </summary>
+
+
+/// <summary>
 /// Custom OWIN middleware that logs incoming HTTP requests and outgoing HTTP responses.
 /// Captures method, URI, headers, and response status for troubleshooting and auditing purposes.
 /// Uses a structured logging helper (LogHelper) to record debug-level logs.
