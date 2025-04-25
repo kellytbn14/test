@@ -1,4 +1,19 @@
 /// <summary>
+/// Retrieves employee information from the HRAPI service.
+/// 
+/// Initializes and configures HRAPI client properties from AppSettings and Azure Key Vault.
+/// Validates the access token before making the API call and ensures the received employee data is valid.
+/// 
+/// In case of any failure during the process, logs the error and returns a user-friendly message
+/// to the client, terminating the response.
+/// </summary>
+/// <returns>
+/// An <see cref="EmpinfoHRApiResponse"/> object containing the employee information,
+/// or null if an error occurs.
+/// </returns>
+
+
+/// <summary>
 /// Handles the BeginRequest event for each incoming HTTP request.
 /// Based on the request URL, dynamically updates the authentication redirect URI
 /// used in the OAuth/OpenID Connect flow to point to the correct WAM (Web Access Manager) endpoint.
