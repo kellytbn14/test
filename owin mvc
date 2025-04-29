@@ -1,5 +1,38 @@
 protected void Application_BeginRequest()
 {
+    try
+    {
+        var userLanguages = HttpContext.Current?.Request?.UserLanguages;
+        string cultureName = userLanguages != null && userLanguages.Length > 0
+            ? userLanguages[0]
+            : "es-CO"; // Valor por defecto
+
+        // Validar contra lista de culturas instaladas
+        var availableCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                           .Select(c => c.Name)
+                                           .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (!availableCultures.Contains(cultureName))
+        {
+            cultureName = "es-CO"; // fallback seguro
+        }
+
+        var culture = new CultureInfo(cultureName);
+        Thread.CurrentThread.CurrentCulture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+    }
+    catch
+    {
+        var fallback = new CultureInfo("es-CO");
+        Thread.CurrentThread.CurrentCulture = fallback;
+        Thread.CurrentThread.CurrentUICulture = fallback;
+    }
+}
+
+
+
+protected void Application_BeginRequest()
+{
     var userLanguages = HttpContext.Current?.Request?.UserLanguages;
 
     if (userLanguages != null && userLanguages.Length > 0)
