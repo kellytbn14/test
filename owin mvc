@@ -1,3 +1,37 @@
+protected void Application_BeginRequest()
+{
+    var userLanguages = HttpContext.Current?.Request?.UserLanguages;
+
+    if (userLanguages != null && userLanguages.Length > 0)
+    {
+        var cultureName = userLanguages[0];
+
+        try
+        {
+            // Intenta asignar la cultura preferida del navegador
+            var culture = CultureInfo.CreateSpecificCulture(cultureName);
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+        }
+        catch (CultureNotFoundException)
+        {
+            // Si es inválida, asigna una segura por defecto (es-CO, en-US, etc.)
+            var defaultCulture = new CultureInfo("es-CO");
+            Thread.CurrentThread.CurrentCulture = defaultCulture;
+            Thread.CurrentThread.CurrentUICulture = defaultCulture;
+        }
+    }
+    else
+    {
+        // Si no hay idioma especificado, también usa la cultura por defecto
+        var defaultCulture = new CultureInfo("es-CO");
+        Thread.CurrentThread.CurrentCulture = defaultCulture;
+        Thread.CurrentThread.CurrentUICulture = defaultCulture;
+    }
+}
+
+
+
 app.Use(async (context, next) =>
 {
     if (context.Request.Path.Value == "/" &&
