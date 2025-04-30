@@ -1,3 +1,35 @@
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    var context = HttpContext.Current;
+    var url = context?.Request?.Url?.ToString().ToLower();
+
+    if (url != null)
+    {
+        if (url.Contains("/hrapp"))
+        {
+            context.Items["CustomRedirectUri"] = "https://tudominio.com/hrapp";
+        }
+        else if (url.Contains("/scotiaw"))
+        {
+            context.Items["CustomRedirectUri"] = "https://tudominio.com/scotiaw";
+        }
+    }
+}
+
+RedirectToIdentityProvider = context =>
+{
+    var httpContext = HttpContext.Current;
+    var customRedirect = httpContext?.Items["CustomRedirectUri"] as string;
+
+    if (!string.IsNullOrEmpty(customRedirect))
+    {
+        context.ProtocolMessage.RedirectUri = customRedirect;
+    }
+
+    return Task.CompletedTask;
+}
+
+
 protected void Application_BeginRequest()
 {
     try
