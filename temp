@@ -1,3 +1,35 @@
+var context = HttpContext.Current;
+
+string currentUrl = context.Request.Url.ToString();
+string redirectUri;
+
+if (currentUrl.Contains("/hrapp/"))
+{
+    redirectUri = "https://tudominio/hrapp/esop/default.aspx";
+}
+else if (currentUrl.Contains("/scotiaworld/"))
+{
+    redirectUri = "https://tudominio/scotiaworld/esop/default.aspx";
+}
+else
+{
+    // Un fallback
+    redirectUri = "https://tudominio/hrapp/esop/default.aspx";
+}
+
+var properties = new AuthenticationProperties
+{
+    RedirectUri = redirectUri
+};
+
+HttpContext.Current.GetOwinContext().Authentication.Challenge(properties, "YourOidcAuthenticationType");
+
+
+
+
+
+
+
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
 {
     // Config básica...
