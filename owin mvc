@@ -1,3 +1,54 @@
+protected void Application_BeginRequest()
+{
+    var context = HttpContext.Current;
+
+    // Solo guardar si no existe aún
+    if (context.Request.Cookies["OriginalHost"] == null)
+    {
+        var host = context.Request.Url.Scheme + "://" + context.Request.Url.Authority;
+
+        var cookie = new HttpCookie("OriginalHost", host);
+        cookie.HttpOnly = true;
+        cookie.Secure = true;
+        context.Response.Cookies.Add(cookie);
+    }
+}
+
+Notifications = new OpenIdConnectAuthenticationNotifications
+{
+    RedirectToIdentityProvider = context =>
+    {
+        if (context.ProtocolMessage.RequestType == OpenIdConnectRequestType.Authentication)
+        {
+            var request = context.OwinContext.Request;
+
+            string baseHost = null;
+            var httpRequest = HttpContext.Current?.Request;
+
+            if (httpRequest != null && httpRequest.Cookies["OriginalHost"] != null)
+            {
+                baseHost = httpRequest.Cookies["OriginalHost"].Value;
+            }
+            else
+            {
+                // fallback si por alguna razón no existe la cookie
+                baseHost = request.Scheme + "://" + request.Host.Value;
+            }
+
+            var baseUri = baseHost + request.PathBase;
+
+            var redirectUri = baseUri.TrimEnd('/') + "/signin-oidc";
+
+            context.ProtocolMessage.RedirectUri = redirectUri;
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+
+
+
 protected void Application_BeginRequest(object sender, EventArgs e)
 {
     var context = HttpContext.Current;
