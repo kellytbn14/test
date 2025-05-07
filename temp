@@ -1,3 +1,14 @@
+HttpContext.Current.GetOwinContext().Set("CustomRedirectUri", redirectUri);
+
+var customRedirect = context.OwinContext.Get<string>("CustomRedirectUri");
+
+if (!string.IsNullOrEmpty(customRedirect))
+{
+    context.ProtocolMessage.RedirectUri = customRedirect;
+}
+
+
+
 var props = new AuthenticationProperties();
 props.Dictionary["CustomRedirectUri"] = "https://scotiaworld.bns/hradmin/signin-oidc";
 
