@@ -2,6 +2,101 @@
 
 ## Overview
 
+This project implements **OAuth 2.0** authentication and **OpenID Connect (OIDC)** in an ASP.NET Web Forms application targeting **.NET Framework 4.7.2**.  
+The solution authenticates users through a Web Access Manager (WAM) and leverages cookies to maintain authentication state. It also retrieves user data from an external HR API post-authentication.
+
+## Key Features
+
+- OAuth 2.0 / OIDC-based authentication.
+- Cookie-based authentication for session management.
+- Integration with **Web Access Manager (WAM)** for login and token acquisition.
+- Secure retrieval of secrets from **Azure Key Vault (AKV)**.
+- User data extraction from tokens.
+- Retrieval of detailed employee information via HRAPI.
+- Structured logging with **Serilog**.
+
+## Versions & Libraries
+
+| Component                    | Version                      | Notes |
+|------------------------------|------------------------------|-------|
+| .NET Framework               | 4.7.2                        |       |
+| Owin                         | 4.2.2 (SystemWeb)            |       |
+| OwinOAuth                    | .NET Standard 2.0            | OAuth/OIDC configuration |
+| AspOwin                      | .NET Standard 2.0            | WAM redirection and user data extraction |
+| CryptoPGP                    | .NET Standard 2.0            | Queries Azure Key Vault for secrets |
+| HRAPILib                     | .NET Standard 2.0            | Retrieves employee information from HR API |
+| Serilog                      | 2.x                          | Logging |
+
+## Architectural Decisions
+
+- **Cookie Authentication**  
+  Chosen to manage session state in a way compatible with Web Forms and scalable for enterprise usage.
+
+- **OwinOAuth Library**  
+  Provides the abstraction for OAuth and OIDC setup, reusable across projects.
+
+- **AspOwin Library**  
+  Handles WAM redirection and extracts essential user data (claims) from the authentication token to support personalized and secure sessions.
+
+- **CryptoPGP Library**  
+  Retrieves sensitive configuration data (client IDs, secrets, private keys) securely from Azure Key Vault. Keeps secrets out of the application code and configuration files.
+
+- **HRAPILib**  
+  Queries the HRAPI to retrieve comprehensive employee information based on the authenticated user's identifier.
+
+- **Serilog & Custom Logging Middleware**  
+  Enables structured and consistent logging throughout the application for better traceability and troubleshooting.
+
+## Authentication Flow Summary
+
+1. **Unauthenticated Request**  
+   User accesses a protected resource. The app triggers redirection to WAM using **AspOwin**.
+
+2. **User Authentication via WAM**  
+   The user logs in through WAM. Upon success, WAM redirects back to the application with an OAuth/OIDC token.
+
+3. **Token Validation & Claim Extraction**  
+   **OwinOAuth** validates the token. **AspOwin** extracts essential user data (claims) from the token payload.
+
+4. **Authentication Cookie Creation**  
+   A secure cookie is created to persist the authenticated session.
+
+5. **User Data Retrieval from HRAPI**  
+   The application calls **HRAPILib** to fetch full employee profile data using the user identifier extracted from the token.
+
+6. **Session Continuation**  
+   On subsequent requests, the authentication cookie is validated to maintain the user session without re-authentication.
+
+## Folder Structure (Key Components)
+
+```plaintext
+/App_Start
+    Startup.cs            // Configures OWIN, OAuth, and Serilog
+
+/Helpers
+    LogHelper.cs          // Structured logging helper
+
+/Middleware
+    LoggingMiddleware.cs  // Logs HTTP request/response data
+
+/Security
+    AuthConfig.cs         // OAuth and OIDC configuration
+
+/Models
+    EmpInfo.cs            // Employee profile model
+
+/Libraries
+    OwinOAuth (.NET Standard 2.0)
+    AspOwin (.NET Standard 2.0)
+    CryptoPGP (.NET Standard 2.0)
+    HRAPILib (.NET Standard 2.0)
+
+
+
+# OAuth Authentication Implementation — ASP.NET Web Forms (.NET Framework 4.7.2)
+
+## Overview
+
 This project implements **OAuth 2.0** authentication and **OpenID Connect (OIDC)** in an ASP.NET Web Forms application targeting **.NET Framework 4.7.2**. The solution authenticates users through a Web Access Manager (WAM) and leverages cookies to manage authentication state throughout the application.
 
 ## Key Features
