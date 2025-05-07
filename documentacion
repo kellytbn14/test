@@ -2,3 +2,167 @@
 /// Represents the basic employee information retrieved from HRAPI or the database.
 /// This class contains profile details for the employee who has logged into the application.
 /// </summary>
+
+
+/// <summary>
+/// Provides access to secret configuration values stored in Azure Key Vault (AKV).
+/// Implements lazy initialization to ensure secrets are loaded only once and on demand.
+/// 
+/// Secrets retrieved include:
+/// - Client IDs and secrets for HRAPI and WAM authentication flows
+/// - The HRAPI private key in PEM format
+/// 
+/// Secrets are retrieved via CryptoManager and decoded if necessary (e.g., PEM key in Base64).
+/// Logging is used to trace secret loading operations and detect failures.
+/// </summary>
+
+
+/// <summary>
+/// Custom OWIN middleware that logs incoming HTTP requests and outgoing HTTP responses.
+/// Captures method, URI, headers, and response status for troubleshooting and auditing purposes.
+/// Uses a structured logging helper (LogHelper) to record debug-level logs.
+/// </summary>
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LoggingMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next middleware component in the OWIN pipeline.</param>
+
+
+
+
+    /// <summary>
+    /// Processes an incoming HTTP request and an outgoing HTTP response.
+    /// Logs request method, URI, request headers, response status code, and response headers.
+    /// </summary>
+    /// <param name="context">The OWIN context containing the HTTP request and response information.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+
+
+
+
+
+/// <summary>
+/// Provides a helper utility for structured logging using Serilog.
+/// Defines log levels and formats log messages consistently across the application.
+/// </summary>
+
+
+
+    /// <summary>
+    /// Defines the available log severity levels for application logging.
+    /// </summary>
+
+
+
+    /// <summary>
+    /// Logs a formatted message to Serilog based on the specified log level.
+    /// The message includes optional environment and identifier information for better traceability.
+    /// </summary>
+    /// <param name="message">The main log message to be recorded.</param>
+    /// <param name="environment">Optional. The environment or context where the log is generated (e.g., Development, Production).</param>
+    /// <param name="id">Optional. An identifier associated with the log entry, such as a request ID or operation ID.</param>
+    /// <param name="level">The severity level of the log. Defaults to Informational if not specified.</param>
+
+
+
+/// <summary>
+/// Retrieves basic employee information from the database based on the provided employee ID (empid).
+/// Connects to the appropriate environment-specific database, executes a query against the LWS_Emp_Basic table,
+/// and maps selected fields into an <see cref="Empinfo"/> object.
+/// 
+/// In case of a database connection or query error, writes an error message to the response and terminates the request.
+/// </summary>
+/// <param name="empid">The employee ID (ScotiaID) used to search for the employee's information in the database.</param>
+/// <returns>
+/// An <see cref="Empinfo"/> object containing selected employee details, or null if no record is found or an error occurs.
+/// </returns>
+
+
+/// <summary>
+/// Validates that the employee token (TokenEmpinfo) contains the required employee identifier (Sub).
+/// If the identifier is missing, sends an error message to the client and terminates the response.
+/// </summary>
+
+
+/// <summary>
+/// Validates that the retrieved employee information from HRAPI is not null and contains a valid employee number.
+/// If validation fails, sends an error message to the client and terminates the response.
+/// </summary>
+/// <param name="empinfo">The employee information response object to validate.</param>
+
+/// <summary>
+/// Determines the language code based on the employee's preferred language.
+/// Defaults to English if the preferred language is not set or unrecognized.
+/// </summary>
+/// <param name="empPreferredLanguage">The employee's preferred language as a string.</param>
+/// <returns>
+/// A language code string (e.g., "en" for English or "fr" for French).
+/// </returns>
+
+
+/// <summary>
+/// Retrieves employee information from the HRAPI service.
+/// 
+/// Initializes and configures HRAPI client properties from AppSettings and Azure Key Vault.
+/// Validates the access token before making the API call and ensures the received employee data is valid.
+/// 
+/// In case of any failure during the process, logs the error and returns a user-friendly message
+/// to the client, terminating the response.
+/// </summary>
+/// <returns>
+/// An <see cref="EmpinfoHRApiResponse"/> object containing the employee information,
+/// or null if an error occurs.
+/// </returns>
+
+
+/// <summary>
+/// Handles the BeginRequest event for each incoming HTTP request.
+/// Based on the request URL, dynamically updates the authentication redirect URI
+/// used in the OAuth/OpenID Connect flow to point to the correct WAM (Web Access Manager) endpoint.
+/// 
+/// Reads route prefixes and redirect URIs from AppSettings configuration.
+/// This logic ensures the application redirects users to the appropriate authentication flow
+/// depending on the access path (e.g., HR Passport or Scotiaworld).
+/// </summary>
+/// <param name="sender">The source of the event.</param>
+/// <param name="e">The EventArgs instance containing the event data.</param>
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    var context = HttpContext.Current;
+    string path = context?.Request?.Url?.ToString();
+
+    if (path != null)
+    {
+        string appRoutePrefixHRPassport = ConfigurationManager.AppSettings["AppRoute_Prefix_HRPassport"];
+        string appRoutePrefixScotiaworld = ConfigurationManager.AppSettings["AppRoute_Prefix_Scotiaworld"];
+        string wamRedirectUri = ConfigurationManager.AppSettings["WamRedirectUri"];
+        string wamScotiaWorldRedirectUri = ConfigurationManager.AppSettings["WamScotiaWorldRedirectUri"];
+
+        if (path.Contains(appRoutePrefixHRPassport))
+        {
+            AuthProperties.RedirectUri = wamRedirectUri;
+        }
+        else if (path.Contains(appRoutePrefixScotiaworld))
+        {
+            AuthProperties.RedirectUri = wamScotiaWorldRedirectUri;
+        }
+    }
+}
+
+
+/// <summary>
+    /// Startup class responsible for configuring the authentication pipeline for the application.
+    /// Initializes logging, retrieves configuration values, fetches secrets from Azure Key Vault,
+    /// and sets up OAuth and OpenID Connect authentication by redirecting users to WAM (Web Access Manager).
+    /// </summary>
+
+
+/// <summary>
+        /// Configures the OWIN middleware pipeline.
+        /// This includes setting up Serilog for logging, fetching authentication secrets from Key Vault,
+        /// and configuring OAuth/OIDC authentication through the external WAM provider.
+        /// 
+        /// It uses ASP.NET OWIN libraries to implement cookie-based authentication as part of the OAuth/OpenID Connect flow.
+        /// </summary>
+        /// <param name="app">The OWIN application builder used to configure middleware components.</param>
