@@ -1,3 +1,26 @@
+### Required NuGet Libraries and Versions
+
+The following libraries and versions are required for correct functionality:
+
+| Library                                         | Version       |
+|-------------------------------------------------|---------------|
+| Microsoft.IdentityModel.Tokens                  | 8.8.0.0       |
+| Microsoft.IdentityModel.Protocols.OpenIdConnect | 5.3.0.0       |
+| BouncyCastle.Cryptography                       | 2.0.0.0       |
+| BouncyCastle.Crypto                             | 1.8.9.0       |
+| Microsoft.Owin                                  | 4.2.2.0       |
+| Microsoft.Owin.Host.System.Web                  | 4.2.2.0       |
+| Microsoft.Owin.Security                         | 4.2.2.0       |
+| Microsoft.Owin.Security.Cookies                 | 4.2.2.0       |
+| Microsoft.Owin.Security.OpenIdConnect           | 4.2.2.0       |
+| Owin                                           | 1.0.0.0       |
+| System.IdentityModel.Tokens.Jwt                 | 8.8.0.0       |
+| System.Text.Json                                | 9.0.0.3       |
+| Azure.Core                                     | 1.44.1.0      |
+| Azure.Identity                                 | 1.13.2.0      |
+| Azure.Security.KeyVault.Secrets                 | 4.7.0.0       |
+
+
 # OAuth Authentication Implementation — ASP.NET Web Forms (.NET Framework 4.7.2)
 
 ## Overview
