@@ -1,3 +1,125 @@
+# OwinOAuthLib
+
+## Overview
+
+**OwinOAuthLib** is a .NET Standard 2.0 library designed to simplify the configuration of **OAuth 2.0** and **OpenID Connect (OIDC)** authentication for ASP.NET applications using **OWIN**.  
+It provides a clean abstraction to configure authentication middleware, manage cookie-based authentication, and handle key OpenID Connect events, including token validation and error handling.
+
+This library is intended for applications running **.NET Framework 4.7.2** with OWIN-based middleware.
+
+## Key Features
+
+- Simplifies OAuth 2.0 / OIDC configuration for OWIN.
+- Sets up **cookie-based authentication**.
+- Automatically registers OpenID Connect event handlers:
+  - Redirect to identity provider.
+  - Security token validated.
+  - Authentication failed.
+- Exposes an event override for `RedirectToIdentityProvider`.
+- Provides centralized storage for authentication properties (`AuthProperties`).
+- Performs required parameter validation to prevent misconfiguration.
+
+## Target Framework
+
+- .NET Standard 2.0
+
+## Typical Use Case
+
+The library is used in **ASP.NET Web Forms** or **ASP.NET MVC** applications (.NET Framework 4.7.2) that require secure authentication with:
+- **OpenID Connect** providers.
+- **Web Access Manager (WAM)** integrations.
+
+It streamlines setting up the OWIN pipeline without repetitive boilerplate code.
+
+## Installation
+
+Add a reference to the `OwinOAuthLib` project or include it as a library in your solution.
+
+Install the following NuGet packages in the consuming application:
+
+```xml
+<PackageReference Include="Microsoft.Owin" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.OpenIdConnect" Version="4.2.2" />
+
+## Configuration Example
+
+In your application’s `Startup.cs` or `Startup.Auth.cs`:
+
+```csharp
+using OwinOAuthLib;
+
+public void Configuration(IAppBuilder app)
+{
+    AuthConfig.ConfigureAuth(
+        app,
+        ClientId: "your-client-id",
+        ClientSecret: "your-client-secret",
+        BaseUrl: "https://your-authority.com",
+        RedirectUri: "https://your-app.com/signin-oidc"
+    );
+}
+
+## How It Works
+
+### Validation
+All required OAuth parameters (`ClientId`, `ClientSecret`, `BaseUrl`, `RedirectUri`) are validated at startup.
+
+### Cookie Authentication
+Registers OWIN’s `CookieAuthenticationOptions` for session management.
+
+### OpenID Connect Authentication
+Registers OWIN’s `OpenIdConnectAuthenticationOptions` with:
+
+- **ResponseType** set to `CodeIdToken`.
+- **Scope** includes `openid` and `profile`.
+- Standard notification handlers:
+  - `RedirectToIdentityProvider`
+  - `SecurityTokenValidated`
+  - `AuthenticationFailed`
+
+### Token Claims
+Adds the **ID token** and **Access token** as claims to the authenticated user’s identity for later use.
+
+### Override Support
+If needed, the `OwinEvents.OnRedirectToIdentityProviderOverride` delegate can be assigned in the application to customize the redirect URI logic dynamically.
+
+## Library Structure
+
+| Class            | Purpose                                                   |
+|------------------|-----------------------------------------------------------|
+| `AuthConfig`     | Configures OWIN authentication pipeline.                  |
+| `AuthProperties` | Stores reusable authentication parameters.                |
+| `OwinEvents`     | Provides an event hook for `RedirectToIdentityProvider`.  |
+| `ValidationHelper` | Ensures required parameters are provided at runtime.     |
+
+## Dependencies
+
+| NuGet Package                          | Version |
+|---------------------------------------|---------|
+| Microsoft.Owin                         | 4.2.2   |
+| Microsoft.Owin.Host.SystemWeb         | 4.2.2   |
+| Microsoft.Owin.Security               | 4.2.2   |
+| Microsoft.Owin.Security.Cookies       | 4.2.2   |
+| Microsoft.Owin.Security.OpenIdConnect | 4.2.2   |
+
+## Security Considerations
+
+### Token Security
+Tokens (**ID token** and **Access token**) are added as claims but should be handled carefully in downstream code to avoid logging or exposing sensitive information.
+
+### Parameter Validation
+The library enforces required parameter validation to prevent runtime errors caused by missing or misconfigured values.
+
+## Limitations
+
+- Designed for ASP.NET applications using **OWIN** middleware.
+- Assumes the consuming application handles secure storage of client secrets and other sensitive values (recommended via Azure Key Vault or equivalent).
+
+
+
 /// <summary>
 /// Provides a mechanism to override the default behavior of the
 /// RedirectToIdentityProvider event in the authentication flow.
