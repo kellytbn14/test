@@ -1,0 +1,4 @@
+/// <summary>
+/// Represents the basic employee information retrieved from HRAPI or the database.
+/// This class contains profile details for the employee who has logged into the application.
+/// </summary>
