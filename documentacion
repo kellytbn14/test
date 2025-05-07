@@ -1,4 +1,57 @@
 /// <summary>
+/// Provides a mechanism to override the default behavior of the
+/// RedirectToIdentityProvider event in the authentication flow.
+/// </summary>
+public static class OwinEvents
+{
+    /// <summary>
+    /// Allows customization of the RedirectToIdentityProvider event by assigning a delegate.
+    /// </summary>
+    public static Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> OnRedirectToIdentityProviderOverride;
+}
+
+
+/// <summary>
+/// Stores authentication properties such as client credentials, authority,
+/// and redirect URIs. Used by the OAuth/OIDC configuration.
+/// </summary>
+public static class AuthProperties
+{
+    public static string ClientId { get; set; }
+    public static string ClientSecret { get; set; }
+    public static string BaseUrl { get; set; }
+    public static string Authorize { get; set; }
+    public static string RedirectUri { get; set; }
+    public static string IdTokenEndpoint { get; set; }
+    public static string PostLogoutRedirectUri { get; set; }
+    public static int ExpireTimeSpan { get; set; }
+}
+
+
+/// <summary>
+/// Provides validation methods to ensure required values are present.
+/// </summary>
+internal static class ValidationHelper
+{
+    /// <summary>
+    /// Validates that a required string value is not null or whitespace.
+    /// Throws an ArgumentException if validation fails.
+/// </summary>
+/// <param name="value">The value to validate.</param>
+/// <param name="paramName">The name of the parameter being validated.</param>
+/// <param name="errorMessage">Optional custom error message.</param>
+    public static void ValidateRequired(string value, string paramName, string errorMessage = null)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentException(errorMessage ?? $"Missing required field: {paramName}", paramName);
+        }
+    }
+}
+
+
+
+/// <summary>
 /// Provides methods to configure OAuth and OpenID Connect authentication
 /// for the OWIN middleware pipeline. Sets up cookie authentication and
 /// OpenID Connect handlers with customizable events.
