@@ -1,4 +1,17 @@
 /// <summary>
+/// Determines the language code based on the employee's preferred language string.
+/// Supports recognition of "English", "en_US", "French", and "fr_FR".
+/// Defaults to English ("en") if the preferred language is null, empty, or unrecognized.
+/// </summary>
+/// <param name="EmpPreferredLanguage">The preferred language string from the employee profile.</param>
+/// <returns>
+/// A language code string: "en" for English or "fr" for French.
+/// </returns>
+
+
+
+
+/// <summary>
 /// Initializes the page and determines the appropriate authentication redirect URI based on the incoming request's host and path.
 /// Evaluates headers and URL patterns to select the correct WAM (Web Access Manager) endpoint for the authentication flow.
 /// If no valid redirect URI is found, writes an error message and terminates the response.
