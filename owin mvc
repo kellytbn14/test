@@ -1,3 +1,37 @@
+public static class OwinEvents
+{
+    public static Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> OnRedirectToIdentityProviderOverride;
+}
+
+
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    // demás configuraciones
+
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        RedirectToIdentityProvider = context =>
+        {
+            // Si la app puso su propio handler, usarlo
+            if (OwinEvents.OnRedirectToIdentityProviderOverride != null)
+            {
+                return OwinEvents.OnRedirectToIdentityProviderOverride.Invoke(context);
+            }
+
+            // Lógica default si la app no puso override
+            var host = context.OwinContext.Request.Host.Value;
+            var defaultRedirect = context.OwinContext.Request.Scheme + "://" + host + "/signin-oidc";
+            context.ProtocolMessage.RedirectUri = defaultRedirect;
+
+            return Task.CompletedTask;
+        },
+
+        // el resto de notificaciones las sigues configurando como antes
+    }
+});
+
+
+
 protected void Application_BeginRequest()
 {
     var context = HttpContext.Current;
