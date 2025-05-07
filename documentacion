@@ -1,3 +1,79 @@
+# OAuth Authentication Implementation — ASP.NET Web Forms (.NET Framework 4.7.2)
+
+## Overview
+
+This project implements **OAuth 2.0** authentication and **OpenID Connect (OIDC)** in an ASP.NET Web Forms application targeting **.NET Framework 4.7.2**. The solution authenticates users through a Web Access Manager (WAM) and leverages cookies to manage authentication state throughout the application.
+
+## Key Features
+
+- OAuth 2.0 / OIDC-based authentication.
+- Cookie-based authentication management.
+- Integration with **Web Access Manager (WAM)** for user login and redirection.
+- Secure storage of client credentials and secrets using **Azure Key Vault (AKV)**.
+- Logging implemented via **Serilog** and a custom `LogHelper`.
+
+## Versions & Libraries
+
+| Component                    | Version                      |
+|------------------------------|------------------------------|
+| .NET Framework               | 4.7.2                        |
+| Owin                         | 4.2.2 (hosted in SystemWeb) |
+| OwinOAuth (custom library)   | .NET Standard 2.0           |
+| AspOwin (custom library)     | .NET Standard 2.0           |
+| Serilog                      | 2.x                          |
+
+> **Note:** `OwinOAuth` handles the OAuth and OIDC authentication configuration.  
+> `AspOwin` is responsible for managing the redirection to WAM during the login flow.
+
+## Architectural Decisions
+
+- **Cookie Authentication:**  
+  Chosen to maintain user session and state post-authentication in a scalable and standard-compliant way compatible with ASP.NET Web Forms.
+
+- **OwinOAuth Library:**  
+  Created to abstract the complexity of configuring OAuth and OIDC in a reusable manner compatible with .NET Standard 2.0, easing integration in future apps.
+
+- **AspOwin Library:**  
+  Handles WAM-specific redirections, decoupling environment-specific login mechanisms from the main application code.
+
+- **Azure Key Vault (AKV):**  
+  Used to securely store client IDs, secrets, and cryptographic keys, minimizing sensitive data exposure in code and configuration files.
+
+## Flow Summary
+
+1. **Unauthenticated Request:**  
+   When a user requests a protected resource, the app redirects them to WAM for authentication using `AspOwin`.
+
+2. **WAM Authentication:**  
+   The user logs in via WAM. Upon success, WAM redirects back to the app with tokens.
+
+3. **Token Handling & Cookie Creation:**  
+   `OwinOAuth` validates the token and creates an authentication cookie to persist the user session.
+
+4. **Session Continuation:**  
+   On subsequent requests, the authentication cookie is validated, allowing seamless session continuity without re-authentication.
+
+## Folder Structure (Key Components)
+
+```plaintext
+/App_Start
+    Startup.cs            // Configures OWIN, OAuth, and Serilog
+
+/Helpers
+    LogHelper.cs          // Structured logging helper
+
+/Middleware
+    LoggingMiddleware.cs  // Logs incoming and outgoing HTTP traffic
+
+/Security
+    AuthConfig.cs         // OAuth and OIDC configuration
+
+/Models
+    EmpInfo.cs            // Employee profile model
+
+
+
+
 /// <summary>
 /// Determines the language code based on the employee's preferred language string.
 /// Supports recognition of "English", "en_US", "French", and "fr_FR".
