@@ -1,3 +1,26 @@
+protected void Application_BeginRequest(object sender, EventArgs e)
+{
+    var context = HttpContext.Current;
+
+    if (context.Request.Cookies["OriginalHost"] == null)
+    {
+        var redirectUri = /* tu lógica para armar el redirect_uri dinámico */;
+        
+        var cookie = new HttpCookie("OriginalHost", redirectUri)
+        {
+            HttpOnly = true,
+            Secure = true
+        };
+
+        context.Response.Cookies.Add(cookie);
+
+        // Forzar un redirect SOLO si no existe la cookie aún
+        context.Response.Redirect(context.Request.RawUrl, endResponse: true);
+    }
+}
+
+
+
 HttpContext.Current.GetOwinContext().Set("CustomRedirectUri", redirectUri);
 
 var customRedirect = context.OwinContext.Get<string>("CustomRedirectUri");
