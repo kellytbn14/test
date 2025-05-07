@@ -1,4 +1,15 @@
 /// <summary>
+/// Initializes the page and determines the appropriate authentication redirect URI based on the incoming request's host and path.
+/// Evaluates headers and URL patterns to select the correct WAM (Web Access Manager) endpoint for the authentication flow.
+/// If no valid redirect URI is found, writes an error message and terminates the response.
+/// 
+/// The selected redirect URI is stored in the current HTTP context items collection under the key "CustomRedirectUri".
+/// </summary>
+/// <param name="e">Event arguments associated with the OnInit event.</param>
+
+
+
+/// <summary>
 /// Represents the basic employee information retrieved from HRAPI or the database.
 /// This class contains profile details for the employee who has logged into the application.
 /// </summary>
