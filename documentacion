@@ -1,3 +1,117 @@
+/// <summary>
+/// Provides methods to configure OAuth and OpenID Connect authentication
+/// for the OWIN middleware pipeline. Sets up cookie authentication and
+/// OpenID Connect handlers with customizable events.
+/// </summary>
+public class AuthConfig
+{
+    /// <summary>
+    /// Configures OAuth and OIDC authentication using the provided client credentials,
+    /// base URL, and redirect URI. Sets up cookie authentication and OpenID Connect options,
+    /// including event handlers for redirect, token validation, and authentication failures.
+    /// </summary>
+    /// <param name="app">The OWIN application builder.</param>
+    /// <param name="ClientId">OAuth client identifier.</param>
+    /// <param name="ClientSecret">OAuth client secret.</param>
+    /// <param name="BaseUrl">The authority URL (WAM or identity provider base URL).</param>
+    /// <param name="RedirectUri">The redirect URI for the authentication flow.</param>
+    public static void ConfigureAuth(IAppBuilder app, string ClientId, string ClientSecret, string BaseUrl, string RedirectUri)
+    {
+        ValidationHelper.ValidateRequired(ClientId, nameof(ClientId));
+        ValidationHelper.ValidateRequired(BaseUrl, nameof(BaseUrl));
+        ValidationHelper.ValidateRequired(ClientSecret, nameof(ClientSecret));
+        ValidationHelper.ValidateRequired(RedirectUri, nameof(RedirectUri));
+
+        AuthProperties.ClientId = ClientId;
+        AuthProperties.ClientSecret = ClientSecret;
+        AuthProperties.BaseUrl = BaseUrl;
+        AuthProperties.RedirectUri = RedirectUri;
+
+        app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+
+        app.UseCookieAuthentication(new CookieAuthenticationOptions
+        {
+            CookieSameSite = SameSiteMode.None,
+            CookieManager = new SystemWebCookieManager()
+        });
+
+        app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+        {
+            ClientId = AuthProperties.ClientId,
+            ClientSecret = AuthProperties.ClientSecret,
+            Authority = AuthProperties.BaseUrl,
+            RedirectUri = AuthProperties.RedirectUri,
+            ResponseType = OpenIdConnectResponseType.CodeIdToken,
+            Scope = "openid profile",
+            CookieManager = new SystemWebCookieManager(),
+            Notifications = new OpenIdConnectAuthenticationNotifications
+            {
+                RedirectToIdentityProvider = OnRedirectToIdentityProvider,
+                SecurityTokenValidated = OnSecurityTokenValidated,
+                AuthenticationFailed = OnAuthenticationFailed
+            }
+        });
+    }
+
+    /// <summary>
+    /// Event handler for the redirect to the identity provider.
+    /// Allows overriding the redirect URI dynamically if required.
+    /// </summary>
+    private static Task OnRedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+    {
+        if (OwinEvents.OnRedirectToIdentityProviderOverride != null)
+        {
+            return OwinEvents.OnRedirectToIdentityProviderOverride.Invoke(context);
+        }
+
+        string redirectUri =
+            context.OwinContext?.Authentication?.AuthenticationResponseChallenge?.Properties?.RedirectUri;
+
+        if (!string.IsNullOrEmpty(redirectUri))
+        {
+            context.ProtocolMessage.RedirectUri = redirectUri;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Event handler triggered when the security token has been validated.
+    /// Adds the ID token and access token as claims to the authenticated identity.
+    /// </summary>
+    private static Task OnSecurityTokenValidated(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+    {
+        var idToken = context.ProtocolMessage.IdToken;
+        var accessToken = context.ProtocolMessage.AccessToken;
+
+        var claimsIdentity = context.AuthenticationTicket.Identity;
+
+        if (!string.IsNullOrEmpty(idToken))
+        {
+            claimsIdentity.AddClaim(new System.Security.Claims.Claim("id.token", idToken));
+        }
+
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            claimsIdentity.AddClaim(new System.Security.Claims.Claim("access.token", accessToken));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Event handler triggered when authentication fails.
+    /// Redirects the user to an error page with the exception message.
+    /// </summary>
+    private static async Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+    {
+        context.HandleResponse();
+        context.Response.Redirect("/error?message=" + Uri.EscapeDataString(context.Exception.Message));
+    }
+}
+
+
+
 ### Required NuGet Libraries and Versions
 
 The following libraries and versions are required for correct functionality:
