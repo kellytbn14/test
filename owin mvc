@@ -1,7 +1,60 @@
+1️⃣ En la librería NET Standard: exponer un delegate público para RedirectToIdentityProvider
+
+
 public static class OwinEvents
 {
     public static Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> OnRedirectToIdentityProviderOverride;
 }
+
+
+
+app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+{
+    // demás configuraciones
+
+    Notifications = new OpenIdConnectAuthenticationNotifications
+    {
+        RedirectToIdentityProvider = context =>
+        {
+            // Si la app puso su propio handler, usarlo
+            if (OwinEvents.OnRedirectToIdentityProviderOverride != null)
+            {
+                return OwinEvents.OnRedirectToIdentityProviderOverride.Invoke(context);
+            }
+
+            // Lógica default si la app no puso override
+            var host = context.OwinContext.Request.Host.Value;
+            var defaultRedirect = context.OwinContext.Request.Scheme + "://" + host + "/signin-oidc";
+            context.ProtocolMessage.RedirectUri = defaultRedirect;
+
+            return Task.CompletedTask;
+        },
+
+        // el resto de notificaciones las sigues configurando como antes
+    }
+});
+
+
+2️⃣ En la aplicación MVC (afuera, en la app que usa la librería)
+Antes de que inicie OWIN (por ejemplo en Startup.Auth o Startup.cs):
+OwinEvents.OnRedirectToIdentityProviderOverride = context =>
+{
+    // Tu lógica personalizada
+    var customUri = context.OwinContext.Request.Scheme + "://" + context.OwinContext.Request.Host.Value + "/signin-oidc";
+
+    // Por ejemplo, usar X-Forwarded-Host si existe
+    if (context.OwinContext.Request.Headers.ContainsKey("X-Forwarded-Host"))
+    {
+        var headerHost = context.OwinContext.Request.Headers["X-Forwarded-Host"];
+        customUri = context.OwinContext.Request.Scheme + "://" + headerHost + "/signin-oidc";
+    }
+
+    context.ProtocolMessage.RedirectUri = customUri;
+
+    return Task.CompletedTask;
+};
+
+
 
 
 app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
