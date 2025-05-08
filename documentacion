@@ -1,4 +1,13 @@
 /// <summary>
+/// Provides a static context to store user identity information (claims) extracted from the ID token
+/// during the OpenID Connect authentication flow.
+/// 
+/// This information is typically populated after successful authentication and is used across the application
+/// to identify the logged-in employee and personalize the user experience.
+/// </summary>
+
+
+/// <summary>
 /// Redirects the current request to the Web Access Manager (WAM) login endpoint.
 /// Uses OWIN’s `Authentication.Challenge` method to initiate the authentication flow.
 /// 
