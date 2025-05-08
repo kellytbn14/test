@@ -1,4 +1,49 @@
 /// <summary>
+/// Redirects the current request to the Web Access Manager (WAM) login endpoint.
+/// Uses OWIN’s `Authentication.Challenge` method to initiate the authentication flow.
+/// 
+/// Retrieves the redirect URI from the current HTTP context's `Items` collection using the key "CustomRedirectUri".
+/// This value is typically set earlier in the request lifecycle (for example, during `Application_BeginRequest` or overridden in OnInit)
+/// to dynamically control which URL the user should return to after authentication.
+/// 
+/// Throws an exception if the redirect URI is missing or an error occurs during redirection.
+/// </summary>
+/// <exception cref="InvalidOperationException">Thrown if redirectUri is missing or an error occurs during redirection.</exception>
+public void RedirectToWAM()
+{
+    try
+    {
+        var httpContext = HttpContext.Current;
+        // Retrieves a dynamically set redirect URI for this request, allowing multi-tenant or multi-path flexibility.
+        redirectUri = httpContext?.Items["CustomRedirectUri"] as string;
+
+        if (string.IsNullOrEmpty(redirectUri))
+        {
+            throw new InvalidOperationException("Missing redirectUri");
+        }
+
+        HttpContext.Current.GetOwinContext().Authentication.Challenge(
+            new AuthenticationProperties
+            {
+                RedirectUri = redirectUri,
+                AllowRefresh = true,
+                IsPersistent = true
+            },
+            OpenIdConnectAuthenticationDefaults.AuthenticationType
+        );
+
+        HttpContext.Current.Response.StatusCode = 401;
+        HttpContext.Current.ApplicationInstance.CompleteRequest();
+    }
+    catch (Exception ex)
+    {
+        throw new InvalidOperationException(ex.Message);
+    }
+}
+
+
+
+/// <summary>
 /// Base page class for ASP.NET Web Forms that handles OAuth authentication via WAM (Web Access Manager).
 /// 
 /// This class intercepts the initialization and loading of the page to ensure the user is authenticated.
