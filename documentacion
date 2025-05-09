@@ -1,4 +1,189 @@
 /// <summary>
+/// Central manager class for encryption, decryption, secret retrieval, and credential operations
+/// in the CryptoPGP library. This class acts as a facade for securely handling secrets via:
+/// - Azure Key Vault
+/// - Windows Credential Manager
+/// - PGP encryption/decryption (with base64 support)
+/// </summary>
+public class CryptoManager
+{
+    private static readonly WCMService wcmService = new WCMService();
+    private static readonly PGPEncryptionService pgpEncryptionService = new PGPEncryptionService();
+    private static readonly AKVService akvService = new AKVService();
+
+    /// <summary>
+    /// Decrypts a Base64-encoded PGP encrypted string.
+    /// </summary>
+    /// <param name="base64EncryptedText">The encrypted text in Base64 format.</param>
+    /// <returns>The decrypted plain text string.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the decryption fails or input is invalid.</exception>
+    public static async Task<string> DecryptBase64(string base64EncryptedText)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(base64EncryptedText, nameof(base64EncryptedText));
+
+            string pgpEncryptedText = Encoding.UTF8.GetString(Convert.FromBase64String(base64EncryptedText));
+            string decryptedText = await Decrypt(pgpEncryptedText);
+
+            return decryptedText;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred during decryption", ex);
+        }
+    }
+
+    /// <summary>
+    /// Decrypts a PGP encrypted string using private key and passphrase from the Windows Credential Manager.
+    /// </summary>
+    /// <param name="encryptedText">The encrypted text (PGP ASCII-armored).</param>
+    /// <returns>The decrypted plain text string.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when decryption fails or required secrets are missing.</exception>
+    public static async Task<string> Decrypt(string encryptedText)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(encryptedText, nameof(encryptedText));
+
+            Credential passphrase = wcmService.ReadCredential(Constants.IIS_PGP_PASSPHRASE, null);
+            Credential privateKeyBase64 = wcmService.ReadFragmentedCredential(Constants.IIS_PGP_PRIVATEKEY);
+
+            string privateKey = Encoding.UTF8.GetString(Convert.FromBase64String(privateKeyBase64.Password));
+
+            ValidationHelper.ValidateRequired(passphrase.Password, nameof(passphrase));
+            ValidationHelper.ValidateRequired(privateKey, nameof(privateKey));
+
+            string decryptedText = await pgpEncryptionService.DecryptText(encryptedText, privateKey, passphrase.Password);
+
+            return decryptedText;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred during decryption", ex);
+        }
+    }
+
+    /// <summary>
+    /// Encrypts plain text using a PGP public key and returns the result as a Base64 string.
+    /// </summary>
+    /// <param name="plainText">The plain text to encrypt.</param>
+    /// <param name="publicKeyPath">Path to the public key file (ASCII-armored).</param>
+    /// <returns>The encrypted string encoded in Base64.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when encryption fails or input is invalid.</exception>
+    public static async Task<string> EncryptToBase64(string plainText, string publicKeyPath)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(plainText, nameof(plainText));
+            ValidationHelper.ValidateRequired(publicKeyPath, nameof(publicKeyPath));
+
+            string encryptedText = await Encrypt(plainText, publicKeyPath);
+            string base64EncryptedText = Convert.ToBase64String(Encoding.UTF8.GetBytes(encryptedText));
+
+            return base64EncryptedText;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred during encryption", ex);
+        }
+    }
+
+    /// <summary>
+    /// Encrypts plain text using a PGP public key read from a file.
+    /// </summary>
+    /// <param name="plainText">The text to encrypt.</param>
+    /// <param name="publicKeyPath">File path to the PGP public key.</param>
+    /// <returns>The encrypted PGP message in ASCII-armored format.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the key or input is invalid.</exception>
+    public static async Task<string> Encrypt(string plainText, string publicKeyPath)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(plainText, nameof(plainText));
+            ValidationHelper.ValidateRequired(publicKeyPath, nameof(publicKeyPath));
+
+            string publicKey = File.ReadAllText(publicKeyPath);
+            ValidationHelper.ValidateRequired(publicKey, nameof(publicKey));
+
+            string encryptedText = await pgpEncryptionService.EncryptText(plainText, publicKey);
+
+            return encryptedText;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred during encryption", ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads a credential from the Windows Credential Manager using a given name and optional username.
+    /// </summary>
+    /// <param name="name">The credential name.</param>
+    /// <param name="username">The expected username (optional).</param>
+    /// <returns>The matching credential object.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the credential is not found or invalid.</exception>
+    public static Credential ReadCredential(string name, string username)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(name, nameof(name));
+            return wcmService.ReadCredential(name, username);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred reading the credentials", ex);
+        }
+    }
+
+    /// <summary>
+    /// Creates or updates a credential entry in the Windows Credential Manager.
+    /// If the secret exceeds the maximum allowed length, it is automatically fragmented.
+    /// </summary>
+    /// <param name="name">The name of the credential.</param>
+    /// <param name="username">The username associated with the credential.</param>
+    /// <param name="secret">The secret or password to store.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the creation fails or input is invalid.</exception>
+    public static void CreateCredential(string name, string username, string secret)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(name, nameof(name));
+            ValidationHelper.ValidateRequired(secret, nameof(secret));
+
+            wcmService.CreateCredential(name, username, secret);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred creating the credentials", ex);
+        }
+    }
+
+    /// <summary>
+    /// Retrieves a secret value from Azure Key Vault using the specified URI and key name.
+    /// </summary>
+    /// <param name="keyVaultUri">The full URI to the Azure Key Vault.</param>
+    /// <param name="key">The name of the secret to retrieve.</param>
+    /// <returns>The retrieved secret value as a string.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if retrieval fails or input is invalid.</exception>
+    public static async Task<string> GetAKVaultAsync(string keyVaultUri, string key)
+    {
+        try
+        {
+            ValidationHelper.ValidateRequired(keyVaultUri, nameof(keyVaultUri));
+            ValidationHelper.ValidateRequired(key, nameof(key));
+
+            return await akvService.GetAKVaultAsync(keyVaultUri, key);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("An error occurred getting key vault.", ex);
+        }
+    }
+}
+
+
+/// <summary>
 /// Defines application-wide constant values used for PGP key retrieval and credential handling.
 /// </summary>
 internal static class Constants
