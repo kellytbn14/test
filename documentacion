@@ -1,4 +1,12 @@
 /// <summary>
+/// Represents the authenticated user's identity information extracted from the ID token
+/// in an OAuth/OpenID Connect authentication flow.
+/// 
+/// This class is typically populated after successful login via WAM (Web Access Manager),
+/// and contains selected claims used across the application to identify the user.
+/// </summary>
+
+/// <summary>
 /// Base class for ASP.NET Web Forms pages that enforces OAuth authentication
 /// and manages user identity information obtained from the ID token.
 /// 
