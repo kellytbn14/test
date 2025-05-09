@@ -1,4 +1,94 @@
 /// <summary>
+/// Helper class for working with OAuth/OpenID Connect tokens and authentication state.
+/// Provides methods to access the ID token and access token, validate authentication,
+/// and extract claims from the decoded ID token.
+/// </summary>
+public static class TokenHelper
+{
+    /// <summary>
+    /// Retrieves the raw ID token from the authenticated user's claims.
+    /// Returns null if the user is not authenticated.
+    /// </summary>
+    /// <returns>The ID token as a string, or null if not available.</returns>
+    private static string GetIdToken()
+    {
+        if (!IsUserAuthenticated()) return null;
+
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("id.token")?.Value;
+    }
+
+    /// <summary>
+    /// Retrieves the raw access token from the authenticated user's claims.
+    /// Returns null if the user is not authenticated.
+    /// </summary>
+    /// <returns>The access token as a string, or null if not available.</returns>
+    private static string GetAccessToken()
+    {
+        if (!IsUserAuthenticated()) return null;
+
+        var identity = HttpContext.Current.GetOwinContext().Authentication.User.Identity as ClaimsIdentity;
+        return identity?.FindFirst("access.token")?.Value;
+    }
+
+    /// <summary>
+    /// Checks if the current user is authenticated.
+    /// </summary>
+    /// <returns>True if the user is authenticated, false otherwise.</returns>
+    public static bool IsUserAuthenticated()
+    {
+        return HttpContext.Current.GetOwinContext().Authentication.User.Identity.IsAuthenticated;
+    }
+
+    /// <summary>
+    /// Checks if the current authenticated user has a valid ID token.
+    /// </summary>
+    /// <returns>True if a non-empty ID token is available, false otherwise.</returns>
+    public static bool HasValidIdToken()
+    {
+        return !string.IsNullOrEmpty(GetIdToken());
+    }
+
+    /// <summary>
+    /// Checks if the current authenticated user has a valid access token.
+    /// </summary>
+    /// <returns>True if a non-empty access token is available, false otherwise.</returns>
+    public static bool HasValidAccessToken()
+    {
+        return !string.IsNullOrEmpty(GetAccessToken());
+    }
+
+    /// <summary>
+    /// Extracts the value of a specific claim from the decoded ID token.
+    /// </summary>
+    /// <param name="claimType">The name/type of the claim to extract.</param>
+    /// <returns>The value of the claim, or null if not found or token is missing.</returns>
+    private static string GetClaimFromIdToken(string claimType)
+    {
+        string idToken = GetIdToken();
+
+        if (string.IsNullOrEmpty(idToken))
+            return null;
+
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.ReadJwtToken(idToken);
+
+        return token.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+    }
+
+    /// <summary>
+    /// Extracts the "sub" (subject) claim from the decoded ID token.
+    /// This is typically the unique identifier of the user.
+    /// </summary>
+    /// <returns>The value of the "sub" claim, or null if not found.</returns>
+    public static string GetSub()
+    {
+        return GetClaimFromIdToken("sub");
+    }
+}
+
+
+/// <summary>
 /// Represents the authenticated user's identity information extracted from the ID token
 /// in an OAuth/OpenID Connect authentication flow.
 /// 
