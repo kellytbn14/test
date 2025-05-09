@@ -1,3 +1,90 @@
+# HRAPI Lib
+
+## Overview
+
+**HRAPI Lib** is a .NET Standard 2.0 library designed to securely retrieve employee information from a remote HRAPI service.  
+It supports OAuth 2.0 authentication using client assertion JWTs signed with a private RSA key in PEM format.
+
+The library is built for use in enterprise-grade .NET applications that require secure, programmatic access to HR data using modern authentication standards.
+
+---
+
+## Key Features
+
+- 🔐 **OAuth 2.0 Authentication with Client Assertion (JWT)**  
+  Generates a signed JWT using a private RSA key and uses it to obtain an access token from the HRAPI token endpoint.
+
+- 👤 **Employee Information Retrieval**  
+  Fetches employee data from the HRAPI endpoint by ScotiaID using secure bearer token authorization.
+
+- 📄 **PEM Key Support via BouncyCastle**  
+  Parses RSA private keys in PEM format for JWT signing.
+
+- 📊 **Automatic Claim Construction**  
+  Builds standard claims (iss, sub, aud, exp, jti, nbf) for client assertion compliance.
+
+- 🌐 **Proxy Support for Corporate Networks**  
+  Configures all outgoing HTTP requests with proxy support by default.
+
+---
+
+## Target Framework
+
+- **.NET Standard 2.0**  
+  Compatible with:
+  - .NET Framework 4.6.1 and later
+  - .NET Core 2.0+
+  - .NET 5/6/7+
+
+---
+
+## Installation
+
+Add the `HRAPI Lib` project to your solution or consume it as a private library.
+
+Required NuGet dependencies:
+
+```xml
+<PackageReference Include="BouncyCastle" Version="1.8.9" />
+<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.8.0" />
+<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
+<PackageReference Include="System.Text.Json" Version="9.0.3" />
+
+## Dependencies
+
+| NuGet Package                            | Version | Description                                                 |
+|-----------------------------------------|---------|-------------------------------------------------------------|
+| BouncyCastle                            | 1.8.9   | Provides cryptographic support for parsing PEM RSA keys     |
+| Microsoft.IdentityModel.Tokens          | 8.8.0   | Used to create and sign JWTs with security credentials      |
+| System.IdentityModel.Tokens.Jwt         | 8.8.0   | Handles JWT creation, serialization, and validation         |
+| System.Text.Json                         | 9.0.3   | Used to serialize and deserialize HTTP responses (JSON)     |
+
+
+## Library Structure
+
+| Component               | Purpose                                                                 |
+|-------------------------|-------------------------------------------------------------------------|
+| `HrApiClientManager`    | Facade for retrieving employee data; coordinates token creation and request. |
+| `HRApiClientService`    | Executes HTTP calls to token and employee endpoints.                    |
+| `ClientAssertionService`| Builds signed client assertion JWTs using RSA PEM private keys.         |
+| `HrApiProperties`       | Holds endpoint URLs, client ID, scopes, audience, and key configuration.|
+| `TokenResponse`         | Model representing OAuth access token response.                         |
+| `EmpInfoHRApiResponse`  | Model for employee profile data from HRAPI.                             |
+| `ValidationHelper`      | Utility class for validating required arguments (not shown here).       |
+
+---
+
+## Limitations
+
+- 🔑 The library expects the **RSA private key to be provided in PEM format**; no other formats (e.g., PFX, XML) are supported.
+- 📦 The library does not handle token refresh or retry logic — this must be implemented at the calling level if needed.
+- 🧠 Sensitive strings (e.g., keys, tokens) are handled in memory; it's your responsibility to protect them if required.
+- ☁️ The audience (`aud`) used in JWTs must match the expected OAuth token endpoint in HRAPI — mismatches will result in 401 responses.
+- 🚫 No built-in caching for tokens or employee responses — designed for stateless request-per-call use cases.
+
+
+
+
 /// <summary>
 /// Provides helper methods for generating client assertion JWTs
 /// using RSA private keys in PEM format.
