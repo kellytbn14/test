@@ -1,3 +1,22 @@
+/// <summary>
+/// Provides a method to retrieve secrets from Azure Key Vault using a specified key and vault URI.
+/// This class uses the Azure SDK with `DefaultAzureCredential` for authentication,
+/// and allows proxy-aware HTTP communication for enterprise environments.
+/// </summary>
+internal class AKVService
+{
+    /// <summary>
+    /// Asynchronously retrieves a secret value from Azure Key Vault.
+    /// </summary>
+    /// <param name="keyUri">The URI of the Azure Key Vault (e.g., https://myvault.vault.azure.net/).</param>
+    /// <param name="key">The name of the secret to retrieve.</param>
+    /// <returns>The value of the requested secret.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the secret is not found or has no value.
+    /// </exception>
+    public async Task<string> GetAKVaultAsync(string keyUri, string key)
+
+
 ## Dependencies
 
 | NuGet Package                                      | Version | Description                                     |
