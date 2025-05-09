@@ -1,4 +1,77 @@
 /// <summary>
+/// Service class responsible for reading, writing, and managing credentials
+/// in the Windows Credential Manager (WCM).
+/// 
+/// Supports both standard and fragmented credentials (split due to size limits).
+/// Uses the CredentialManager API to interact with system-level secrets.
+/// </summary>
+internal class WCMService
+{
+    /// <summary>
+    /// Reads a credential from Windows Credential Manager by name and (optionally) username.
+    /// Throws an exception if not found or if the username does not match.
+    /// </summary>
+    /// <param name="name">The name/key of the credential.</param>
+    /// <param name="username">Optional expected username to validate.</param>
+    /// <returns>The retrieved credential.</returns>
+    public Credential ReadCredential(string name, string username)
+    {
+        
+    }
+
+    /// <summary>
+    /// Reads a fragmented credential composed of multiple parts (due to size limitations).
+    /// The parts are expected to follow a naming convention: {name}_PART_{index}.
+    /// </summary>
+    /// <param name="name">The logical name of the full credential (without _PART_ suffix).</param>
+    /// <returns>The reassembled credential.</returns>
+    public Credential ReadFragmentedCredential(string name)
+    {
+       
+    }
+
+    /// <summary>
+    /// Creates a credential in Windows Credential Manager.
+    /// If the secret exceeds the allowed length, it is automatically split and stored as fragments.
+    /// </summary>
+    /// <param name="name">The base name/key of the credential.</param>
+    /// <param name="userName">The username associated with the credential.</param>
+    /// <param name="secret">The secret or password to store.</param>
+    public void CreateCredential(string name, string userName, string secret)
+    {
+       
+    }
+
+    /// <summary>
+/// Writes a single credential entry to Windows Credential Manager.
+/// This method uses the provided credential name, username, and secret to create or update
+/// an entry in the system's secure credential store.
+/// </summary>
+/// <param name="name">The unique name of the credential entry.</param>
+/// <param name="userName">The username associated with the credential.</param>
+/// <param name="secret">The secret (e.g., password, token) to store securely.</param>
+private void WriteCredential(string name, string userName, string secret)
+{
+
+}
+
+
+    /// <summary>
+    /// Splits a long secret into multiple parts to bypass WCM size limitations.
+    /// Each fragment is named using the format {name}_PART_{index}.
+    /// </summary>
+    /// <param name="name">The base name of the credential.</param>
+    /// <param name="secret">The full secret to be split.</param>
+    /// <returns>A dictionary of fragment names and corresponding secret parts.</returns>
+    private Dictionary<string, string> BuildPartitionedLongCredential(string name, string secret)
+    {
+     
+    }
+}
+
+
+
+/// <summary>
 /// Provides a method to retrieve secrets from Azure Key Vault using a specified key and vault URI.
 /// This class uses the Azure SDK with `DefaultAzureCredential` for authentication,
 /// and allows proxy-aware HTTP communication for enterprise environments.
