@@ -1,3 +1,17 @@
+## Dependencies
+
+| NuGet Package                                      | Version | Description                                     |
+|---------------------------------------------------|---------|-------------------------------------------------|
+| Microsoft.Owin.Host.SystemWeb                     | 4.2.2   | Enables OWIN integration in System.Web apps     |
+| Microsoft.Owin.Security                           | 4.2.2   | Base middleware for authentication              |
+| Microsoft.Owin.Security.Cookies                   | 4.2.2   | Cookie-based authentication support             |
+| Microsoft.Owin.Security.OpenIdConnect             | 4.2.2   | OIDC protocol integration for OWIN              |
+| Microsoft.IdentityModel.Protocols                 | 5.3.0   | Support for reading OIDC metadata               |
+| Microsoft.IdentityModel.Protocols.OpenIdConnect   | 5.3.0   | OIDC protocol helpers for token validation      |
+| Microsoft.IdentityModel.Tokens                    | 8.8.0   | Token validation and cryptographic support      |
+| System.IdentityModel.Tokens.Jwt                   | 8.8.0   | Parsing and decoding JWTs (used by TokenHelper) |
+
+
 ## How It Works
 
 ### 1. Page Authentication
