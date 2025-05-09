@@ -1,4 +1,41 @@
 /// <summary>
+/// Provides helper methods for generating client assertion JWTs
+/// using RSA private keys in PEM format.
+/// 
+/// These tokens are typically used for client authentication in OAuth 2.0 flows
+/// where the grant type is `client_credentials` with `client_assertion`.
+/// </summary>
+internal class ClientAssertionService
+{
+    /// <summary>
+    /// Generates a signed JWT (client assertion) using the provided client ID, PEM-formatted RSA private key,
+    /// and token audience (typically the OAuth token endpoint).
+    /// </summary>
+    /// <param name="clientId">The client ID (also used as issuer and subject in the token).</param>
+    /// <param name="privateKeyPem">The RSA private key in PEM format used to sign the JWT.</param>
+    /// <param name="urlAud">The audience for the token, usually the token endpoint URL.</param>
+    /// <returns>A signed JWT string representing the client assertion.</returns>
+    /// <exception cref="Exception">Thrown if the private key is invalid or unreadable.</exception>
+    public static string GenerateClientAssertionFromPem(string clientId, string privateKeyPem, string urlAud)
+    {
+      
+    }
+
+    /// <summary>
+    /// Parses a PEM-encoded RSA private key string and returns a usable .NET RSA instance.
+    /// </summary>
+    /// <param name="pem">PEM-encoded RSA private key.</param>
+    /// <returns>An RSA instance usable for signing.</returns>
+    /// <exception cref="Exception">Thrown if the key is not in valid RSA PEM format.</exception>
+    private static RSA LoadRsaPrivateKeyFromPem(string pem)
+    {
+      
+    }
+}
+
+
+
+/// <summary>
 /// Handles HTTP communication with the HRAPI service, including:
 /// - Fetching employee data
 /// - Obtaining access tokens via client assertion or client secret
