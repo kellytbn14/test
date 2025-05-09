@@ -1,4 +1,58 @@
 /// <summary>
+/// Handles HTTP communication with the HRAPI service, including:
+/// - Fetching employee data
+/// - Obtaining access tokens via client assertion or client secret
+/// 
+/// This service uses proxy-aware HttpClient configuration and attaches standard BNS headers.
+/// </summary>
+internal class HRApiClientService
+{
+    /// <summary>
+    /// Sends a request to the HRAPI employee endpoint to retrieve employee information by ScotiaID.
+    /// Includes standard headers required by BNS (e.g., trace ID, channel ID).
+    /// </summary>
+    /// <param name="scotiaid">The ScotiaID of the employee to query.</param>
+    /// <param name="token">The access token obtained via OAuth client assertion.</param>
+    /// <returns>An <see cref="EmpInfoHRApiResponse"/> object with the most recently updated employee data.</returns>
+    /// <exception cref="Exception">Thrown if the API request fails or the response is invalid.</exception>
+    public async Task<EmpInfoHRApiResponse> GetEmployeeInfo(string scotiaid, TokenResponse token)
+    {
+       
+    }
+
+    /// <summary>
+    /// Selects the most recently updated employee from a list of employee records.
+    /// </summary>
+    /// <param name="employees">A list of employee records returned by the HRAPI.</param>
+    /// <returns>The most recently updated employee record.</returns>
+    private EmpInfoHRApiResponse GetMostRecentlyUpdatedEmployee(List<EmpInfoHRApiResponse> employees)
+    {
+        return employees.OrderByDescending(e => DateTime.Parse(e.LastModifiedTimestamp)).FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Obtains an OAuth access token from the HRAPI token endpoint using a client assertion JWT.
+    /// </summary>
+    /// <param name="clientAssertion">A signed JWT representing the client assertion.</param>
+    /// <returns>A <see cref="TokenResponse"/> containing the access token.</returns>
+    public async Task<TokenResponse> GetTokenWithAssertion(string clientAssertion)
+    {
+     
+    }
+
+    /// <summary>
+    /// Obtains an OAuth access token using client ID and client secret authentication.
+    /// </summary>
+    /// <returns>A <see cref="TokenResponse"/> containing the access token.</returns>
+    public async Task<TokenResponse> GetToken()
+    {
+      
+    }
+}
+
+
+
+/// <summary>
 /// Manages the process of retrieving employee information from the HRAPI service.
 /// Handles authentication using a client assertion JWT and sends the request to the employee endpoint.
 /// </summary>
