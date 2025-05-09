@@ -1,4 +1,116 @@
 /// <summary>
+/// Base class for ASP.NET Web Forms pages that enforces OAuth authentication
+/// and manages user identity information obtained from the ID token.
+/// 
+/// This class checks if the user is authenticated during the page lifecycle (`OnInit`).
+/// If the user has a valid token, it populates the `TokenEmpInfo` object with the subject (`sub`).
+/// Otherwise, it redirects the user to WAM (Web Access Manager) using the OWIN authentication pipeline.
+/// 
+/// A custom redirect URI is dynamically retrieved from `HttpContext.Items["CustomRedirectUri"]`
+/// to support multi-tenant or path-specific authentication flows.
+/// </summary>
+public class AuthPage : System.Web.UI.Page
+{
+    /// <summary>
+    /// The redirect URI to be used for WAM authentication.
+    /// This is typically determined dynamically based on the request context.
+    /// </summary>
+    public string redirectUri;
+
+    /// <summary>
+    /// Represents the current authenticated user's identity, populated from token claims.
+    /// This object is initialized during OnInit after a successful authentication check.
+    /// </summary>
+    public TokenEmpInfo TokenEmpInfo { get; set; }
+
+    /// <summary>
+    /// Handles the page initialization lifecycle event.
+    /// If the user is authenticated and a valid ID token is present, the user info is loaded into TokenEmpInfo.
+    /// Otherwise, redirects the user to the WAM authentication flow.
+    /// </summary>
+    /// <param name="e">Event arguments.</param>
+    protected override void OnInit(EventArgs e)
+    {
+        try
+        {
+            if (TokenHelper.IsUserAuthenticated())
+            {
+                if (TokenHelper.HasValidIdToken())
+                {
+                    TokenEmpInfo = new TokenEmpInfo();
+                    TokenEmpInfo.Sub = TokenHelper.GetSub();
+                    base.OnInit(e);
+                    return;
+                }
+                else
+                {
+                    throw new Exception("Missing Token");
+                }
+            }
+            else
+            {
+                RedirectToWAM();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Handles the page load lifecycle event.
+    /// Ensures authentication has occurred before continuing the load process.
+    /// </summary>
+    /// <param name="e">Event arguments.</param>
+    protected override void OnLoad(EventArgs e)
+    {
+        if (TokenHelper.IsUserAuthenticated())
+        {
+            base.OnLoad(e);
+        }
+    }
+
+    /// <summary>
+    /// Redirects the user to the Web Access Manager (WAM) for authentication using OWIN's challenge flow.
+    /// Retrieves the redirect URI from HttpContext.Items["CustomRedirectUri"].
+    /// Throws an error if the redirect URI is not set.
+    /// </summary>
+    public void RedirectToWAM()
+    {
+        try
+        {
+            var httpContext = HttpContext.Current;
+            redirectUri = httpContext?.Items["CustomRedirectUri"] as string;
+
+            if (string.IsNullOrEmpty(redirectUri))
+            {
+                throw new InvalidOperationException("Missing redirectUri");
+            }
+
+            HttpContext.Current.GetOwinContext().Authentication.Challenge(
+                new AuthenticationProperties
+                {
+                    RedirectUri = redirectUri,
+                    AllowRefresh = true,
+                    IsPersistent = true
+                },
+                OpenIdConnectAuthenticationDefaults.AuthenticationType
+            );
+
+            HttpContext.Current.Response.StatusCode = 401;
+            HttpContext.Current.ApplicationInstance.CompleteRequest();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(ex.Message);
+        }
+    }
+}
+
+
+
+/// <summary>
 /// Provides a static context to store user identity information (claims) extracted from the ID token
 /// during the OpenID Connect authentication flow.
 /// 
