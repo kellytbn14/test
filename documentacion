@@ -2,6 +2,44 @@
 
 ## Overview
 
+**AspOwinOAuthLib** is a lightweight utility library for **ASP.NET Web Forms (.NET Framework 4.7.2)** that provides a base class for `.aspx` pages to **enforce authentication early in the page lifecycle**.
+
+The library integrates with an existing **OWIN-based authentication setup**, but does **not depend on OwinOAuthLib** or any specific OAuth configuration library.  
+Its only purpose is to **override `Page.OnInit`**, ensuring that unauthenticated users are redirected to the login flow (e.g., WAM), and that the authentication context is validated before any page logic is executed.
+
+## Key Features
+
+- Reusable base class `AuthPage` for `.aspx` code-behind files.
+- Forces OAuth authentication at `OnInit`, before controls or logic are loaded.
+- Redirects unauthenticated users to WAM using `Authentication.Challenge`.
+- Allows dynamic control of the post-authentication redirect URI via `HttpContext.Items`.
+- Extracts identity information (like the `sub` claim) from the token and stores it in `TokenEmpInfo`.
+- Includes a `TokenHelper` utility for accessing token data safely.
+
+## Target Framework
+
+- .NET Framework 4.7.2 (ASP.NET Web Forms)
+
+## Installation
+
+Include the library project in your solution or add the DLL to your Web Forms application.
+
+### Required NuGet Packages
+
+These must be installed in the consuming application (not in this library):
+
+```xml
+<PackageReference Include="Microsoft.Owin" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.OpenIdConnect" Version="4.2.2" />
+
+
+# AspOwinOAuthLib
+
+## Overview
+
 **AspOwinOAuthLib** is a helper library for ASP.NET Web Forms applications (.NET Framework 4.7.2) that integrates with the OWIN OAuth/OIDC authentication pipeline to manage user login redirection and token-based identity extraction.
 
 It complements `OwinOAuthLib` by handling redirect challenges to WAM (Web Access Manager), and provides utility methods and base classes to simplify authentication enforcement and user context management within Web Forms (`.aspx`) pages.
