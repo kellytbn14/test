@@ -1,4 +1,36 @@
 /// <summary>
+/// Service class for performing PGP encryption and decryption operations.
+/// Uses public and private key pairs with optional passphrases for secure data handling.
+/// </summary>
+internal class PGPEncryptionService
+{
+    /// <summary>
+    /// Encrypts the provided plain text using a PGP public key.
+    /// </summary>
+    /// <param name="textToEncrypt">The plain text content to encrypt.</param>
+    /// <param name="publicKey">The PGP public key used for encryption (in ASCII-armored format).</param>
+    /// <returns>The encrypted text as a string (typically ASCII-armored).</returns>
+    public async Task<string> EncryptText(string textToEncrypt, string publicKey)
+    {
+
+    }
+
+    /// <summary>
+    /// Decrypts the provided encrypted text using a PGP private key and passphrase.
+    /// </summary>
+    /// <param name="encryptedText">The encrypted content to decrypt (ASCII-armored PGP data).</param>
+    /// <param name="privateKey">The PGP private key used for decryption (in ASCII-armored format).</param>
+    /// <param name="passphrase">The passphrase associated with the private key.</param>
+    /// <returns>The decrypted plain text content.</returns>
+    public async Task<string> DecryptText(string encryptedText, string privateKey, string passphrase)
+    {
+
+    }
+}
+
+
+
+/// <summary>
 /// Service class responsible for reading, writing, and managing credentials
 /// in the Windows Credential Manager (WCM).
 /// 
