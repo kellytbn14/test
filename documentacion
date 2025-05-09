@@ -1,3 +1,25 @@
+/// <summary>
+/// Manages the process of retrieving employee information from the HRAPI service.
+/// Handles authentication using a client assertion JWT and sends the request to the employee endpoint.
+/// </summary>
+public class HrApiClientManager
+{
+    /// <summary>
+    /// Asynchronously retrieves employee information from the HRAPI endpoint using the provided Scotia ID.
+    /// 
+    /// This method:
+    /// - Validates required configuration values.
+    /// - Generates a client assertion using the provided PEM private key.
+    /// - Requests an access token from HRAPI using the client assertion.
+    /// - Queries the employee endpoint for employee data using the obtained access token.
+    /// </summary>
+    /// <param name="scotiaid">The ScotiaID (unique employee identifier) to look up.</param>
+    /// <returns>An <see cref="EmplafoHBApiResponse"/> object containing employee data.</returns>
+    /// <exception cref="Exception">Thrown if any required parameter is missing or if the API call fails.</exception>
+    public async Task<EmplafoHBApiResponse> GetEmployeeInfo(string scotiaid)
+
+
+
 # CryptoPGP
 
 ## Overview
