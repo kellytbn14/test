@@ -1,3 +1,40 @@
+## How It Works
+
+### 1. Page Authentication
+
+Inherit from `AuthPage` in your `.aspx.cs` code-behind:
+
+```csharp
+public partial class Dashboard : AuthPage
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        var userInfo = this.TokenEmpInfo;
+        if (userInfo != null)
+        {
+            welcomeLabel.Text = $"Welcome, {userInfo.GivenName}";
+        }
+    }
+}
+
+## Library Structure
+
+| Component      | Purpose                                                              |
+|----------------|----------------------------------------------------------------------|
+| `AuthPage`     | Base page that handles WAM redirect and token validation.            |
+| `TokenEmpInfo` | Model for storing authenticated user's identity information.         |
+| `TokenHelper`  | Utility class for checking authentication and reading token claims.  |
+
+---
+
+## Limitations
+
+- Designed specifically for **ASP.NET Web Forms (.aspx)** applications using **OWIN-based authentication**.
+- Assumes `id.token` and `access.token` have been added to claims during the `SecurityTokenValidated` event (usually handled in the application's OWIN configuration).
+
+
+
+
 # AspOwinOAuthLib
 
 ## Overview
