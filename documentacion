@@ -1,3 +1,97 @@
+# CryptoPGP
+
+## Overview
+
+**CryptoPGP** is a .NET Standard 2.0 utility library designed to simplify secure data handling in enterprise applications.  
+It provides a unified interface for:
+
+- Encrypting and decrypting text using **PGP**.
+- Storing and retrieving secrets from the **Windows Credential Manager**.
+- Accessing secrets from **Azure Key Vault**.
+
+The library is designed to work in layered or service-oriented architectures and is ideal for .NET applications that require secure handling of credentials and encrypted data.
+
+---
+
+## Key Features
+
+- 🔐 **PGP Encryption and Decryption**  
+  Asynchronous encryption and decryption with public/private key pairs using [PgpCore](https://github.com/mattosaurus/PgpCore).
+
+- 🧩 **Credential Fragmentation Support**  
+  Handles long secrets by splitting them into multiple entries when saving to the Windows Credential Manager.
+
+- 🔑 **Secure Credential Storage and Retrieval**  
+  Read and write secrets to the Windows Credential Manager, with optional username validation.
+
+- ☁️ **Azure Key Vault Integration**  
+  Fetch secrets securely using `DefaultAzureCredential`, suitable for enterprise environments with managed identity or client secret authentication.
+
+- 🧪 **Base64 Helpers**  
+  Built-in methods to encrypt to and decrypt from Base64 strings.
+
+- 🧱 **Central Access Point**  
+  `CryptoManager` serves as a single-entry service for encryption, decryption, credential operations, and secret retrieval.
+
+---
+
+## Target Framework
+
+- **.NET Standard 2.0**  
+  Compatible with a wide range of platforms, including:
+  - .NET Framework (≥ 4.6.1)
+  - .NET Core (≥ 2.0)
+  - .NET 5/6/7+
+
+---
+
+## Installation
+
+Add the `CryptoPGP` project to your solution or include it via a library package.
+
+Required NuGet dependencies:
+
+```xml
+<PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
+<PackageReference Include="Azure.Identity" Version="1.13.2" />
+<PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.7.0" />
+<PackageReference Include="PgpCore" Version="6.5.1" />
+
+
+## Library Structure
+
+| Component            | Purpose                                                                 |
+|----------------------|-------------------------------------------------------------------------|
+| `CryptoManager`      | Main facade for all operations: encrypt, decrypt, key vault, credentials. |
+| `PGPEncryptionService` | Handles async PGP encryption and decryption using PgpCore.              |
+| `WCMService`         | Manages read/write operations to Windows Credential Manager.             |
+| `AKVService`         | Connects to Azure Key Vault and fetches secrets using DefaultAzureCredential. |
+| `Credential`         | Model for representing name/username/password credential triples.        |
+| `Constants`          | Central definitions for key names and secret limits.                     |
+| `ValidationHelper`   | Utility class to enforce required parameters (not shown here).           |
+
+---
+
+## Limitations
+
+- ❗ This library **does not manage authentication or configuration for Azure Key Vault** — your application must configure `DefaultAzureCredential` appropriately (e.g., via environment or managed identity).
+- 📦 The Windows Credential Manager has size limits (~1280 characters per secret); this is handled automatically through fragmentation.
+- 🧠 It is your responsibility to secure the `publicKeyPath`, base64 strings, or any other in-memory secrets — no secure wiping or memory protection is provided.
+- 🔐 Only ASCII-armored keys and PGP messages are supported via PgpCore.
+
+
+## Dependencies
+
+| NuGet Package                          | Version  | Description                                                |
+|---------------------------------------|----------|------------------------------------------------------------|
+| AdysTech.CredentialManager            | 2.6.0    | Provides access to Windows Credential Manager APIs         |
+| Azure.Identity                        | 1.13.2   | Enables secure credential management for Azure services    |
+| Azure.Security.KeyVault.Secrets       | 4.7.0    | Client library for accessing Azure Key Vault secrets       |
+| PgpCore                               | 6.5.1    | Simplified wrapper around BouncyCastle for PGP operations  |
+
+
+
+
 /// <summary>
 /// Central manager class for encryption, decryption, secret retrieval, and credential operations
 /// in the CryptoPGP library. This class acts as a facade for securely handling secrets via:
