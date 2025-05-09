@@ -1,3 +1,50 @@
+# AspOwinOAuthLib
+
+## Overview
+
+**AspOwinOAuthLib** is a helper library for ASP.NET Web Forms applications (.NET Framework 4.7.2) that integrates with the OWIN OAuth/OIDC authentication pipeline to manage user login redirection and token-based identity extraction.
+
+It complements `OwinOAuthLib` by handling redirect challenges to WAM (Web Access Manager), and provides utility methods and base classes to simplify authentication enforcement and user context management within Web Forms (`.aspx`) pages.
+
+## Key Features
+
+- Provides a reusable `AuthPage` base class that enforces authentication on every page request.
+- Manages dynamic WAM redirect URIs via `HttpContext.Items`.
+- Extracts and decodes claims from the ID token after successful authentication.
+- Provides a `TokenHelper` utility for access token and ID token validation.
+- Defines the `TokenEmpInfo` model to represent user identity information.
+- Supports safe access to authentication context without static state.
+
+## Target Framework
+
+- .NET Framework 4.7.2 (Web Forms)
+
+## Typical Use Case
+
+You can use this library in ASP.NET Web Forms applications that need to:
+
+- Redirect unauthenticated users to WAM via OWIN.
+- Read the authenticated user's identity from the decoded ID token.
+- Store identity info in a safe, per-request or per-session context (`TokenEmpInfo`).
+- Avoid writing authentication logic manually in every `.aspx` page.
+
+## Installation
+
+Include the library project in your solution or add the DLL to your Web Forms application.
+
+### Dependencies
+
+The following packages must be installed in the consuming application:
+
+```xml
+<PackageReference Include="Microsoft.Owin" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.2" />
+<PackageReference Include="Microsoft.Owin.Security.OpenIdConnect" Version="4.2.2" />
+
+
+
 /// <summary>
 /// Helper class for working with OAuth/OpenID Connect tokens and authentication state.
 /// Provides methods to access the ID token and access token, validate authentication,
