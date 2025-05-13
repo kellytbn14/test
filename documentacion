@@ -1,3 +1,10 @@
+<PropertyGroup>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <NoWarn>$(NoWarn);1591</NoWarn> <!-- (opcional) suprime warnings por falta de comentarios -->
+</PropertyGroup>
+
+
+
 # HRAPI Lib
 
 ## Overview
