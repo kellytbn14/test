@@ -1,4 +1,170 @@
 /// <summary>
+/// Custom action filter that retrieves employee information from HRAPI and stores it in the session
+/// if it has not already been loaded. This ensures that controllers and views have access to
+/// the user's profile information, such as name, language, and employee number.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
+public class EmployeeInformationFilterAttribute : ActionFilterAttribute
+{
+    /// <summary>
+    /// Token identity information retrieved from the WAM token, used for querying HRAPI.
+    /// </summary>
+    public TokenEmpinfo TokenEmplafo { get; set; }
+
+    private SessionHelper _currentSession;
+
+    /// <summary>
+    /// Called before an action method is invoked. This method ensures that employee
+    /// information is present in the session. If not, it retrieves it from HRAPI and sets it.
+    /// If the user has a requested page, the request is redirected.
+    /// </summary>
+    /// <param name="filterContext">The context of the currently executing action.</param>
+    public override void OnActionExecuting(System.Web.Mvc.ActionExecutingContext filterContext)
+    {
+        LogHelper.Log("[EmployeeInformationFilterAttribute]", level: LogHelper.LogLevel.Debug);
+
+        HttpSessionStateBase sessionState = filterContext.HttpContext.Session;
+        _currentSession = new SessionHelper(sessionState);
+
+        if (_currentSession.Userinfo == null)
+        {
+            var empinfo = GetEmployeeInfo();
+            _currentSession.Userinfo = empinfo;
+
+            if (string.IsNullOrEmpty(_currentSession.Userinfo.LanguageCode))
+                LogHelper.Log("Employee information language is missing.", _currentSession.SessionID, LogHelper.LogLevel.Warning);
+
+            if (string.IsNullOrEmpty(_currentSession.Userinfo.CountryCode))
+                LogHelper.Log("Employee information country is missing.", _currentSession.SessionID, LogHelper.LogLevel.Warning);
+
+            if (string.IsNullOrEmpty(_currentSession.Userinfo.EmployeeNumber))
+                LogHelper.Log("Employee information employee number is missing.", _currentSession.SessionID, LogHelper.LogLevel.Warning);
+
+            if (!string.IsNullOrEmpty(_currentSession.Userinfo.RequestedPage))
+            {
+                LogHelper.Log($"{_currentSession.Userinfo.RequestedPage} was requested. Redirecting", _currentSession.SessionID);
+
+                _currentSession.RequestedPage = _currentSession.Userinfo.RequestedPage;
+
+                filterContext.Result = new RedirectToRouteResult(
+                    new RouteValueDictionary
+                    {
+                        { "controller", "Info" },
+                        { "action", "Replaced" }
+                    });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Retrieves employee information from HRAPI and parses it into the local model.
+    /// </summary>
+    /// <returns>An instance of <see cref="EmployeeInfo"/> populated with data from HRAPI.</returns>
+    /// <exception cref="Exception">
+    /// Thrown if the token is invalid, HRAPI call fails, or the response is invalid.
+    /// </exception>
+    private EmployeeInfo GetEmployeeInfo()
+    {
+        try
+        {
+            LogHelper.Log("Execute [GetEmployeeInfo] HR API", level: LogHelper.LogLevel.Informational);
+
+            ValidateTokenEmpinfo();
+
+            HrApiClientManager hrApiClientManager = new HrApiClientManager();
+
+            HrApiProperties.EndpointAccessToken = ConfigurationHelper.HRAPIEndpointAccessToken;
+            HrApiProperties.EndpointEmployees = ConfigurationHelper.HRAPIEndpointEmployees;
+            HrApiProperties.Scope = ConfigurationHelper.HRAPIScope;
+            HrApiProperties.UrlAudience = ConfigurationHelper.HRAPIUrlAudience;
+
+            var taskClientId = Task.Run(async () => await AKVProperties.Singleton.HRApiClientId);
+            var taskPrivateKeyPem = Task.Run(async () => await AKVProperties.Singleton.HRApiPrivateKeyPem);
+
+            HrApiProperties.ClientId = taskClientId.Result;
+            HrApiProperties.PrivateKeyPem = taskPrivateKeyPem.Result;
+
+            LogHelper.Log($"[EmployeeInformationFilterAttribute] TokenEmplafo: {TokenEmplafo?.Sub}", level: LogHelper.LogLevel.Debug);
+
+            var task = Task.Run(async () => await hrApiClientManager.GetEmployeeInfo(TokenEmplafo.Sub));
+            var empinfo = task.Result;
+
+            ValidateEmpinfo(empinfo);
+
+            return ParseEmpinfoHRApi(empinfo);
+        }
+        catch (Exception e)
+        {
+            string msg = "There was a problem getting employee information from HRAPI.";
+            LogHelper.Log($"{msg}. {e.Message}. {e.InnerException?.Message}", level: LogHelper.LogLevel.Error);
+            throw new Exception(msg);
+        }
+    }
+
+    /// <summary>
+    /// Converts the HRAPI response into a strongly typed <see cref="EmployeeInfo"/> object.
+    /// </summary>
+    /// <param name="empinfoHRApi">The raw HRAPI employee response.</param>
+    /// <returns>The mapped <see cref="EmployeeInfo"/> model.</returns>
+    private EmployeeInfo ParseEmpinfoHRApi(EmpInfoHRApiResponse empinfoHRApi)
+    {
+        return new EmployeeInfo
+        {
+            FirstName = empinfoHRApi.FirstName,
+            LastName = empinfoHRApi.LastName,
+            EmployeeNumber = ConvertToLenDigitString(empinfoHRApi.EmployeeNumber),
+            LanguageCode = LanguageCode.GetLanguageCode(empinfoHRApi.DefaultLocale),
+            CountryCode = empinfoHRApi.ContactInfo?.Address?.Country ?? CountryCode.DEFAULT_COUNTRY,
+            PositionId = empinfoHRApi.Position?.Code
+        };
+    }
+
+    /// <summary>
+    /// Validates the WAM token and extracts the employee's subject identifier.
+    /// </summary>
+    /// <exception cref="Exception">Thrown if the token is missing or invalid.</exception>
+    private void ValidateTokenEmpinfo()
+    {
+        TokenEmplafo = new TokenEmpinfo();
+        TokenEmplafo.Sub = TokenHelper.GetSub();
+
+        if (string.IsNullOrEmpty(TokenEmplafo.Sub))
+        {
+            string msg = "Employee information could not be retrieved from the WAM token.";
+            LogHelper.Log(msg, level: LogHelper.LogLevel.Error);
+            throw new Exception(msg);
+        }
+    }
+
+    /// <summary>
+    /// Validates the HRAPI response to ensure that it contains an employee number.
+    /// </summary>
+    /// <param name="empinfo">The HRAPI employee response object.</param>
+    /// <exception cref="Exception">Thrown if the response is null or lacks an employee number.</exception>
+    private void ValidateEmpinfo(EmpInfoHRApiResponse empinfo)
+    {
+        if (empinfo == null || string.IsNullOrEmpty(empinfo.EmployeeNumber))
+        {
+            string msg = "Employee information could not be retrieved from HRAPI.";
+            LogHelper.Log(msg, level: LogHelper.LogLevel.Error);
+            throw new Exception(msg);
+        }
+    }
+
+    /// <summary>
+    /// Pads a numeric employee ID string with leading zeroes to ensure a fixed 10-digit format.
+    /// </summary>
+    /// <param name="number">The employee number string to normalize.</param>
+    /// <returns>The normalized employee number string with leading zeroes.</returns>
+    public static string ConvertToLenDigitString(string number)
+    {
+        return number.PadLeft(10, '0');
+    }
+}
+
+
+
+/// <summary>
 /// Base controller class for all MVC controllers in the application that require authentication.
 /// 
 /// This class enforces that all inheriting controllers are protected by the <see cref="AuthorizeAttribute"/>,
