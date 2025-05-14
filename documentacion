@@ -1,4 +1,18 @@
 /// <summary>
+/// Handles the <c>BeginRequest</c> event in the ASP.NET application lifecycle.
+/// Determines the appropriate redirect URI based on the request host, and sets
+/// a secure "OriginalHost" cookie for downstream use (e.g., during WAM authentication).
+/// </summary>
+/// <param name="sender">The source of the event (usually the application instance).</param>
+/// <param name="e">Event arguments associated with the request.</param>
+/// <exception cref="Exception">
+/// Thrown if no matching redirect URI is found based on the request path or forwarded headers.
+/// This usually indicates a misconfiguration in the route prefixes or hostnames.
+/// </exception>
+protected void Application_BeginRequest(object sender, EventArgs e)
+
+
+/// <summary>
 /// Custom action filter that retrieves employee information from HRAPI and stores it in the session
 /// if it has not already been loaded. This ensures that controllers and views have access to
 /// the user's profile information, such as name, language, and employee number.
