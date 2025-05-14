@@ -1,4 +1,14 @@
 /// <summary>
+/// Represents metadata configuration for a specific application module, such as
+/// Personal Portfolio, PBS History, or Report Administration.
+/// 
+/// This data is typically loaded from custom sections defined in the application's
+/// <c>web.config</c> (e.g., <c>&lt;PerportMetadataConfig&gt;</c>, <c>&lt;PbshistoryMetadataConfig&gt;</c>).
+/// </summary>
+
+
+
+/// <summary>
 /// Retrieves employee information from the HR API using the subject from the authenticated token.
 /// </summary>
 /// <returns>
