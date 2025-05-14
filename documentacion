@@ -1,3 +1,54 @@
+/// <summary>
+/// Provides utility methods for mapping and normalizing language codes to standard internal values.
+/// </summary>
+public static class LanguageCode
+{
+    /// <summary>
+    /// The default language code used when no match is found or input is null.
+    /// </summary>
+    private const string DEFAULT_LANGUAGE = "EN";
+
+    /// <summary>
+    /// A dictionary mapping full language-culture codes to simplified internal language codes.
+    /// </summary>
+    public static readonly Dictionary<string, string> LanguageMap = new Dictionary<string, string>
+    {
+        { "en.US", "EN" },
+        { "fr.FR", "FR" },
+        { "es.ES", "ES" }
+    };
+
+    /// <summary>
+    /// Resolves a normalized internal language code from a full language input (e.g., "en.US").
+    /// </summary>
+    /// <param name="languageCode">The input language code, typically from user profile or system locale.</param>
+    /// <returns>
+    /// The mapped internal language code (e.g., "EN", "FR", "ES").
+    /// Returns "EN" if the input is null or not found in the dictionary.
+    /// </returns>
+    public static string GetLanguageCode(string languageCode)
+    {
+        if (languageCode == null)
+        {
+            return DEFAULT_LANGUAGE;
+        }
+
+        if (LanguageMap.TryGetValue(languageCode, out string value))
+        {
+            return value;
+        }
+
+        LogHelper.Log($"[LanguageCode] The language [{languageCode}] is not in the dictionary.", level: LogHelper.LogLevel.Error);
+        return DEFAULT_LANGUAGE;
+    }
+}
+
+
+
+
+
+
+
 <PropertyGroup>
   <GenerateDocumentationFile>true</GenerateDocumentationFile>
   <NoWarn>$(NoWarn);1591</NoWarn> <!-- (opcional) suprime warnings por falta de comentarios -->
