@@ -1,4 +1,28 @@
 /// <summary>
+/// Retrieves employee information from the HR API using the subject from the authenticated token.
+/// </summary>
+/// <returns>
+/// An <see cref="Emplafo"/> object containing the employee's personal and organizational data.
+/// </returns>
+/// <exception cref="Exception">
+/// Thrown when token validation fails or when employee information is incomplete or missing.
+/// </exception>
+private Emplafo GetEmpinfo()
+
+/// <summary>
+/// Maps the HR API response to the internal <see cref="Emplafo"/> data structure.
+/// </summary>
+/// <param name="empinfoHRApi">The employee information received from the HR API.</param>
+/// <returns>
+/// A transformed <see cref="Emplafo"/> object containing normalized values for application use.
+/// </returns>
+private Emplafo ParseEmpinfoHRApi(EmpInfoHRApiResponse empinfoHRApi)
+
+
+
+
+
+/// <summary>
 /// Redirects the user to a legacy report page if the current role is flagged for report redirection.
 /// </summary>
 /// <param name="reportID">The report identifier used to build the redirection URL.</param>
