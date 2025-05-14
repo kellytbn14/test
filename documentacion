@@ -1,4 +1,48 @@
 /// <summary>
+/// Redirects the user to a legacy report page if the current role is flagged for report redirection.
+/// </summary>
+/// <param name="reportID">The report identifier used to build the redirection URL.</param>
+private void ValidateIfRedirectToReport(string reportID)
+
+/// <summary>
+/// Initializes the dataset with template information based on the user's role.
+/// </summary>
+/// <param name="roleID">The identifier of the user's role.</param>
+private void InitializeDataset(string roleID)
+
+/// <summary>
+/// Retrieves the report ID to be used during authentication and redirection flows.
+/// </summary>
+/// <returns>A report identifier string.</returns>
+private string GetReportId()
+
+/// <summary>
+/// Validates that the token information for the current user contains a valid subject (sub).
+/// </summary>
+/// <exception cref="Exception">
+/// Thrown when the token information or subject value is missing.
+/// </exception>
+private void ValidateTokenEmpinfo()
+
+/// <summary>
+/// Validates that the employee information retrieved from HR API contains a valid employee number.
+/// </summary>
+/// <param name="empinfo">The <see cref="EmpInfoHRApiResponse"/> instance to validate.</param>
+/// <exception cref="Exception">
+/// Thrown when the employee information or employee number is null.
+/// </exception>
+private void ValidateEmpInfo(EmpInfoHRApiResponse empinfo)
+
+/// <summary>
+/// Converts a numeric string to a 10-digit string by left-padding with zeros.
+/// </summary>
+/// <param name="number">The input number as a string.</param>
+/// <returns>A 10-digit left-padded string representation of the input.</returns>
+private static string ConvertToTenDigitString(string number)
+
+
+
+/// <summary>
 /// Redirects the user to a frameset view based on the route prefix and role, if redirection is allowed.
 /// </summary>
 /// <param name="allowRedirect">Specifies whether redirection to the frameset should be performed.</param>
