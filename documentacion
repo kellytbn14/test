@@ -1,3 +1,23 @@
+
+/// <summary>
+/// Executes custom initialization logic to validate authentication and set redirection URI if necessary.
+/// </summary>
+/// <param name="e">The event data associated with the page initialization.</param>
+protected override void OnInit(EventArgs e)
+{
+    ValidateAndBuildRedirectToWam();
+    base.OnInit(e);
+}
+
+/// <summary>
+/// Validates the user's authentication state and sets a redirection URI for WAM login if not authenticated.
+/// </summary>
+/// <exception cref="HttpException">Thrown when redirection to the AccessDenied page is triggered due to missing route resolution.</exception>
+private void ValidateAndBuildRedirectToWam()
+
+
+
+
 /// <summary>
 /// Represents the base class for all WebReport pages that require authentication,
 /// HRAPI integration, session initialization, and role-based redirection logic.
