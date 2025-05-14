@@ -1,4 +1,17 @@
 /// <summary>
+/// Handles the <c>Application_Start</c> event, which is triggered once when the ASP.NET application is first launched.
+/// 
+/// This method registers custom page routes that provide user-friendly URLs for accessing application modules.
+/// These routes all point to <c>Default.aspx</c>, which uses the requested URL to determine which module is being accessed.
+/// 
+/// The requested path (e.g., <c>perport.aspx</c>, <c>pbshistory.aspx</c>) is used to:
+/// - Identify which application is being accessed
+/// - Load the corresponding <see cref="AppMetadata"/> configuration section from <c>web.config</c>
+/// </summary>
+
+
+
+/// <summary>
 /// Handles the <c>Application_Start</c> event, which is triggered once when the application starts.
 /// 
 /// This method registers custom URL routing rules that map friendly URLs to the default page.
