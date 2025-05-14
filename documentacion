@@ -1,5 +1,21 @@
 
 /// <summary>
+/// Verifies the user's authentication state, retrieves user and role information,
+/// initializes session variables, and conditionally redirects based on role or template type.
+/// </summary>
+/// <param name="allowTemplateTypeRedirect">
+/// Indicates whether redirection to a specific template-based view should occur after authentication.
+/// </param>
+/// <exception cref="Exception">
+/// Thrown when an unexpected error occurs during authentication, metadata loading, or session initialization.
+/// </exception>
+public void CheckForAuthentication(bool allowTemplateTypeRedirect = true)
+
+
+
+
+
+/// <summary>
 /// Executes custom initialization logic to validate authentication and set redirection URI if necessary.
 /// </summary>
 /// <param name="e">The event data associated with the page initialization.</param>
