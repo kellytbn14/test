@@ -1,4 +1,27 @@
 /// <summary>
+/// Redirects the user to a frameset view based on the route prefix and role, if redirection is allowed.
+/// </summary>
+/// <param name="allowRedirect">Specifies whether redirection to the frameset should be performed.</param>
+/// <param name="templateType">The template type to include in the redirect URL.</param>
+/// <param name="roleID">The user's role identifier used in the redirection.</param>
+/// <exception cref="HttpException">
+/// Thrown when the base path cannot be determined and the user is redirected to the AccessDenied page.
+/// </exception>
+private void ValidateIfRedirectToFrameset(bool allowRedirect, string templateType, string roleID)
+
+/// <summary>
+/// Validates whether the request originates from an allowed Scotiaworld domain; otherwise, redirects to AccessDenied.
+/// </summary>
+/// <exception cref="HttpException">
+/// Thrown when the request comes from a different host and does not match the expected Scotiaworld domain.
+/// </exception>
+private void ValidateIfFromScotiaworld()
+
+
+
+
+
+/// <summary>
 /// Retrieves application metadata configuration based on the current request URL and route prefix.
 /// </summary>
 /// <returns>
