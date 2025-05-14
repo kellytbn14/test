@@ -1,4 +1,15 @@
 /// <summary>
+/// Handles the <c>Application_Start</c> event, which is triggered once when the application starts.
+/// 
+/// This method registers custom URL routing rules that map friendly URLs to the default page.
+/// The routing allows cleaner and more meaningful URLs for accessing specific modules.
+/// </summary>
+/// <param name="sender">The source of the event (typically the application instance).</param>
+/// <param name="e">The event arguments associated with application start.</param>
+
+
+
+/// <summary>
 /// Represents metadata configuration for a specific application module, such as
 /// Personal Portfolio, PBS History, or Report Administration.
 /// 
