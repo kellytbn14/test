@@ -1,3 +1,16 @@
+/// <summary>
+/// Retrieves application metadata configuration based on the current request URL and route prefix.
+/// </summary>
+/// <returns>
+/// An <see cref="AppMetadata"/> object containing application-level configuration values.
+/// </returns>
+/// <exception cref="HttpException">
+/// Thrown when the required configuration section is missing, triggering a redirection to the AccessDenied page.
+/// </exception>
+private AppMetadata ExtractAppMetadata()
+
+
+
 
 /// <summary>
 /// Verifies the user's authentication state, retrieves user and role information,
