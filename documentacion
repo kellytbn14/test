@@ -1,4 +1,16 @@
 /// <summary>
+/// Handles the <c>PostAuthenticateRequest</c> event in the ASP.NET application lifecycle.
+/// This event is triggered after the user has been authenticated by the OWIN pipeline.
+/// 
+/// The method validates that the user is authenticated and that a valid ID token is present.
+/// If either check fails, an error is logged.
+/// </summary>
+/// <param name="sender">The source of the event, typically the application object.</param>
+/// <param name="e">Event arguments related to the HTTP request.</param>
+protected void Application_PostAuthenticateRequest(object sender, EventArgs e)
+
+
+/// <summary>
 /// Handles the <c>BeginRequest</c> event in the ASP.NET application lifecycle.
 /// Determines the appropriate redirect URI based on the request host, and sets
 /// a secure "OriginalHost" cookie for downstream use (e.g., during WAM authentication).
