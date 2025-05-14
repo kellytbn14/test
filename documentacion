@@ -1,3 +1,117 @@
+# OAuth Authentication Implementation — ASP.NET MVC (.NET Framework 4.7.2)
+
+## Overview
+
+This project implements **OAuth 2.0** authentication and **OpenID Connect (OIDC)** in an **ASP.NET MVC application** targeting **.NET Framework 4.7.2**.  
+Authentication is delegated to **WAM** (Web Access Manager) using OpenID Connect, and a secure cookie is used to maintain session state. After authentication, the app retrieves employee information from an external **HR API**.
+
+---
+
+## Key Features
+
+- ✅ OAuth 2.0 / OIDC-based authentication via WAM.
+- 🍪 Cookie-based authentication lifecycle.
+- 🔄 Dynamic redirection logic based on the request domain (HRPassport or ScotiaWorld).
+- 🔐 Secure secret retrieval from **Azure Key Vault (AKV)**.
+- 🧾 Claims extraction and validation from the ID token.
+- 👤 Post-login user data enrichment from HRAPI (e.g., name, language, employee ID).
+
+---
+
+## Versions & Libraries
+
+| Component         | Target Framework     | Purpose                                      |
+|------------------|----------------------|----------------------------------------------|
+| MVC App           | .NET Framework 4.7.2 | Web application entrypoint and controllers   |
+| OwinOAuthLib      | .NET Standard 2.0    | OAuth/OIDC authentication configuration      |
+| AspOwinOAuth      | .NET Framework 4.7.2 | WAM redirection & token claim extraction     |
+| CryptoPGP         | .NET Standard 2.0    | Retrieves secrets from Azure Key Vault       |
+| HRAPILib          | .NET Standard 2.0    | Retrieves authenticated user’s profile info  |
+
+---
+
+## Architectural Decisions
+
+- **MVC Pattern**  
+  The project uses the ASP.NET MVC pattern to cleanly separate concerns across models, views, and controllers.
+
+- **[Authorize] on BaseController**  
+  All controllers inherit from a `BaseController` that enforces authentication via the `[Authorize]` attribute.
+
+- **Token Validation in Global.asax**  
+  The OWIN middleware validates tokens and extracts claims during `Application_PostAuthenticateRequest`.
+
+- **Session Hydration via Filter**  
+  A custom `EmployeeInformationFilterAttribute` ensures the employee information is fetched only once and stored in session.
+
+- **Decoupled OAuth & WAM Logic**  
+  `OwinOAuthLib` focuses on cookie+OIDC config, while `AspOwinOAuth` handles redirection and token introspection separately.
+
+---
+
+## Flow Summary
+
+1. **Initial Request**  
+   User accesses a protected controller that inherits from `BaseController`. The app checks if they are authenticated.
+
+2. **Redirection to WAM**  
+   If not authenticated, WAM redirection is triggered using `AspOwinOAuth`. The origin is determined dynamically.
+
+3. **Login & Return**  
+   User logs in via WAM and is redirected back to the app with an ID token and access token.
+
+4. **Token Validation & Claim Extraction**  
+   `OwinOAuthLib` validates the token and establishes an authenticated session via a secure cookie.
+
+5. **Session Data Setup**  
+   `EmployeeInformationFilterAttribute` invokes `HRAPILib` to retrieve and store the employee’s info in session.
+
+6. **Subsequent Requests**  
+   Cookies maintain session continuity, and `SessionHelper` provides easy access to the authenticated user’s data.
+
+---
+
+## Required NuGet Libraries and Versions
+
+| Library                                          | Version     | Purpose                                     |
+|--------------------------------------------------|-------------|---------------------------------------------|
+| Microsoft.IdentityModel.Tokens                   | 8.8.0.0     | Token signing and validation                |
+| Microsoft.IdentityModel.Protocols.OpenIdConnect  | 5.3.0.0     | OIDC metadata and protocol support          |
+| Microsoft.Owin                                   | 4.2.2.0     | Core OWIN components                        |
+| Microsoft.Owin.Host.System.Web                   | 4.2.2.0     | Integrates OWIN pipeline into ASP.NET       |
+| Microsoft.Owin.Security                          | 4.2.2.0     | Base authentication middleware              |
+| Microsoft.Owin.Security.Cookies                  | 4.2.2.0     | Cookie-based session handling               |
+| Microsoft.Owin.Security.OpenIdConnect            | 4.2.2.0     | OpenID Connect client middleware            |
+| Owin                                             | 1.0.0.0     | OWIN abstractions                           |
+| System.IdentityModel.Tokens.Jwt                  | 8.8.0.0     | Token parsing and JWT decoding              |
+| System.Text.Json                                 | 9.0.0.3     | JSON (de)serialization                      |
+| BouncyCastle.Crypto                              | 1.8.9.0     | PEM key reading and JWT signing             |
+| Azure.Core                                       | 1.44.1.0    | Azure SDK core abstraction layer            |
+| Azure.Identity                                   | 1.13.2.0    | Managed identity / credential auth          |
+| Azure.Security.KeyVault.Secrets                  | 4.7.0.0     | Azure Key Vault secret retrieval            |
+
+---
+
+## Recommended Practices
+
+- 🔐 Store all client secrets and PEM keys securely in Azure Key Vault.
+- ✅ Implement detailed logging with `LogHelper` to trace authentication and data retrieval issues.
+- 🧪 Use integration testing with test tokens and dummy HRAPI endpoints when developing locally.
+- 🔁 Rotate keys and tokens securely and monitor WAM token expirations and scope changes.
+
+---
+
+## License
+
+This project is proprietary and intended for internal enterprise use only.
+
+
+
+
+
+
+
+
 /// <summary>
 /// Handles the <c>PostAuthenticateRequest</c> event in the ASP.NET application lifecycle.
 /// This event is triggered after the user has been authenticated by the OWIN pipeline.
