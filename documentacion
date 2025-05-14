@@ -1,3 +1,41 @@
+/// <summary>
+/// Represents the base class for all WebReport pages that require authentication,
+/// HRAPI integration, session initialization, and role-based redirection logic.
+/// 
+/// <para>
+/// The <see cref="WebReportBase"/> class extends <see cref="AuthPage"/> and centralizes
+/// the authentication flow and session context initialization for authenticated users.
+/// It performs key tasks such as:
+/// </para>
+/// <list type="bullet">
+///   <item>Validating user authentication via token or WAM redirection</item>
+///   <item>Fetching user metadata from HRAPI using a secure client assertion</item>
+///   <item>Loading dynamic labels and templates based on the user's role and language</item>
+///   <item>Tracking page access and managing redirection to role-based views or reports</item>
+/// </list>
+/// 
+/// <para>
+/// This class is typically inherited by report pages that rely on WAM/OIDC login 
+/// and require access to session-level employee information and permissions.
+/// </para>
+/// </summary>
+/// <remarks>
+/// This class integrates with multiple services:
+/// <list type="bullet">
+///   <item><see cref="TrackVisitors"/> for access auditing</item>
+///   <item><see cref="HRReportService"/> for template and report metadata</item>
+///   <item><see cref="HrApiClientManager"/> for retrieving employee info via HRAPI</item>
+/// </list>
+/// 
+/// It also uses shared configuration from <c>GlobalStatics</c> and WAM route management
+/// via <c>CustomRedirectUri</c> cookies or context values.
+/// </remarks>
+/// <seealso cref="AuthPage"/>
+
+
+
+
+
 # OAuth Authentication Implementation — ASP.NET MVC (.NET Framework 4.7.2)
 
 ## Overview
