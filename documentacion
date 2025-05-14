@@ -1,4 +1,12 @@
 /// <summary>
+/// Base controller class for all MVC controllers in the application that require authentication.
+/// 
+/// This class enforces that all inheriting controllers are protected by the <see cref="AuthorizeAttribute"/>,
+/// ensuring that only authenticated users can access their actions.
+/// </summary>
+
+
+/// <summary>
 /// Provides utility methods for mapping and normalizing language codes to standard internal values.
 /// </summary>
 public static class LanguageCode
