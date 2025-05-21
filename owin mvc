@@ -1,3 +1,26 @@
+public class BaseController : Controller
+{
+    protected override void OnAuthorization(AuthorizationContext filterContext)
+    {
+        var request = HttpContext.Request;
+
+        // Permitir paso libre si viene de WAM con el token
+        if (request.HttpMethod == "POST" &&
+            (!string.IsNullOrEmpty(request.Form["id_token"]) || !string.IsNullOrEmpty(request.Form["code"])))
+        {
+            // Evita ejecutar base.OnAuthorization para que no dispare [Authorize]
+            return;
+        }
+
+        base.OnAuthorization(filterContext);
+    }
+}
+
+
+
+
+
+
 1️⃣ En la librería NET Standard: exponer un delegate público para RedirectToIdentityProvider
 
 
