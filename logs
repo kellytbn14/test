@@ -1,0 +1,57 @@
+1. Define una interfaz en la librería NetStandard
+
+// En tu proyecto .NET Standard
+public interface ILoggerBridge
+{
+    void LogInfo(string message);
+    void LogError(string message, Exception ex = null);
+    void LogDebug(string message);
+}
+2. Usa esa interfaz en tu librería NetStandard
+
+public class SomeService
+{
+    private readonly ILoggerBridge _logger;
+
+    public SomeService(ILoggerBridge logger)
+    {
+        _logger = logger;
+    }
+
+    public void DoSomething()
+    {
+        _logger.LogInfo("Doing something important...");
+        try
+        {
+            // tu lógica
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error occurred", ex);
+        }
+    }
+}
+3. Implementa la interfaz en la app .NET Framework
+
+public class SerilogAdapter : ILoggerBridge
+{
+    public void LogInfo(string message)
+    {
+        LogHelper.LogInfo(message); // tu clase Serilog interna
+    }
+
+    public void LogError(string message, Exception ex = null)
+    {
+        LogHelper.LogError(message, ex);
+    }
+
+    public void LogDebug(string message)
+    {
+        LogHelper.LogDebug(message);
+    }
+}
+4. Inyecta la implementación desde la app .NET Framework
+
+var logger = new SerilogAdapter();
+var service = new SomeService(logger);
+service.DoSomething();
