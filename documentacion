@@ -1,4 +1,37 @@
 /// <summary>
+/// Provides a base implementation for logging functionality using <see cref="LogHelper"/>.
+/// Intended to be inherited by logging adapters for different modules.
+/// </summary>
+public abstract class BaseLogHelperAdapter
+
+
+/// <summary>
+/// Logging adapter implementation for the <c>HRApilib</c> library.
+/// Delegates logging calls to <see cref="LogHelper"/> via <see cref="BaseLogHelperAdapter"/>.
+/// </summary>
+public class LogHelperAdapter : BaseLogHelperAdapter, HRApilib.Helpers.LoggerBridge
+
+
+/// <summary>
+/// Logging adapter implementation for the <c>HRApilib</c> library.
+/// Delegates logging calls to <see cref="LogHelper"/> via <see cref="BaseLogHelperAdapter"/>.
+/// </summary>
+public class LogHelperAdapter : BaseLogHelperAdapter, HRApilib.Helpers.LoggerBridge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// <summary>
 /// Handles the <c>Application_Start</c> event, which is triggered once when the ASP.NET application is first launched.
 /// 
 /// This method registers custom page routes that provide user-friendly URLs for accessing application modules.
