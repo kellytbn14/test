@@ -1,3 +1,56 @@
+/// <summary>
+/// Defines a bridge interface for logging functionality. 
+/// This allows applications to inject their own logging mechanism into the library,
+/// enabling decoupling from specific logging implementations.
+/// </summary>
+public interface LoggerBridge
+
+
+
+
+## Logging Integration
+
+The library exposes an interface `LoggerBridge` so the consuming application can provide its own logging mechanism.
+
+### Step 1 – Implement `LoggerBridge`
+
+```csharp
+public class LogHelperAdapter : HRAPILib.Helpers.LoggerBridge
+{
+    public void LogInfo(string message)
+    {
+        LogHelper.Log(message, level: LogHelper.LogLevel.Informational);
+    }
+
+    public void LogError(string message, Exception ex = null)
+    {
+        LogHelper.Log(message, level: LogHelper.LogLevel.Error);
+    }
+
+    public void LogDebug(string message)
+    {
+        LogHelper.Log(message, level: LogHelper.LogLevel.Debug);
+    }
+}
+
+
+Step 2 – Pass the Adapter to the Manager
+
+var logger = new LogHelperAdapter();
+HrApiClientManager hrApiClientManager = new HrApiClientManager(logger);
+
+
+
+
+
+
+
+
+
+
+
+
+
 1. Define una interfaz en la librería NetStandard
 
 // En tu proyecto .NET Standard
