@@ -1,4 +1,18 @@
 /// <summary>
+/// Base class for WebReport pages that require OAuth authentication.
+///
+/// Inherits from <see cref="AspowinQAuth.AuthRage"/> to enforce authentication via WAM.
+/// After successful login, user information is available in the <c>TokenEmpinfo</c> property.
+///
+/// This class should be inherited by any page that needs the authenticated user's ID (sub).
+/// </summary>
+public class WebReportBase : AuthRage
+{
+}
+
+
+
+/// <summary>
 /// Provides a base implementation for logging functionality using <see cref="LogHelper"/>.
 /// Intended to be inherited by logging adapters for different modules.
 /// </summary>
