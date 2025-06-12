@@ -1,3 +1,13 @@
+Retry =
+            {
+                MaxRetries = 3,
+                Mode = RetryMode.Exponential,
+                Delay = TimeSpan.FromSeconds(0.8),
+                MaxDelay = TimeSpan.FromSeconds(10),
+            },
+
+
+
 internal class AKVService
 {
     public async Task<string> GetAKVaultAsync(string keyUri, string key)
