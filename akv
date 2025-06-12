@@ -1,3 +1,38 @@
+internal class AKVService
+{
+    public async Task<string> GetAKVaultAsync(string keyUri, string key)
+    {
+        var handler = new HttpClientHandler { Proxy = new WebProxy(), UseProxy = true };
+
+        var options = new SecretClientOptions { Transport = new HttpClientTransport(handler) };
+
+        var credentialOptions = new DefaultAzureCredentialOptions
+        {
+            ExcludeEnvironmentCredential = true,
+            ExcludeManagedIdentityCredential = true,
+            ExcludeVisualStudioCredential = true,
+            ExcludeWorkloadIdentityCredential = true,
+            ExcludeSharedTokenCacheCredential = true,
+            ExcludeInteractiveBrowserCredential = true,
+        };
+
+        var credential = new DefaultAzureCredential(credentialOptions);
+
+        var client = new SecretClient(new Uri(keyUri), credential, options);
+
+        KeyVaultSecret secret = await client.GetSecretAsync(key);
+
+        if (secret == null || secret.Value == null || string.IsNullOrEmpty(secret.Value))
+        {
+            throw new InvalidOperationException($"No credentials found for the key: {key}");
+        }
+
+        return secret.Value;
+    }
+}
+
+
+
 public static class HrApiSecrets
 {
     private static readonly Lazy<string> _clientId = new Lazy<string>(() =>
