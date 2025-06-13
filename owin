@@ -1,3 +1,17 @@
+string state = context.ProtocolMessage.State;
+    string redirectUri = null;
+
+    if (!string.IsNullOrEmpty(state) && state.StartsWith("redir:"))
+    {
+        redirectUri = HttpUtility.UrlDecode(state.Substring("redir:".Length));
+    }
+
+    if (string.IsNullOrEmpty(redirectUri))
+    {
+        redirectUri = AuthProperties.RedirectUri; // fallback
+    }
+
+
 🛠️ Paso 1: En RedirectToIdentityProvider, guarda el redirectUri dentro del state
 csharp
 Copiar
