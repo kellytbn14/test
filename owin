@@ -1,3 +1,56 @@
+1. En OnRedirectToIdentityProvider → guardar la URI en una cookie
+csharp
+Copiar
+Editar
+private Task OnRedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+{
+    var redirectUri = context.OwinContext.Authentication?.ResponseChallenge?.Properties?.RedirectUri;
+
+    if (!string.IsNullOrEmpty(redirectUri))
+    {
+        context.ProtocolMessage.RedirectUri = redirectUri;
+
+        // Guardar en cookie temporal
+        var response = context.OwinContext.Environment["System.Web.HttpResponseBase"] as HttpResponseBase;
+        if (response != null)
+        {
+            var tempCookie = new HttpCookie("Wam_RedirectUri", HttpUtility.UrlEncode(redirectUri))
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/",
+                Expires = DateTime.UtcNow.AddMinutes(5)
+            };
+            response.Cookies.Add(tempCookie);
+        }
+    }
+
+    return Task.CompletedTask;
+}
+2. En AuthorizationCodeReceived → recuperar la URI de la cookie
+csharp
+Copiar
+Editar
+private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
+{
+    var request = context.OwinContext.Environment["System.Web.HttpRequestBase"] as HttpRequestBase;
+    string redirectUri = AuthProperties.RedirectUri; // fallback
+
+    if (request?.Cookies["Wam_RedirectUri"] != null)
+    {
+        redirectUri = HttpUtility.UrlDecode(request.Cookies["Wam_RedirectUri"].Value);
+    }
+
+    // continuar el flujo normalmente con redirectUri recuperado de cookie
+    ...
+}
+✅ Vent
+
+
+
+
+
 string state = context.ProtocolMessage.State;
     string redirectUri = null;
 
