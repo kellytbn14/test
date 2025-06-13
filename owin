@@ -1,3 +1,28 @@
+🔁 Reemplaza este bloque:
+csharp
+Copiar
+Editar
+var response = context.OwinContext.Environment["System.Web.HttpResponseBase"] as HttpResponseBase;
+🚀 Por este otro:
+csharp
+Copiar
+Editar
+var response = HttpContext.Current?.Response;
+🔁 Y en el AuthorizationCodeReceived, cambia:
+csharp
+Copiar
+Editar
+var request = context.OwinContext.Environment["System.Web.HttpRequestBase"] as HttpRequestBase;
+🚀 Por:
+csharp
+Copiar
+Editar
+var request = HttpContext.Current?.Request;
+
+
+
+
+
 1. En OnRedirectToIdentityProvider → guardar la URI en una cookie
 csharp
 Copiar
