@@ -1,0 +1,105 @@
+🛠️ Paso 1: En RedirectToIdentityProvider, guarda el redirectUri dentro del state
+csharp
+Copiar
+Editar
+private Task OnRedirectToIdentityProvider(
+    RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+{
+    var redirectUri = context
+        .OwinContext?
+        .Authentication?
+        .ResponseChallenge?
+        .Properties?
+        .RedirectUri;
+
+    if (!string.IsNullOrEmpty(redirectUri))
+    {
+        context.ProtocolMessage.RedirectUri = redirectUri;
+
+        // Codificar redirectUri como parte del estado
+        var statePayload = new JObject
+        {
+            ["ru"] = redirectUri
+        }.ToString();
+
+        var encodedState = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(statePayload));
+        context.ProtocolMessage.State = encodedState;
+    }
+
+    return Task.CompletedTask;
+}
+🛠️ Paso 2: En AuthorizationCodeReceived, extrae el redirectUri desde el state
+csharp
+Copiar
+Editar
+private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
+{
+    var code = context.Code;
+    string redirectUri = null;
+
+    try
+    {
+        var stateRaw = context.ProtocolMessage.State;
+        var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(stateRaw));
+        var stateJson = JObject.Parse(decoded);
+        redirectUri = stateJson["ru"]?.ToString();
+    }
+    catch
+    {
+        // Si falla, usa uno por defecto
+        redirectUri = AuthProperties.RedirectUri;
+    }
+
+    // Continuar normalmente
+    var tokenClient = new HttpClient();
+    var tokenResponse = await tokenClient.PostAsync(
+        "https://wam-ist.cloud.bns/sso/oauth2/bns/access_token",
+        new FormUrlEncodedContent(
+            new Dictionary<string, string>
+            {
+                { "client_id", AuthProperties.ClientId },
+                { "client_secret", AuthProperties.ClientSecret },
+                { "code", code },
+                { "redirect_uri", redirectUri },
+                { "grant_type", "authorization_code" },
+            }
+        )
+    );
+
+    var tokenResult = await tokenResponse.Content.ReadAsStringAsync();
+    var tokenData = JObject.Parse(tokenResult);
+
+    var idToken = tokenData["id_token"]?.ToString();
+    var accessToken = tokenData["access_token"]?.ToString();
+
+    if (!string.IsNullOrEmpty(idToken))
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwt = handler.ReadJwtToken(idToken);
+        var sub = jwt.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+        if (!string.IsNullOrEmpty(sub))
+        {
+            var claims = new List<Claim>
+            {
+                new Claim("sub", sub),
+                new Claim(ClaimTypes.NameIdentifier, sub),
+                new Claim(ClaimTypes.Name, sub),
+                new Claim("id_token", idToken),
+            };
+
+            var identity = new ClaimsIdentity(claims, "Cookies");
+
+            context.OwinContext.Authentication.SignIn(
+                new AuthenticationProperties
+                {
+                    IsPersistent = false,
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60),
+                },
+                identity
+            );
+        }
+    }
+
+    context.HandleCodeRedemption(accessToken, idToken);
+}
