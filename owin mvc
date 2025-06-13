@@ -1,3 +1,37 @@
+RedirectToIdentityProvider = context =>
+{
+    var customRedirectUri = HttpContext.Current.Items["CustomRedirectUri"] as string;
+
+    if (!string.IsNullOrEmpty(customRedirectUri))
+    {
+        context.ProtocolMessage.RedirectUri = customRedirectUri;
+
+        // Guarda el valor en el state
+        var props = context.OwinContext.Authentication.AuthenticationResponseChallenge?.Properties;
+        if (props != null)
+        {
+            props.Dictionary["redirect_uri"] = customRedirectUri;
+        }
+    }
+
+    return Task.CompletedTask;
+}
+
+
+AuthorizationCodeReceived = context =>
+{
+    var redirectUri = context.AuthenticationTicket?.Properties?.Dictionary["redirect_uri"];
+
+    // Aquí ya puedes usar redirectUri si necesitas reenviarlo en la solicitud del token
+    // Ejemplo: usar redirectUri en un cliente HttpClient o para logging/debug
+
+    return Task.CompletedTask;
+}
+
+
+
+
+
 public class BaseController : Controller
 {
     protected override void OnAuthorization(AuthorizationContext filterContext)
