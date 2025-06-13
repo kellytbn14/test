@@ -1,3 +1,29 @@
+public static Func<RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>, Task> 
+    BuildRedirectToIdentityProvider(AuthProperties authProps)
+{
+    return context =>
+    {
+        var redirectUri = context.OwinContext?
+            .Authentication?
+            .AuthenticationResponseChallenge?
+            .Properties?
+            .RedirectUri;
+
+        if (!string.IsNullOrEmpty(redirectUri))
+        {
+            context.ProtocolMessage.RedirectUri = redirectUri;
+            authProps.RedirectUri = redirectUri;
+        }
+
+        return Task.CompletedTask;
+    };
+}
+
+
+
+
+
+
 protected void Application_BeginRequest(object sender, EventArgs e)
 {
     var context = HttpContext.Current;
