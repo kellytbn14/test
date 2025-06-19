@@ -1,0 +1,89 @@
+✅ Pasos para migrar tu proyecto a .NET 8
+1. 🔄 Cambiar TargetFramework en el .csproj
+Abre tu archivo .csproj y cambia:
+
+xml
+Copiar
+Editar
+<TargetFramework>net6.0</TargetFramework>
+por:
+
+xml
+Copiar
+Editar
+<TargetFramework>net8.0</TargetFramework>
+⚠️ Si tienes instalado .NET 8 SDK, Visual Studio 2022+ (v17.8 o superior) lo reconocerá.
+
+2. 🔼 Actualizar paquetes NuGet a versiones compatibles con .NET 8
+Reemplaza en tu .csproj:
+
+xml
+Copiar
+Editar
+<PackageReference Include="StackExchange.Redis" Version="1.2.7-alpha-00002" />
+por:
+
+xml
+Copiar
+Editar
+<PackageReference Include="StackExchange.Redis" Version="2.6.66" />
+Y luego actualiza todos los paquetes a las últimas versiones estables compatibles con net8. Puedes hacer esto desde Visual Studio:
+
+Botón derecho sobre el proyecto > Manage NuGet Packages > Updates > Actualizar todo.
+
+O desde consola:
+
+bash
+Copiar
+Editar
+dotnet list package --outdated
+dotnet add package [paquete] --version [última versión estable]
+3. 🚫 Eliminar referencias obsoletas
+Elimina esta línea:
+
+xml
+Copiar
+Editar
+<PackageReference Update="Microsoft.NETCore.App" Version="1.1.1" />
+No es válida ni necesaria desde .NET Core 3.0 en adelante.
+
+4. ✅ Verificar compatibilidad de código
+Tu código ya es compatible con .NET 8, pero revisa esto:
+
+ConfigurationBuilder: sigue igual ✅
+
+HttpClient, Serilog, Newtonsoft.Json: sin cambios necesarios ✅
+
+IdentityModel v6 es compatible con net8 ✅
+
+Aes y CryptoStream: siguen vigentes ✅
+
+5. 📦 Confirmar runtime instalado
+Ejecuta en consola:
+
+bash
+Copiar
+Editar
+dotnet --list-sdks
+Debe aparecer .NET 8 como:
+
+css
+Copiar
+Editar
+8.0.xxx [ruta]
+Si no lo tienes, descarga desde: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
+6. 🔃 Reconstruir el proyecto
+Desde consola:
+
+bash
+Copiar
+Editar
+dotnet clean
+dotnet restore
+dotnet build
+Desde Visual Studio:
+
+Build > Clean Solution
+
+Build > Rebuild Solution
