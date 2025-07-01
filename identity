@@ -1,3 +1,7 @@
+dotnet ef migrations script 0 20250627170709_CheckModelChanges_Config --context ConfigurationDbContext -o config_changes.sql
+
+
+
 dotnet ef migrations script 20250627170709_CheckModelChanges_Config --context ConfigurationDbContext -o "config_changes.sql"
 dotnet ef migrations script 20250627170812_CheckModelChanges_Persisted --context PersistedGrantDbContext -o "persisted_changes.sql"
 
