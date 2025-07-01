@@ -1,1 +1,4 @@
+dotnet ef migrations script 0 --context PersistedGrantDbContext -o PersistedGrantDb_model.sql
+
+
 dotnet ef migrations script 0 --context ConfigurationDbContext -o identityserver_model.sql
