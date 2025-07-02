@@ -1,3 +1,8 @@
+INSERT INTO ApiResourceScopes (Scope, ApiResourceId)
+VALUES ('api_EmployeeBasicInfo_V2.level2', 6);
+
+
+
 if (!context.ApiScopes.Any())
 {
     Log.Debug("ApiScopes being populated");
