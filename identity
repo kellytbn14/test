@@ -1,3 +1,19 @@
+if (!context.ApiScopes.Any())
+{
+    Log.Debug("ApiScopes being populated");
+    foreach (var scope in Config.ApiScopes.ToList())
+    {
+        context.ApiScopes.Add(scope.ToEntity());
+    }
+    context.SaveChanges();
+}
+else
+{
+    Log.Debug("ApiScopes already populated");
+}
+
+
+
 using System.Collections.Generic;
 using IdentityServer8.Models;
 
