@@ -1,3 +1,94 @@
+using System.Collections.Generic;
+using IdentityServer8.Models;
+
+namespace HRIdentityServer
+{
+    public static class Config
+    {
+        public static IEnumerable<IdentityResource> Ids =>
+            new IdentityResource[]
+            {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile(),
+            };
+
+        public static IEnumerable<ApiScope> ApiScopes =>
+            new ApiScope[]
+            {
+                new ApiScope("api1", "My API #1"),
+                new ApiScope("api_EmployeeBasicInfo_V2.level2", "Employee Info Access Level 2") // 🔥 AÑADIDO
+            };
+
+        public static IEnumerable<ApiResource> Apis =>
+            new ApiResource[]
+            {
+                new ApiResource("api1", "My API #1")
+                {
+                    Scopes = { "api1" }
+                },
+                new ApiResource("employee_api", "Employee API")
+                {
+                    Scopes = { "api_EmployeeBasicInfo_V2.level2" } // 🔥 ASOCIACIÓN AL SCOPE
+                }
+            };
+
+        public static IEnumerable<Client> Clients =>
+            new Client[]
+            {
+                new Client
+                {
+                    ClientId = "client",
+                    ClientName = "Client Credentials Client",
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    ClientSecrets = { new Secret("511536EF-F270-4058-80CA-1C89C192F69A".Sha256()) },
+                    AllowedScopes = { "api1" },
+                },
+                new Client
+                {
+                    ClientId = "HRPassport IST SVC Account", // 🔥 ESTE DEBES EDITAR
+                    ClientName = "Client Credentials Client",
+                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    ClientSecrets = { new Secret("9jlqzxgFegN".Sha256()) },
+                    AllowedScopes = { "api_EmployeeBasicInfo_V2.level2" }
+                },
+                new Client
+                {
+                    ClientId = "mys",
+                    ClientName = "MVC Client",
+                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+                    RequirePkce = true,
+                    ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
+                    RedirectUris = { "http://localhost:5003/signin-gids" },
+                    FrontChannelLogoutUri = "http://localhost:5003/signout-gids",
+                    PostLogoutRedirectUris = { "http://localhost:5003/signout-callback-oids" },
+                    AllowOfflineAccess = true,
+                    AllowedScopes = { "openid", "profile", "api1" },
+                },
+                new Client
+                {
+                    ClientId = "spa",
+                    ClientName = "SPA Client",
+                    ClientUri = "http://identityserver.io",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequirePkce = true,
+                    RequireClientSecret = false,
+                    RedirectUris =
+                    {
+                        "http://localhost:5002/index.html",
+                        "http://localhost:5002/callback.html",
+                        "http://localhost:5002/silent.html",
+                        "http://localhost:5002/popup.html",
+                    },
+                    PostLogoutRedirectUris = { "http://localhost:5002/index.html" },
+                    AllowedCorsOrigins = { "http://localhost:5002" },
+                    AllowedScopes = { "openid", "profile", "api1" },
+                },
+            };
+    }
+}
+
+
+
 dotnet ef migrations script 20240326214511_Config_v4 20250627170709_CheckModelChanges_Config --context ConfigurationDbContext -o config_changes.sql
 dotnet ef migrations script 20240326220000_Persisted_v2 20250627170812_CheckModelChanges_Persisted --context PersistedGrantDbContext -o persisted_changes.sql
 
