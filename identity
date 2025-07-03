@@ -1,3 +1,27 @@
+ "EnableFileLogging": false, 
+
+
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+var enableFile = configuration.GetValue<bool>("Serilog:EnableFileLogging");
+
+var loggerConfig = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration);
+
+if (!enableFile)
+{
+    loggerConfig = loggerConfig.WriteTo.Console(); // solo consola
+}
+
+Log.Logger = loggerConfig.CreateLogger();
+
+
+
+
+
+
 {
   "Serilog": {
     "MinimumLevel": {
