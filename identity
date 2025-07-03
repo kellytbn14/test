@@ -1,3 +1,13 @@
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+
+
 INSERT INTO ApiResourceScopes (Scope, ApiResourceId)
 VALUES ('api_EmployeeBasicInfo_V2.level2', 6);
 
