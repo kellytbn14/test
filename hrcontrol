@@ -1,0 +1,30 @@
+private Object convertToFieldType(Field field, Object value) {
+    if (!(value instanceof String strValue)) {
+        return value;
+    }
+
+    Class<?> targetType = field.getType();
+
+    try {
+        strValue = strValue.replace(",", "").trim(); // elimina separador de miles
+
+        if (targetType == BigDecimal.class) {
+            return new BigDecimal(strValue);
+        } else if (targetType == Double.class || targetType == double.class) {
+            return Double.parseDouble(strValue);
+        } else if (targetType == Float.class || targetType == float.class) {
+            return Float.parseFloat(strValue);
+        } else if (targetType == Long.class || targetType == long.class) {
+            return Long.parseLong(strValue);
+        } else if (targetType == Integer.class || targetType == int.class) {
+            return Integer.parseInt(strValue);
+        } else if (targetType == Short.class || targetType == short.class) {
+            return Short.parseShort(strValue);
+        }
+    } catch (NumberFormatException e) {
+        logger.warn("Could not convert value [{}] to type [{}] for field [{}]",
+                strValue, targetType.getSimpleName(), field.getName());
+    }
+
+    return value; // fallback si no pudo convertir
+}
