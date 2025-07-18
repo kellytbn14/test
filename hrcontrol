@@ -1,3 +1,46 @@
+private String resolveMaxValuePattern(Field field) {
+    int precision = 0;
+    int scale = 0;
+
+    AttributeOverride override = modelClass.getAnnotation(AttributeOverride.class);
+    if (override != null && override.name().equals(field.getName())) {
+        precision = override.column().precision();
+        scale = override.column().scale();
+    } else {
+        Column column = getColumnAnnotation(field);
+        if (column != null) {
+            precision = column.precision();
+            scale = column.scale();
+        }
+    }
+
+    if (precision == 0) {
+        return ""; // sin restricción
+    }
+
+    int integerDigits = precision - scale;
+    if (integerDigits <= 0) {
+        integerDigits = 1; // al menos 1 dígito entero
+    }
+
+    StringBuilder pattern = new StringBuilder();
+    for (int i = 0; i < integerDigits; i++) {
+        pattern.append("9");
+    }
+
+    if (scale > 0) {
+        pattern.append(".");
+        for (int i = 0; i < scale; i++) {
+            pattern.append("9");
+        }
+    }
+
+    return pattern.toString(); // ejemplo: "9999.9999"
+}
+
+
+
+
 public int getDecimalPlaces() {
     return scale;
 }
