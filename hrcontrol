@@ -1,3 +1,9 @@
+public boolean isDecimalType() {
+    return (type == BigDecimal.class || type == Double.class || type == Float.class) && !readOnly;
+}
+
+
+
 private Object convertToFieldType(Field field, Object value) {
     if (!(value instanceof String strValue)) {
         return value;
