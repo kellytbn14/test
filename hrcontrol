@@ -1,3 +1,19 @@
+public Map<String, Object> extractFilters(Field field) {
+    EntityReference ref = field.getAnnotation(EntityReference.class);
+    Map<String, Object> filterMap = new HashMap<>();
+    if (ref != null && ref.filters().length > 0) {
+        for (String filter : ref.filters()) {
+            String[] parts = filter.split(":", 2);
+            if (parts.length == 2) {
+                filterMap.put(parts[0], convert(parts[1]));
+            }
+        }
+    }
+    return filterMap;
+}
+
+
+
 private String resolveMaxValuePattern(Field field) {
     int precision = 0;
     int scale = 0;
