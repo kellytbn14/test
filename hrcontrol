@@ -1,3 +1,80 @@
+public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(Class<?> entityClass, String displayValue) {
+    BaseRepository<T, E> repository = getRepository(entityClass);
+    EntityReference ref = findEntityReferenceAnnotation(entityClass, displayValue);
+
+    Map<String, Object> filterMap = new HashMap<>();
+
+    if (ref != null) {
+        for (String filter : ref.filters()) {
+            String[] parts = filter.split(":", 2);
+            if (parts.length == 2) {
+                filterMap.put(parts[0], convert(parts[1]));
+            }
+        }
+    }
+
+    return repository.findAll().stream()
+        .filter(obj -> matchesFilters(obj, filterMap))
+        .map(obj -> {
+            Object value = resolveProperty(obj, displayValue);
+            return new FormOption(obj.getId(), String.valueOf(value), obj.getClass());
+        })
+        .toList();
+}
+✅ Método matchesFilters(...)
+java
+Copiar
+Editar
+private boolean matchesFilters(Object obj, Map<String, Object> filters) {
+    for (Map.Entry<String, Object> entry : filters.entrySet()) {
+        Object fieldValue = resolveProperty(obj, entry.getKey());
+        if (fieldValue == null || !fieldValue.equals(entry.getValue())) {
+            return false;
+        }
+    }
+    return true;
+}
+✅ Método findEntityReferenceAnnotation(...) (igual que antes)
+java
+Copiar
+Editar
+private EntityReference findEntityReferenceAnnotation(Class<?> entityClass, String displayValue) {
+    for (Field field : entityClass.getDeclaredFields()) {
+        EntityReference ref = field.getAnnotation(EntityReference.class);
+        if (ref != null && displayValue.equals(ref.fieldName())) {
+            return ref;
+        }
+    }
+    return null;
+}
+✅ Método convert(...) simple
+java
+Copiar
+Editar
+private Object convert(String raw) {
+    if ("true".equalsIgnoreCase(raw)) return true;
+    if ("false".equalsIgnoreCase(raw)) return false;
+    if (raw.matches("-?\\d+")) return Integer.parseInt(raw);
+    return raw;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ✅ Paso 1: Suposiciones
 TmGenericControl es la entidad de donde se llena el dropdown.
 
