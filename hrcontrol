@@ -1,3 +1,18 @@
+<h:outputText value="MinLength: #{input.minLength}" />
+<p:inputText id="text_#{input.name}" placeholder="#{input.label}"
+             value="#{genericCrudBean.formData[input.name]}" 
+             rendered="#{input.stringType}"
+             required="#{input.required}" 
+             maxlength="#{input.maxLength}" 
+             counterTemplate="{0}">
+    
+    <f:passThroughAttribute name="minlength" value="#{input.minLength}" />
+    <f:passThroughAttribute name="title" value="minLength=#{input.minLength}" />
+
+</p:inputText>
+
+
+
 <p:inputText id="campo"
              value="#{bean.valor}"
              required="true"
