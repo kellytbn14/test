@@ -1,3 +1,63 @@
+public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(
+        Class<?> entityClass, String displayValue, String[] filters) {
+
+    BaseRepository<T, E> repository = getRepository(entityClass);
+
+    Map<String, Object> filterMap = Arrays.stream(filters)
+        .map(f -> f.split(":", 2))
+        .filter(arr -> arr.length == 2)
+        .collect(Collectors.toMap(arr -> arr[0], arr -> convert(arr[1])));
+
+    return repository.findAll().stream()
+        .filter(obj -> matchesFilters(obj, filterMap))
+        .map(obj -> {
+            Object value = resolveProperty(obj, displayValue);
+            return new FormOption(((BaseEntity<?>) obj).getId(), String.valueOf(value), obj.getClass());
+        })
+        .toList();
+}
+✅ matchesFilters
+java
+Copiar
+Editar
+private boolean matchesFilters(Object obj, Map<String, Object> filters) {
+    for (Map.Entry<String, Object> entry : filters.entrySet()) {
+        Object fieldValue = resolveProperty(obj, entry.getKey());
+
+        if (fieldValue == null || !fieldValue.equals(entry.getValue())) {
+            return false;
+        }
+    }
+    return true;
+}
+✅ convert (para convertir "true" → Boolean, "123" → Integer, etc.)
+java
+Copiar
+Editar
+private Object convert(String raw) {
+    if ("true".equalsIgnoreCase(raw) || "false".equalsIgnoreCase(raw)) {
+        return Boolean.parseBoolean(raw);
+    }
+
+    try {
+        return Integer.parseInt(raw);
+    } catch (NumberFormatException ignored) { }
+
+    return raw;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(Class<?> entityClass, String displayValue) {
     BaseRepository<T, E> repository = getRepository(entityClass);
     EntityReference ref = findEntityReferenceAnnotation(entityClass, displayValue);
