@@ -1,3 +1,6 @@
+ String[] safeFilters = filters != null ? filters : new String[0];
+
+
 public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(
         Class<?> entityClass, String displayValue, String[] filters) {
 
