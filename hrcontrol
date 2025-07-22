@@ -1,4 +1,24 @@
- String[] safeFilters = filters != null ? filters : new String[0];
+import jakarta.persistence.Id;
+
+public String getIdFieldName(Class<?> clazz) {
+    for (Field field : clazz.getDeclaredFields()) {
+        if (field.isAnnotationPresent(Id.class)) {
+            return field.getName();
+        }
+    }
+
+    // También puedes buscar en superclases si el ID está ahí
+    Class<?> superClass = clazz.getSuperclass();
+    if (superClass != null && superClass != Object.class) {
+        return getIdFieldName(superClass);
+    }
+
+    return null;
+}
+
+
+
+String[] safeFilters = filters != null ? filters : new String[0];
 
 
 public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(
