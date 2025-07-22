@@ -1,3 +1,95 @@
+✅ Paso 1: Suposiciones
+TmGenericControl es la entidad de donde se llena el dropdown.
+
+filters = {"type:ROLE", "active:true"} indica que se debe filtrar por type = 'ROLE' y active = true.
+
+Estás usando un método genérico como este:
+
+java
+Copiar
+Editar
+public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(Class<?> entityClass, String displayValue)
+✅ Paso 2: Implementación organizada
+java
+Copiar
+Editar
+public <T extends BaseEntity<E>, E> List<FormOption> findAllFormOptions(Class<?> entityClass, String displayValue) {
+    BaseRepository<T, E> repository = getRepository(entityClass);
+    List<T> allItems = repository.findAll();
+
+    return allItems.stream()
+        .filter(item -> matchesEntityReferenceFilters(item, entityClass))
+        .map(obj -> {
+            Object value = resolveProperty(obj, displayValue);
+            return new FormOption(obj.getId(), String.valueOf(value), obj.getClass());
+        })
+        .toList();
+}
+✅ Paso 3: Método matchesEntityReferenceFilters
+java
+Copiar
+Editar
+private boolean matchesEntityReferenceFilters(Object entity, Class<?> targetClass) {
+    for (Field field : getAllFieldsReferencing(targetClass)) {
+        EntityReference ref = field.getAnnotation(EntityReference.class);
+        if (ref != null && ref.targetEntity().equals(targetClass)) {
+            for (String filter : ref.filters()) {
+                String[] parts = filter.split(":", 2);
+                if (parts.length != 2) continue;
+
+                String property = parts[0].trim();
+                Object expectedValue = convert(parts[1].trim());
+
+                Object actualValue = resolveProperty(entity, property);
+                if (actualValue == null || !actualValue.equals(expectedValue)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+✅ Método auxiliar getAllFieldsReferencing
+java
+Copiar
+Editar
+private List<Field> getAllFieldsReferencing(Class<?> referencedClass) {
+    return Arrays.stream(DFCReportDistribution.class.getDeclaredFields())
+        .filter(f -> {
+            EntityReference ref = f.getAnnotation(EntityReference.class);
+            return ref != null && ref.targetEntity().equals(referencedClass);
+        })
+        .toList();
+}
+✅ Método convert(String)
+java
+Copiar
+Editar
+private Object convert(String value) {
+    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+        return Boolean.parseBoolean(value);
+    }
+
+    try {
+        return Integer.parseInt(value);
+    } catch (NumberFormatException ignored) {}
+
+    try {
+        return Long.parseLong(value);
+    } catch (NumberFormatException ignored) {}
+
+    return value; // fallback: keep as string
+}
+
+
+
+
+
+
+
+
+
+
 public Map<String, Object> extractFilters(Field field) {
     EntityReference ref = field.getAnnotation(EntityReference.class);
     Map<String, Object> filterMap = new HashMap<>();
