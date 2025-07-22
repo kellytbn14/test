@@ -1,3 +1,16 @@
+<p:inputText id="campo"
+             value="#{bean.valor}"
+             required="true"
+             maxlength="20">
+    <f:passThroughAttribute name="minlength" value="12"/>
+    <f:validateLength minimum="12" maximum="20"/>
+</p:inputText>
+
+
+
+
+
+
 import jakarta.persistence.Id;
 
 public String getIdFieldName(Class<?> clazz) {
