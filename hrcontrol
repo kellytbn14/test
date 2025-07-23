@@ -1,3 +1,49 @@
+@FacesConverter(value = "baseEntityConverter", managed = true)
+public class BaseEntityConverter implements Converter<Object> {
+
+    @Override
+    public Object getAsObject(FacesContext facesContext, UIComponent uiComponent, String s) {
+        if (s == null || s.isEmpty()) {
+            return null;
+        }
+
+        List<FormOption> options = (List<FormOption>) uiComponent.getAttributes().get("options");
+        if (options == null) {
+            return null;
+        }
+
+        return options.stream()
+                .filter(op -> Objects.equals(String.valueOf(op.getId()), s))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public String getAsString(FacesContext facesContext, UIComponent uiComponent, Object o) {
+        if (o == null) {
+            return "";
+        }
+
+        try {
+            Object id = o.getClass().getMethod("getId").invoke(o);
+            return id != null ? String.valueOf(id) : "";
+        } catch (Exception e) {
+            // Optional: log the error
+            return "";
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 <h:outputText value="MinLength: #{input.minLength}" />
 <p:inputText id="text_#{input.name}" placeholder="#{input.label}"
              value="#{genericCrudBean.formData[input.name]}" 
