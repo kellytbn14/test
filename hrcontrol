@@ -1,3 +1,20 @@
+public void logAllFieldNames(UIComponent base) {
+    for (UIComponent child : base.getFacetsAndChildren()) {
+        Object fieldName = child.getAttributes().get("fieldName");
+        if (fieldName != null) {
+            logger.info("Found fieldName: {}", fieldName);
+        }
+
+        // Recursión profunda
+        logAllFieldNames(child);
+    }
+}
+
+
+ logAllFieldNames(context.getViewRoot());
+
+
+
 public List<UIComponent> findComponentsByFieldName(UIComponent root, String targetFieldName) {
     List<UIComponent> result = new ArrayList<>();
 
