@@ -1,3 +1,15 @@
+private String[] resolveDynamicFilters(String[] rawFilters, Map<String, Object> formData) {
+    return Arrays.stream(rawFilters)
+        .map(key -> {
+            Object value = formData.get(key);
+            return (value != null) ? key + ":" + value.toString() : null;
+        })
+        .filter(Objects::nonNull)
+        .toArray(String[]::new);
+}
+
+
+
 Class<?> entityClass = sessionContext.getEntityClass();
 
 for (Field field : entityClass.getDeclaredFields()) {
