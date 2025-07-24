@@ -1,3 +1,31 @@
+Class<?> entityClass = sessionContext.getEntityClass();
+
+for (Field field : entityClass.getDeclaredFields()) {
+    DropdownChange dropdownChange = field.getAnnotation(DropdownChange.class);
+
+    if (dropdownChange != null && dropdownChange.source().equals(fieldName)) {
+        // ¡Aquí está el campo dependiente!
+
+        String[] resolvedFilters = resolveDynamicFilters(dropdownChange.filters(), formData);
+
+        InputModel input = getInputModel(field.getName());
+
+        if (input != null) {
+            List<FormOption> options = formOptionService.findAllFormOptions(
+                input.getEntityClass(),
+                input.getDisplayField(),
+                resolvedFilters
+            );
+
+            input.setOptions(options);
+
+            // Limpiar el valor anterior seleccionado
+            formData.put(field.getName(), null);
+        }
+    }
+}
+
+
 <p:selectOneMenu id="combo_#{input.name}"
     value="#{genericCrudBean.formData[input.name]}"
     rendered="#{input.relation and not input.radioSelection}"
