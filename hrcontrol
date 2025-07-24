@@ -1,3 +1,33 @@
+public void onDropdownChange() {
+    FacesContext context = FacesContext.getCurrentInstance();
+    UIComponent component = UIComponent.getCurrentComponent(context);
+
+    String changedFieldName = (String) component.getAttributes().get("fieldName");
+
+    if (changedFieldName == null) {
+        logger.warn("Dropdown change triggered without identifying the changed field");
+        return;
+    }
+
+    Object selectedValue = formData.get(changedFieldName);
+
+    for (Field field : sessionContext.getEntityClass().getDeclaredFields()) {
+        DropdownChange change = field.getAnnotation(DropdownChange.class);
+        if (change != null && change.source().equals(changedFieldName)) {
+            String[] resolvedFilters = resolveDynamicFilters(change.filters(), formData);
+
+            InputModel input = getInputModel(field.getName());
+            if (input != null) {
+                List<FormOption> options = formOptionService.findAllFormOptions(
+                    input.getEntityClass(), input.getDisplayField(), resolvedFilters);
+                input.setOptions(options);
+                formData.put(field.getName(), null); // Limpia valor actual
+            }
+        }
+    }
+}
+
+
 private String[] resolveDynamicFilters(String[] filterKeys, Map<String, Object> context) {
     return Arrays.stream(filterKeys)
         .map(key -> {
