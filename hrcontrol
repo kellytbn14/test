@@ -1,3 +1,8 @@
+logger.info("Found fieldName: {} | ClientId: {}", fieldName, child.getClientId());
+
+logger.info("InputModel name: {} - rendered: {}", input.getName(), input.isRelation());
+
+
 public void logAllFieldNames(UIComponent base) {
     for (UIComponent child : base.getFacetsAndChildren()) {
         Object fieldName = child.getAttributes().get("fieldName");
