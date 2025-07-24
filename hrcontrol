@@ -1,3 +1,56 @@
+public void onDropdownChange() {
+    FacesContext context = FacesContext.getCurrentInstance();
+    String changedFieldName = context.getExternalContext().getRequestParameterMap().get("changedField");
+
+    if (changedFieldName == null) {
+        logger.warn("Dropdown change triggered without identifying the changed field");
+        return;
+    }
+
+    Object selectedValue = formData.get(changedFieldName);
+
+    for (Field field : sessionContext.getEntityClass().getDeclaredFields()) {
+        DropdownChange change = field.getAnnotation(DropdownChange.class);
+        if (change != null && change.source().equals(changedFieldName)) {
+            String[] resolvedFilters = resolveDynamicFilters(change.filters(), formData);
+
+            InputModel input = getInputModel(field.getName());
+            if (input != null) {
+                List<FormOption> options = formOptionService.findAllFormOptions(
+                    input.getEntityClass(), input.getDisplayField(), resolvedFilters);
+                input.setOptions(options);
+
+                // Limpiar valor actual
+                formData.put(field.getName(), null);
+            }
+        }
+    }
+}
+
+
+
+<p:selectOneMenu id="combo_#{input.name}"
+    value="#{genericCrudBean.formData[input.name]}"
+    rendered="#{input.relation and not input.radioSelection}"
+    converter="baseEntityConverter"
+    required="#{input.required}">
+    
+    <f:attribute name="options" value="#{input.options}" />
+    <f:selectItem itemLabel="#{input.label}" itemValue="#{null}" />
+    <f:selectItems value="#{input.options}" var="opt" itemLabel="#{opt.value}" itemValue="#{opt}" />
+    
+    <p:ajax event="change"
+        listener="#{genericCrudBean.onDropdownChange}"
+        update="@form">
+        <f:param name="changedField" value="#{input.name}" />
+    </p:ajax>
+</p:selectOneMenu>
+
+
+
+
+
+
 public void onDropdownChange(String changedFieldName) {
     Object selectedValue = formData.get(changedFieldName);
 
