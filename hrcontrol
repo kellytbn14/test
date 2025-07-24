@@ -1,3 +1,78 @@
+1) En tu GenericCrudBean
+java
+Copiar
+Editar
+// agrega esto
+private final Map<String, UIComponent> inputComponents = new HashMap<>();
+public Map<String, UIComponent> getInputComponents() { return inputComponents; }
+2) En el XHTML (dentro del ui:repeat)
+xml
+Copiar
+Editar
+<p:selectOneMenu id="combo"
+                 binding="#{genericCrudBean.inputComponents[input.name]}"
+                 value="#{genericCrudBean.formData[input.name]}"
+                 rendered="#{input.relation and not input.radioSelection}"
+                 converter="baseEntityConverter"
+                 required="#{input.required}">
+    <f:attribute name="fieldName" value="#{input.name}" />
+    <f:attribute name="options" value="#{input.options}" />
+    <f:selectItem itemLabel="#{input.label}" itemValue="#{null}" />
+    <f:selectItems value="#{input.options}" var="opt" itemLabel="#{opt.value}" itemValue="#{opt}" />
+
+    <p:ajax event="change"
+            listener="#{genericCrudBean.onDropdownChange}"
+            process="@this"
+            update="@this" />
+</p:selectOneMenu>
+Nota: el update="@this" solo refresca el dropdown que cambió. El dependiente lo actualizamos desde el backend con PrimeFaces.current().ajax().update(...).
+
+3) Completa tu onDropdownChange
+java
+Copiar
+Editar
+public void onDropdownChange() {
+    FacesContext ctx = FacesContext.getCurrentInstance();
+    UIComponent source = UIComponent.getCurrentComponent(ctx);
+
+    String changedFieldName = (String) source.getAttributes().get("fieldName");
+    if (changedFieldName == null) {
+        logger.warn("Dropdown change triggered without identifying the changed field");
+        return;
+    }
+
+    Object selectedValue = formData.get(changedFieldName);
+
+    Class<?> entityClass = sessionContext.getEntityClass();
+    for (Field field : entityClass.getDeclaredFields()) {
+        DropdownChange change = field.getAnnotation(DropdownChange.class);
+        if (change != null && change.source().equals(changedFieldName)) {
+
+            // Arma los filtros como tú definiste (ajusta este método a tu regla)
+            String[] resolvedFilters = resolveDynamicFilters(change.filters(), changedFieldName, selectedValue);
+
+            InputModel input = getInputModel(field.getName());
+            if (input != null) {
+                List<FormOption> options = formOptionService.findAllFormOptions(
+                        input.getEntityClass(), input.getDisplayField(), resolvedFilters);
+
+                input.setOptions(options);
+                formData.put(field.getName(), null); // limpia selección previa
+
+                // --- Actualiza SOLO el dropdown dependiente ---
+                UIComponent target = inputComponents.get(field.getName());
+                if (target != null) {
+                    PrimeFaces.current().ajax().update(target.getClientId(ctx));
+                } else {
+                    logger.warn("No UIComponent bound for dependent field {}", field.getName());
+                }
+            }
+        }
+    }
+}
+
+
+
 public void onDropdownChange() {
     FacesContext context = FacesContext.getCurrentInstance();
     UIComponent component = UIComponent.getCurrentComponent(context);
