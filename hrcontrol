@@ -1,3 +1,32 @@
+public List<UIComponent> findComponentsByFieldName(UIComponent root, String targetFieldName) {
+    List<UIComponent> result = new ArrayList<>();
+
+    for (UIComponent child : root.getChildren()) {
+        Object fieldNameAttr = child.getAttributes().get("fieldName");
+        if (targetFieldName.equals(fieldNameAttr)) {
+            result.add(child);
+        }
+
+        // Recursivamente buscar en hijos también
+        result.addAll(findComponentsByFieldName(child, targetFieldName));
+    }
+
+    return result;
+}
+
+
+
+
+ UIComponent root = context.getViewRoot();
+                List<UIComponent> matches = findComponentsByFieldName(root, field.getName());
+
+                for (UIComponent comp : matches) {
+                    String clientId = comp.getClientId(context);
+                    PrimeFaces.current().ajax().update(clientId);
+                }
+
+
+
 1) En tu GenericCrudBean
 java
 Copiar
