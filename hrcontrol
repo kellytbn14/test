@@ -1,3 +1,212 @@
+package com.bns.hrappadmin.model.pk;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+public class EmailAddressId implements Serializable {
+
+    private Integer sr;
+    private String tableId;
+
+    public EmailAddressId() {}
+
+    public EmailAddressId(Integer sr, String tableId) {
+        this.sr = sr;
+        this.tableId = tableId;
+    }
+
+    public Integer getSr() {
+        return sr;
+    }
+
+    public void setSr(Integer sr) {
+        this.sr = sr;
+    }
+
+    public String getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(String tableId) {
+        this.tableId = tableId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EmailAddressId)) return false;
+        EmailAddressId that = (EmailAddressId) o;
+        return Objects.equals(sr, that.sr) && Objects.equals(tableId, that.tableId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sr, tableId);
+    }
+}
+
+
+
+package com.bns.hrappadmin.hrcontrol.model;
+
+import com.bns.hrappadmin.model.generic.BaseEntity;
+import com.bns.hrappadmin.model.pk.EmailAddressId;
+import com.bns.hrappadmin.utils.annotations.ColumnData;
+import com.bns.hrappadmin.utils.annotations.Metadata;
+import com.bns.hrappadmin.utils.annotations.TableData;
+
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "DD_Stg_Input_EmailAddress")
+@IdClass(EmailAddressId.class)
+@Metadata(
+    data = {
+        @TableData(
+            name = "Email Address Input",
+            tableLabel = "Email Address Input",
+            entityLabel = "Email Address Input"
+        )
+    }
+)
+public class EmailAddressInput extends BaseEntity<EmailAddressId> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Sr")
+    private Integer sr;
+
+    @Id
+    @Column(name = "Table_ID", length = 255, nullable = false)
+    private String tableId;
+
+    @Column(name = "Email_Address", length = 255)
+    private String emailAddress;
+
+    @Column(name = "Email_CC", length = 255)
+    private String emailCC;
+
+    @Column(name = "Email_BCC", length = 255)
+    private String emailBCC;
+
+    @Column(name = "Email_Attachment", length = 255)
+    private String emailAttachment;
+
+    @Column(name = "Email_Language", length = 2)
+    private String emailLanguage;
+
+    @Column(name = "SSIS_PKG_Name", length = 8000)
+    private String ssisPkgName;
+
+    @Column(name = "Comments", length = 8000)
+    private String comments;
+
+    @Column(name = "DateCreated")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateCreated;
+
+    public EmailAddressInput() {
+    }
+
+    @Override
+    @Transient
+    public EmailAddressId getId() {
+        return new EmailAddressId(sr, tableId);
+    }
+
+    @Override
+    public void setId(EmailAddressId id) {
+        if (id != null) {
+            this.sr = id.getSr();
+            this.tableId = id.getTableId();
+        }
+    }
+
+    // Getters y setters
+
+    public Integer getSr() {
+        return sr;
+    }
+
+    public void setSr(Integer sr) {
+        this.sr = sr;
+    }
+
+    public String getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(String tableId) {
+        this.tableId = tableId;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public String getEmailCC() {
+        return emailCC;
+    }
+
+    public void setEmailCC(String emailCC) {
+        this.emailCC = emailCC;
+    }
+
+    public String getEmailBCC() {
+        return emailBCC;
+    }
+
+    public void setEmailBCC(String emailBCC) {
+        this.emailBCC = emailBCC;
+    }
+
+    public String getEmailAttachment() {
+        return emailAttachment;
+    }
+
+    public void setEmailAttachment(String emailAttachment) {
+        this.emailAttachment = emailAttachment;
+    }
+
+    public String getEmailLanguage() {
+        return emailLanguage;
+    }
+
+    public void setEmailLanguage(String emailLanguage) {
+        this.emailLanguage = emailLanguage;
+    }
+
+    public String getSsisPkgName() {
+        return ssisPkgName;
+    }
+
+    public void setSsisPkgName(String ssisPkgName) {
+        this.ssisPkgName = ssisPkgName;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+}
+
+
 @Embeddable
 public class ReportDistributionId implements Serializable {
 
