@@ -1,3 +1,36 @@
+import jakarta.faces.component.UIComponent;
+
+private UIComponent component;
+
+public UIComponent getComponent() {
+    return component;
+}
+
+public void setComponent(UIComponent component) {
+    this.component = component;
+}
+
+public String getClientId() {
+    return component != null ? component.getClientId() : null;
+}
+
+
+
+<p:selectOneMenu id="combo"
+                 value="#{genericCrudBean.formData[input.name]}"
+                 rendered="#{input.relation and not input.radioSelection}"
+                 converter="baseEntityConverter"
+                 required="#{input.required}"
+                 binding="#{input.component}">
+
+
+
+
+
+
+
+
+
 🔧 Método para obtener el <h:form id="genericForm">
 java
 Copiar
