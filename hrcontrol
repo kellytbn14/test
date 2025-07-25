@@ -1,3 +1,9 @@
+<c:forEach items="#{genericCrudBean.inputs}" var="input" varStatus="status">
+    <f:subview id="sv_#{input.name}_#{status.index}">
+
+</f:subview>
+        </c:forEach>
+
 import jakarta.faces.component.UIComponent;
 
 private UIComponent component;
