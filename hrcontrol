@@ -1,3 +1,20 @@
+private void printComponentTree(UIComponent component, String indent) {
+    if (component == null) return;
+
+    logger.info("{}{} [{}] attributes: {}", indent, component.getId(), component.getClass().getSimpleName(), component.getAttributes().keySet());
+
+    for (UIComponent child : component.getChildren()) {
+        printComponentTree(child, indent + "  ");
+    }
+
+    for (UIComponent facet : component.getFacets().values()) {
+        printComponentTree(facet, indent + "  ");
+    }
+}
+
+printComponentTree(FacesContext.getCurrentInstance().getViewRoot(), "");
+
+
 private UIComponent findComponentWithFieldName(UIComponent root, String targetFieldName) {
     if (root == null) return null;
 
