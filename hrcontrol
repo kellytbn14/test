@@ -1,3 +1,39 @@
+@Embeddable
+public class ReportDistributionId implements Serializable {
+
+    @Column(name = "Transit", length = 5)
+    private String transit;
+
+    @Column(name = "Report_Name", length = 100)
+    private String reportName;
+
+    public ReportDistributionId() {}
+
+    public ReportDistributionId(String transit, String reportName) {
+        this.transit = transit;
+        this.reportName = reportName;
+    }
+
+    // Getters y setters
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ReportDistributionId)) return false;
+        ReportDistributionId that = (ReportDistributionId) o;
+        return Objects.equals(transit, that.transit) &&
+               Objects.equals(reportName, that.reportName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transit, reportName);
+    }
+}
+
+
+
+
 <c:forEach items="#{genericCrudBean.inputs}" var="input" varStatus="status">
     <f:subview id="sv_#{input.name}_#{status.index}">
 
