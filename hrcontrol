@@ -1,3 +1,35 @@
+if (field != null) {
+                field.setAccessible(true);
+                setFieldValueWithAnnotations(entityClass, item, field, value);
+            } else {
+                // Buscar en campos embebidos
+                for (Field f : entityClass.getDeclaredFields()) {
+                    if (f.isAnnotationPresent(EmbeddedId.class)) {
+                        f.setAccessible(true);
+                        Object embeddedId = f.get(item);
+
+                        if (embeddedId == null) {
+                            embeddedId = f.getType().getDeclaredConstructor().newInstance();
+                            f.set(item, embeddedId);
+                        }
+
+                        Field embeddedField = getField(f.getType(), fieldName);
+                        if (embeddedField != null) {
+                            embeddedField.setAccessible(true);
+                            embeddedField.set(embeddedId, value);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
 package com.bns.hrappadmin.model.pk;
 
 import java.io.Serializable;
