@@ -1,3 +1,41 @@
+🔧 Método para obtener el <h:form id="genericForm">
+java
+Copiar
+Editar
+private UIComponent getFormComponent(String formId) {
+    return FacesContext.getCurrentInstance()
+                       .getViewRoot()
+                       .findComponent(formId);
+}
+🔍 Método para recorrer el árbol y recolectar todos los componentes que tengan el atributo fieldName
+java
+Copiar
+Editar
+private List<UIComponent> findComponentsWithFieldName(UIComponent parent) {
+    List<UIComponent> result = new ArrayList<>();
+    if (parent == null) return result;
+
+    Object fieldName = parent.getAttributes().get("fieldName");
+    if (fieldName != null) {
+        result.add(parent);
+    }
+
+    for (UIComponent child : parent.getChildren()) {
+        result.addAll(findComponentsWithFieldName(child));
+    }
+
+    for (UIComponent facet : parent.getFacets().values()) {
+        result.addAll(findComponentsWithFieldName(facet));
+    }
+
+    return result;
+}
+
+
+
+ UIComponent form = getFormComponent("genericForm");
+            List<UIComponent> matches = findComponentsWithFieldName(form);
+
 private void printComponentTree(UIComponent component, String indent) {
     if (component == null) return;
 
