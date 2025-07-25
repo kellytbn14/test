@@ -1,3 +1,86 @@
+private T processFormData(Map<String, Object> formData) {
+    try {
+        Class<?> entityClass = sessionContext.getEntityClass();
+        T item = (T) entityClass.getDeclaredConstructor().newInstance();
+
+        // Mapa para almacenar temporalmente los EmbeddedId instanciados
+        Map<String, Object> embeddedIdMap = new HashMap<>();
+
+        for (Map.Entry<String, Object> entry : formData.entrySet()) {
+            String fieldName = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof LocalDateTime ldt) {
+                value = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+            } else if (value instanceof LocalDate ld) {
+                value = Date.from(ld.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            }
+
+            Field field = getField(entityClass, fieldName);
+            if (field != null) {
+                field.setAccessible(true);
+                setFieldValueWithAnnotations(field, value, item, entityClass);
+            } else {
+                // Buscar en campos @EmbeddedId
+                for (Field f : entityClass.getDeclaredFields()) {
+                    if (f.isAnnotationPresent(EmbeddedId.class)) {
+                        f.setAccessible(true);
+                        Object embeddedId = embeddedIdMap.computeIfAbsent(f.getName(), k -> {
+                            try {
+                                return f.getType().getDeclaredConstructor().newInstance();
+                            } catch (Exception e) {
+                                logger.error("No se pudo instanciar EmbeddedId", e);
+                                return null;
+                            }
+                        });
+
+                        if (embeddedId != null) {
+                            Field embeddedField = getField(embeddedId.getClass(), fieldName);
+                            if (embeddedField != null) {
+                                embeddedField.setAccessible(true);
+                                embeddedField.set(embeddedId, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Asignar los EmbeddedId al item
+        for (Field f : entityClass.getDeclaredFields()) {
+            if (f.isAnnotationPresent(EmbeddedId.class)) {
+                f.setAccessible(true);
+                Object embeddedId = embeddedIdMap.get(f.getName());
+                if (embeddedId != null) {
+                    f.set(item, embeddedId);
+                }
+            }
+        }
+
+        // Adjuntar archivo si hay
+        if (docInput != null) {
+            setFieldValue(item, docInput.getFileName(), "fileName");
+
+            getDocumentField().ifPresentOrElse(
+                field -> setFieldValue(item, docInput.getFile(), field.getName()),
+                () -> {
+                    logger.error("Document field not found");
+                    throw new RuntimeException("Document field not found");
+                }
+            );
+        }
+
+        return item;
+
+    } catch (Exception e) {
+        addMessage(FacesMessage.SEVERITY_ERROR, "ERROR", customEntityLabel + " could not be loaded with form data");
+        logger.error("Entity could not be loaded with form data", e);
+        return null;
+    }
+}
+
+
+
 if (field != null) {
                 field.setAccessible(true);
                 setFieldValueWithAnnotations(entityClass, item, field, value);
