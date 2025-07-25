@@ -1,3 +1,27 @@
+private UIComponent findComponentWithFieldName(UIComponent root, String targetFieldName) {
+    if (root == null) return null;
+
+    Object attr = root.getAttributes().get("fieldName");
+    if (attr != null && targetFieldName.equals(attr.toString())) {
+        return root;
+    }
+
+    for (UIComponent child : root.getChildren()) {
+        UIComponent found = findComponentWithFieldName(child, targetFieldName);
+        if (found != null) return found;
+    }
+
+    // También recorrer facets si los hay
+    for (UIComponent facet : root.getFacets().values()) {
+        UIComponent found = findComponentWithFieldName(facet, targetFieldName);
+        if (found != null) return found;
+    }
+
+    return null;
+}
+UIComponent root = FacesContext.getCurrentInstance().getViewRoot();
+                UIComponent targetDropdown = findComponentWithFieldName(root, field.getName());
+
 <ui:repeat value="#{genericCrudBean.inputs}" var="input" varStatus="status">
     <p:selectOneMenu id="combo_#{status.index}"
                      value="#{genericCrudBean.formData[input.name]}"
