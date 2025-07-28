@@ -1,3 +1,105 @@
+String encodedId = URLEncoder.encode(buildIdString(item.getId()), StandardCharsets.UTF_8);
+outcome.append("&id=").append(encodedId);
+sessionContext.setIdParam(encodedId);
+
+
+
+private String buildIdString(Object idObj) {
+    if (idObj == null) return "";
+
+    if (idObj.getClass().getDeclaredFields().length == 0) {
+        return idObj.toString();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for (Field field : idObj.getClass().getDeclaredFields()) {
+        field.setAccessible(true);
+        try {
+            Object value = field.get(idObj);
+            if (value != null) {
+                sb.append(field.getName()).append("=").append(value).append(",");
+            }
+        } catch (IllegalAccessException ignored) {}
+    }
+    if (sb.length() > 0) sb.setLength(sb.length() - 1); // remove last comma
+    return sb.toString();
+}
+
+
+
+public <E> E resolveIdParam(Class<?> entityClass, String idParam) {
+    try {
+        // Detectar si tiene @EmbeddedId
+        Field embeddedIdField = Arrays.stream(entityClass.getDeclaredFields())
+            .filter(f -> f.isAnnotationPresent(EmbeddedId.class))
+            .findFirst()
+            .orElse(null);
+
+        if (embeddedIdField != null) {
+            // Parsear "tableId=PERSON,sr=100"
+            Class<?> embeddedIdClass = embeddedIdField.getType();
+            Object embeddedId = embeddedIdClass.getDeclaredConstructor().newInstance();
+
+            String[] parts = idParam.split(",");
+            for (String part : parts) {
+                String[] keyValue = part.split("=");
+                String fieldName = keyValue[0];
+                String fieldValue = keyValue[1];
+
+                Field f = embeddedIdClass.getDeclaredField(fieldName);
+                f.setAccessible(true);
+                f.set(embeddedId, castValue(f.getType(), fieldValue));
+            }
+
+            return (E) embeddedId;
+        } else {
+            // No es EmbeddedId
+            return (E) castValue(entityClass.getMethod("getId").getReturnType(), idParam);
+        }
+
+    } catch (Exception e) {
+        throw new RuntimeException("Error resolviendo idParam", e);
+    }
+}
+
+private Object castValue(Class<?> type, String value) {
+    if (type == Long.class || type == long.class) return Long.parseLong(value);
+    if (type == Integer.class || type == int.class) return Integer.parseInt(value);
+    if (type == Boolean.class || type == boolean.class) return Boolean.parseBoolean(value);
+    return value;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 private T processFormData(Map<String, Object> formData) {
     try {
         Class<?> entityClass = sessionContext.getEntityClass();
