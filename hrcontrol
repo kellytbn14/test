@@ -1,3 +1,36 @@
+private String buildIdString(Object idObj) {
+    if (idObj == null) return "";
+
+    // Si es una clase JDK simple (String, Long, etc), devuélvelo tal cual
+    if (isSimpleType(idObj.getClass())) {
+        return idObj.toString();
+    }
+
+    StringBuilder sb = new StringBuilder();
+    for (Field field : idObj.getClass().getDeclaredFields()) {
+        try {
+            field.setAccessible(true);
+            Object value = field.get(idObj);
+            if (value != null) {
+                sb.append(field.getName()).append("=").append(value).append(",");
+            }
+        } catch (IllegalAccessException ignored) {}
+    }
+    if (sb.length() > 0) sb.setLength(sb.length() - 1); // remove last comma
+    return sb.toString();
+}
+
+private boolean isSimpleType(Class<?> clazz) {
+    return clazz.isPrimitive()
+            || clazz == String.class
+            || Number.class.isAssignableFrom(clazz)
+            || clazz == Boolean.class
+            || clazz == Character.class;
+}
+
+
+
+
 String encodedId = URLEncoder.encode(buildIdString(item.getId()), StandardCharsets.UTF_8);
 outcome.append("&id=").append(encodedId);
 sessionContext.setIdParam(encodedId);
