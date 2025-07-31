@@ -1,3 +1,87 @@
+private T createEntityFromRow(Row row, Map<String, Integer> columnMap, Class<T> entityClass, int index) {
+    try {
+        T entity = entityClass.getDeclaredConstructor().newInstance();
+
+        for (Field field : getAllFields(entityClass)) {
+            field.setAccessible(true);
+
+            if (field.isAnnotationPresent(EmbeddedId.class)) {
+                Object embeddedId = processEmbeddedId(row, columnMap, field);
+                field.set(entity, embeddedId);
+            } else {
+                String fieldName = field.getName();
+                Integer columnIndex = columnMap.get(fieldName);
+                ColumnData columnData = field.getAnnotation(ColumnData.class);
+
+                if (columnIndex != null) {
+                    Object value = getFormattedCellValue(row.getCell(columnIndex), field.getType(), columnData);
+                    field.set(entity, value);
+                }
+            }
+        }
+
+        return entity;
+    } catch (Exception e) {
+        logger.error("Error while creating entity from {} row: {}", index, e.getMessage());
+        return null;
+    }
+}
+🧩 Método processEmbeddedId(...) – Construye el objeto ID
+java
+Copiar
+Editar
+private Object processEmbeddedId(Row row, Map<String, Integer> columnMap, Field embeddedField) throws Exception {
+    Class<?> idClass = embeddedField.getType();
+    Object embeddedId = idClass.getDeclaredConstructor().newInstance();
+
+    for (Field idField : getAllFields(idClass)) {
+        idField.setAccessible(true);
+        String idFieldName = idField.getName();
+        Integer columnIndex = columnMap.get(idFieldName);
+        ColumnData columnData = idField.getAnnotation(ColumnData.class);
+
+        if (columnIndex != null) {
+            Object value = getFormattedCellValue(row.getCell(columnIndex), idField.getType(), columnData);
+            idField.set(embeddedId, value);
+        }
+    }
+
+    return embeddedId;
+}
+🧠 Método getFormattedCellValue(...) – Convierte números, fechas, etc.
+java
+Copiar
+Editar
+private Object getFormattedCellValue(Cell cell, Class<?> targetType, ColumnData columnData) {
+    Object value = getCellValue(cell);
+
+    if (columnData != null && columnData.stringDate()) {
+        return FORMATTER.format(value);
+    }
+
+    if (targetType.equals(String.class) && value instanceof Number) {
+        double d = ((Number) value).doubleValue();
+        if (d == Math.floor(d)) {
+            return String.format("%.0f", d);
+        } else {
+            return BigDecimal.valueOf(d).toPlainString();
+        }
+    }
+
+    return value;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 if (columnData != null && columnData.stringDate()) {
     field.set(entity, FORMATTER.format(value));
 } else {
