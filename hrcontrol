@@ -1,3 +1,27 @@
+if (columnData != null && columnData.stringDate()) {
+    field.set(entity, FORMATTER.format(value));
+} else {
+    if (field.getType().equals(String.class) && value instanceof Number) {
+        // Para Double: evitar notación científica
+        if (value instanceof Double || value instanceof Float) {
+            double doubleVal = ((Number) value).doubleValue();
+            if (doubleVal == Math.floor(doubleVal)) {
+                // Es un entero, sin decimales: quitar .0
+                value = String.format("%.0f", doubleVal);
+            } else {
+                // Tiene decimales: mantenerlos
+                value = String.valueOf(doubleVal);
+            }
+        } else {
+            // Otros tipos numéricos como Integer, Long, etc.
+            value = String.valueOf(value);
+        }
+    }
+
+    field.set(entity, value);
+}
+
+
 private void assignEmbeddedField(Class<?> entityClass, Object item, String fieldName, Object value) {
     for (Field f : entityClass.getDeclaredFields()) {
         if (f.isAnnotationPresent(EmbeddedId.class)) {
