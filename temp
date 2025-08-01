@@ -1,3 +1,36 @@
+else {
+    String fieldName = field.getName();
+    Integer columnIndex = columnMap.get(fieldName);
+    ColumnData columnData = field.getAnnotation(ColumnData.class);
+
+    if (columnIndex != null) {
+        Object value = getFormattedCellValue(row.getCell(columnIndex), field.getType(), columnData);
+
+        // Si es una relación @ManyToOne, ir a buscar la entidad relacionada
+        if (field.isAnnotationPresent(ManyToOne.class)) {
+            if (value != null) {
+                Class<?> relatedEntityClass = field.getType();
+                Optional<Object> repo = resolver.getRepository(relatedEntityClass);
+
+                if (repo.isPresent()) {
+                    Object entityReference = repo.get().findById(value);
+                    if (entityReference != null) {
+                        field.set(entity, entityReference);
+                    } else {
+                        logger.warn("No se encontró entidad relacionada de tipo {} con ID {}", relatedEntityClass.getSimpleName(), value);
+                    }
+                } else {
+                    logger.warn("No se encontró repositorio para {}", relatedEntityClass.getSimpleName());
+                }
+            }
+        } else {
+            field.set(entity, value);
+        }
+    }
+}
+
+
+
 <ui:repeat value="#{genericCrudBean.inputs}" var="input" varStatus="status">
     <p:selectOneMenu id="combo_#{status.index}"
                      value="#{genericCrudBean.formData[input.name]}"
