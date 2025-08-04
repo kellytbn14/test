@@ -1,3 +1,12 @@
+Field field = MyClass.class.getDeclaredField("audits");
+Type genericType = field.getGenericType();
+
+if (genericType instanceof ParameterizedType pt) {
+    Type elementType = pt.getActualTypeArguments()[0];
+    System.out.println("Tipo genérico de la lista: " + elementType.getTypeName());
+}
+
+
 else {
     String fieldName = field.getName();
     Integer columnIndex = columnMap.get(fieldName);
