@@ -1,3 +1,30 @@
+for (Field field : item.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                MinLength minLength = field.getAnnotation(MinLength.class);
+
+                if (minLength != null) {
+                    Object value = field.get(item);
+
+                    if (value instanceof String strValue && strValue.length() < minLength.value()) {
+                        addMessage(FacesMessage.SEVERITY_ERROR, "Validation Error",
+                                "El campo [" + field.getName() + "] debe tener mínimo " + minLength.value() + " caracteres");
+                        return;
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
 Field field = MyClass.class.getDeclaredField("audits");
 Type genericType = field.getGenericType();
 
