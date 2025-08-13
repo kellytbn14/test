@@ -1,3 +1,14 @@
+<configuration>
+  <system.web>
+    <machineKey
+      validationKey="C68C3C3F7F3D2E3B...A7B5D1C4E3F2A1B0"
+      decryptionKey="A9F3C4E7D1B2F9A4C6E3F7B1A2D4C5E3"
+      validation="HMACSHA256"
+      decryption="AES" />
+  </system.web>
+</configuration>
+
+
 else {
     String fieldName = field.getName();
     Integer columnIndex = columnMap.get(fieldName);
