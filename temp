@@ -1,3 +1,67 @@
+using System;
+using System.Configuration;
+using System.Globalization;
+
+public static class DateLocalizationHelper
+{
+    public static string FormatEventDateForUi(CultureInfo culture)
+    {
+        var rawUtc = ConfigurationManager.AppSettings["EventDateUtc"];
+        var tzKey  = ConfigurationManager.AppSettings["EventTimeZoneId"] ?? "EST";
+
+        if (!DateTime.TryParse(rawUtc, CultureInfo.InvariantCulture,
+            DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var eventUtc))
+            return "";
+
+        // Convertir a hora local de la zona elegida
+        TimeZoneInfo tz;
+        switch (tzKey)
+        {
+            case "CST": tz = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time"); break;
+            case "MST": tz = TimeZoneInfo.FindSystemTimeZoneById("Mountain Standard Time"); break;
+            case "PST": tz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"); break;
+            default:    tz = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"); break;
+        }
+
+        var local = TimeZoneInfo.ConvertTimeFromUtc(eventUtc, tz);
+        var isDst = tz.IsDaylightSavingTime(local);
+
+        // Mapear a abreviaturas EN/FR
+        var (tzEn, tzFr) = GetZoneAbbreviations(tzKey, isDst);
+
+        var lang = culture.TwoLetterISOLanguageName;
+
+        if (lang == "fr")
+        {
+            // Ej: 17h (HE) le 19 novembre, 2025
+            var time = $"{local:HH}h";
+            var date = local.ToString("d MMMM, yyyy", culture).ToLower(culture);
+            return $"{time} ({tzFr}) le {date}";
+        }
+        else
+        {
+            // Ej: 5pm EST on November 19, 2025
+            var hour = local.ToString("h", CultureInfo.InvariantCulture);
+            var ampm = local.ToString("tt", CultureInfo.InvariantCulture).ToLowerInvariant();
+            var date = local.ToString("MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
+            return $"{hour}{ampm} {tzEn} on {date}";
+        }
+    }
+
+    private static (string en, string fr) GetZoneAbbreviations(string tzKey, bool isDst)
+    {
+        switch (tzKey)
+        {
+            case "CST": return (isDst ? "CDT" : "CST", "HC"); // Heure du Centre
+            case "MST": return (isDst ? "MDT" : "MST", "HR"); // Heure des Rocheuses
+            case "PST": return (isDst ? "PDT" : "PST", "HP"); // Heure du Pacifique
+            case "EST":
+            default:    return (isDst ? "EDT" : "EST", "HE"); // Heure de l'Est
+        }
+    }
+}
+
+
 <configuration>
   <appSettings>
     <!-- 5pm EST del 19/11/2025 es 22:00 UTC -->
