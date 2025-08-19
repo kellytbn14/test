@@ -1,4 +1,105 @@
 <configuration>
+  <appSettings>
+    <!-- 5pm EST del 19/11/2025 es 22:00 UTC -->
+    <add key="EventDateUtc" value="2025-11-19T22:00:00Z" />
+    <add key="EventTimeZoneId" value="Eastern Standard Time" />
+  </appSettings>
+
+  <system.web>
+    <globalization culture="auto" uiCulture="auto" enableClientBasedCulture="true" />
+  </system.web>
+</configuration>
+
+
+using System;
+using System.Configuration;
+using System.Globalization;
+
+public static class DateLocalizationHelper
+{
+  private static (string en, string fr) GetZoneAbbreviation(string tzId, bool isDst)
+{
+    switch (tzId)
+    {
+        case "Eastern Standard Time":
+            return (isDst ? "EDT" : "EST", "HE"); // Heure de l'Est
+        case "Central Standard Time":
+            return (isDst ? "CDT" : "CST", "HC"); // Heure du Centre
+        case "Mountain Standard Time":
+            return (isDst ? "MDT" : "MST", "HR"); // Heure des Rocheuses
+        case "Pacific Standard Time":
+            return (isDst ? "PDT" : "PST", "HP"); // Heure du Pacifique
+        default:
+            return ("", ""); // fallback
+    }
+}
+
+public static string FormatEventDateForUi(CultureInfo uiCulture)
+{
+    var rawUtc = ConfigurationManager.AppSettings["EventDateUtc"];
+    var tzId   = ConfigurationManager.AppSettings["EventTimeZoneId"] ?? "Eastern Standard Time";
+
+    if (!DateTime.TryParse(rawUtc, CultureInfo.InvariantCulture, 
+        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var eventUtc))
+        throw new FormatException($"Invalid UTC datetime in config: {rawUtc}");
+
+    var tz   = TimeZoneInfo.FindSystemTimeZoneById(tzId);
+    var local = TimeZoneInfo.ConvertTimeFromUtc(eventUtc, tz);
+    var isDst = tz.IsDaylightSavingTime(local);
+
+    var (tzEn, tzFr) = GetZoneAbbreviation(tzId, isDst);
+
+    var lang = uiCulture.TwoLetterISOLanguageName;
+
+    if (lang == "fr")
+    {
+        // 17h (HE) le 19 novembre, 2025
+        var time = $"{local:HH}h";
+        var date = local.ToString("d MMMM, yyyy", uiCulture).ToLower(uiCulture);
+        return $"{time} ({tzFr}) le {date}";
+    }
+    else
+    {
+        // 5pm EST on November 19, 2025.
+        var hour = local.ToString("h", CultureInfo.InvariantCulture);
+        var ampm = local.ToString("tt", CultureInfo.GetCultureInfo("en-US")).ToLowerInvariant();
+        var date = local.ToString("MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
+        return $"{hour}{ampm} {tzEn} on {date}.";
+    }
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<configuration>
   <system.web>
     <machineKey
       validationKey="C68C3C3F7F3D2E3B...A7B5D1C4E3F2A1B0"
