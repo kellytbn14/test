@@ -1,3 +1,22 @@
+
+<p:messages id="message" closable="true" showDetail="true" showSummary="true" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public void onRowEdit(RowEditEvent<T> event) {
     T editedItem = event.getObject();
     resolver.save(editedItem); // Reutiliza tu lógica de guardado genérico
