@@ -1,3 +1,65 @@
+private Object convertToFieldType(Field field, Object value) {
+    if (value == null) {
+        return null;
+    }
+
+    Class<?> targetType = field.getType();
+
+    // ✅ 1. Si ya es del tipo esperado, lo devolvemos tal cual
+    if (targetType.isInstance(value)) {
+        return value;
+    }
+
+    try {
+        if (value instanceof String strValue) {
+            strValue = strValue.replace(",", "").trim();
+
+            if (targetType == BigDecimal.class) {
+                return new BigDecimal(strValue);
+            } else if (targetType == Double.class || targetType == double.class) {
+                return Double.parseDouble(strValue);
+            } else if (targetType == Float.class || targetType == float.class) {
+                return Float.parseFloat(strValue);
+            } else if (targetType == Long.class || targetType == long.class) {
+                return Long.parseLong(strValue);
+            } else if (targetType == Integer.class || targetType == int.class) {
+                return Integer.parseInt(strValue);
+            } else if (targetType == Short.class || targetType == short.class) {
+                return Short.parseShort(strValue);
+            } else if (targetType == Date.class) {
+                // Intenta parsear desde formato ISO (ajústalo si usas otro formato)
+                try {
+                    LocalDate parsedDate = LocalDate.parse(strValue);
+                    return Date.from(parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                } catch (DateTimeParseException e) {
+                    logger.warn("Could not parse date string: {}", strValue);
+                }
+            }
+        }
+
+        // ✅ 2. Conversión desde LocalDate a Date
+        if (value instanceof LocalDate localDate && targetType == Date.class) {
+            return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        }
+
+        // ✅ 3. Conversión desde LocalDateTime a Date
+        if (value instanceof LocalDateTime localDateTime && targetType == Date.class) {
+            return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        }
+
+    } catch (Exception e) {
+        logger.warn("Could not convert value [{}] to type [{}] for field [{}]",
+                value, targetType.getSimpleName(), field.getName());
+    }
+
+    // ⚠ fallback si no pudo convertir
+    return value;
+}
+
+
+
+
+
 
 <p:messages id="message" closable="true" showDetail="true" showSummary="true" />
 
