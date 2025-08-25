@@ -1,3 +1,17 @@
+<p:dataTable id="genericTable"
+             widgetVar="genericTable"
+             ...
+/>
+
+<p:commandButton value="Agregar nueva fila"
+                 action="#{genericCrudBean.addEmptyRow}"
+                 process="@this"
+                 update="genericTable"
+                 oncomplete="PF('genericTable').getPaginator().setPage(PF('genericTable').getPaginator().getPageCount() - 1)" />
+
+
+
+
 <p:commandButton value="Add Row"
                  icon="pi pi-plus"
                  action="#{genericCrudBean.addEmptyRow}"
