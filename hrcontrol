@@ -1,3 +1,17 @@
+<p:commandButton value="Add new row"
+                 icon="pi pi-plus-circle"
+                 styleClass="ui-button-outlined ui-button-secondary button-search"
+                 process="@this"
+                 update="tableForm:genericTable"
+                 action="#{genericCrudBean.onAddNewRow}"
+                 oncomplete="setTimeout(function() {
+                     var table = PF('genericTable');
+                     if (table) {
+                         table.getPaginator().setPage(table.getPaginator().getPageCount() - 1);
+                     }
+                 }, 250);"/>
+
+
 oncomplete="setTimeout(function() {
                      var table = PF('genericTable');
                      var paginator = table.getPaginator();
