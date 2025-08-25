@@ -1,4 +1,10 @@
+
+RequestContext context = RequestContext.getCurrentInstance();
+context.execute("PF('genericTable').getPaginator().setPage(" + lastPage + ");");
+
+// Espera a que la tabla se renderice antes de activar edición (usa otro timeout si es necesario)
 context.execute("setTimeout(function() { PF('genericTable').showRowEditor(" + lastRowIndex + "); }, 200);");
+
 
 
 public void onAddNewRow() {
