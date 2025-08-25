@@ -1,3 +1,31 @@
+ <p:ajax event="page" listener="#{genericCrudBean.onPageChange}" update="@none"/>
+    <p:ajax event="rowsPerPage" listener="#{genericCrudBean.onRowsChange}" update="@none"/>
+
+public void onPageChange() {
+    // no se necesita nada aquí, pero se puede usar si quieres guardar la página actual
+}
+
+public void onRowsChange() {
+    // este se dispara cuando cambia el "Rows per page"
+    // puedes usarlo para debug si quieres
+    logger.info("Rows per page changed to: {}", rowsPerPage);
+}
+
+
+
+
+oncomplete="setTimeout(function() {
+    PF('genericTable').getPaginator().setPage(#{genericCrudBean.lastPageToNavigate});
+}, 100);"
+
+
+
+
+
+
+
+
+
 <p:commandButton icon="pi pi-plus-circle"
                  styleClass="ui-button-outlined ui-button-secondary button-search"
                  action="#{genericCrudBean.onAddNewRow}"
