@@ -1,3 +1,12 @@
+<p:commandButton icon="pi pi-plus-circle"
+                 styleClass="ui-button-outlined ui-button-secondary button-search"
+                 action="#{genericCrudBean.onAddNewRow}"
+                 process="@this"
+                 update="genericTable"
+                 value="Add new row"
+                 oncomplete="PF('genericTable').getPaginator().setPage(#{genericCrudBean.lastPageToNavigate})"/>
+
+
 <p:ajax event="page" listener="#{genericCrudBean.onPageChange}" />
 
 public void onPageChange(PageEvent event) {
