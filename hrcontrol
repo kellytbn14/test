@@ -1,4 +1,10 @@
- <p:ajax event="page" listener="#{genericCrudBean.onPageChange}" update="@none"/>
+oncomplete="setTimeout(function() {
+                     var table = PF('genericTable');
+                     var paginator = table.getPaginator();
+                     paginator.setPage(paginator.getPageCount() - 1);
+                 }, 100);"
+
+<p:ajax event="page" listener="#{genericCrudBean.onPageChange}" update="@none"/>
     <p:ajax event="rowsPerPage" listener="#{genericCrudBean.onRowsChange}" update="@none"/>
 
 public void onPageChange() {
