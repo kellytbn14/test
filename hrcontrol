@@ -1,3 +1,31 @@
+<p:commandButton value="Add Row"
+                 icon="pi pi-plus"
+                 action="#{genericCrudBean.addEmptyRow}"
+                 process="@this"
+                 update="genericTable" />
+public void addEmptyRow() {
+    try {
+        Class<?> entityClass = sessionContext.getEntityClass();
+        T newItem = (T) entityClass.getDeclaredConstructor().newInstance();
+
+        // Inicializa con null o valores por defecto
+        for (Field field : entityClass.getDeclaredFields()) {
+            field.setAccessible(true);
+            if (!Modifier.isFinal(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())) {
+                field.set(newItem, null);
+            }
+        }
+
+        items.add(newItem); // ya debe existir la lista "items" con getter/setter
+    } catch (Exception e) {
+        logger.error("Error creating empty row", e);
+        addMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "Could not add empty row");
+    }
+}
+
+<p:ajax event="rowEdit" listener="#{genericCrudBean.onRowEdit}" update="@form" />
+
+
 private Object convertToFieldType(Field field, Object value) {
     if (value == null) {
         return null;
