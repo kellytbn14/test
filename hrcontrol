@@ -1,3 +1,6 @@
+context.execute("setTimeout(function() { PF('genericTable').showRowEditor(" + lastRowIndex + "); }, 200);");
+
+
 public void onAddNewRow() {
     try {
         Class<?> entityClass = sessionContext.getEntityClass();
