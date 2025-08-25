@@ -1,3 +1,15 @@
+// Actualizar tabla y redirigir a la última página
+        PrimeFaces.current().ajax().update("tableForm:genericTable");
+
+        // Activar edición automáticamente en la nueva fila
+        String widgetVar = "genericTable";
+        int rowIndex = totalItems - 1;
+        PrimeFaces.current().executeScript(String.format(
+            "PF('%s').getPaginator().setPage(%d); " +
+            "setTimeout(function() { PF('%s').showEditor(%d); }, 100);",
+            widgetVar, lastPageIndex, widgetVar, rowIndex
+        ));
+
 
 RequestContext context = RequestContext.getCurrentInstance();
 context.execute("PF('genericTable').getPaginator().setPage(" + lastPage + ");");
