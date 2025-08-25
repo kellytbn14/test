@@ -1,3 +1,30 @@
+public void onAddNewRow() {
+    try {
+        Class<?> entityClass = sessionContext.getEntityClass();
+        T newInstance = (T) entityClass.getDeclaredConstructor().newInstance();
+        items.add(newInstance);
+
+        int totalRows = items.size();
+        int rowsPerPage = 10; // asegúrate que esto coincida con el valor del HTML o se obtenga dinámicamente
+        int lastPage = (int) Math.ceil((double) totalRows / rowsPerPage) - 1;
+        int rowIndexOnLastPage = (totalRows - 1) % rowsPerPage;
+
+        PrimeFaces.current().executeScript(
+            "setTimeout(function() {" +
+                "var dt = PF('genericTable');" +
+                "dt.getPaginator().setPage(" + lastPage + ");" +
+                "setTimeout(function() { dt.showRowEditor(" + rowIndexOnLastPage + "); }, 200);" +
+            "}, 100);"
+        );
+
+    } catch (Exception e) {
+        logger.error("Error adding new row", e);
+    }
+}
+
+
+
+
 <p:commandButton value="Add new row"
                  icon="pi pi-plus-circle"
                  action="#{genericCrudBean.onAddNewRow}"
