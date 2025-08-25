@@ -1,3 +1,46 @@
+private int lastPageToNavigate = -1;
+
+public int getLastPageToNavigate() {
+    return lastPageToNavigate;
+}
+
+public void setLastPageToNavigate(int lastPageToNavigate) {
+    this.lastPageToNavigate = lastPageToNavigate;
+}
+
+public void onAddNewRow() {
+    T newItem = createNewItem(); // lógica tuya
+    items.add(newItem);
+
+    // Calcula última página (items.size() - 1) / rowsPorPagina
+    int rowsPerPage = 10; // asegúrate que coincida con tu <p:dataTable rows="10">
+    lastPageToNavigate = (items.size() - 1) / rowsPerPage;
+}
+
+
+<p:commandButton icon="pi pi-plus-circle"
+                 styleClass="ui-button-outlined ui-button-secondary button-search"
+                 action="#{genericCrudBean.onAddNewRow}"
+                 process="@this"
+                 value="Add new row"
+                 update="genericTable"
+                 oncomplete="if (#{genericCrudBean.lastPageToNavigate} >= 0) PF('genericTable').getPaginator().setPage(#{genericCrudBean.lastPageToNavigate});" />
+
+
+
+oncomplete="PF('genericTable').getPaginator().setPage(#{genericCrudBean.lastPageToNavigate});"
+
+
+oncomplete="PF('genericTable').getPaginator().changePage(#{genericCrudBean.lastPageToNavigate});"
+
+
+
+
+
+
+
+
+
 <p:dataTable id="genericTable"
              widgetVar="genericTable"
              ...
