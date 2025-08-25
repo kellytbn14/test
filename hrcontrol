@@ -1,3 +1,12 @@
+<p:ajax event="page" listener="#{genericCrudBean.onPageChange}" />
+
+public void onPageChange(PageEvent event) {
+    if (tableComponent instanceof UIData dataTable) {
+        currentRowsPerPage = dataTable.getRows();
+    }
+}
+
+
 private int lastPageToNavigate = -1;
 
 public int getLastPageToNavigate() {
