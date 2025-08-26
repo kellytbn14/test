@@ -1,4 +1,6 @@
- <!-- Si es nueva fila, usa un input genérico y seguro -->
+<p:ajax event="rowEditInit" listener="#{bean.onRowEditInit}" process="@this" update="@none" />
+
+<!-- Si es nueva fila, usa un input genérico y seguro -->
             <h:panelGroup rendered="#{genericCrudBean.isNewRow(item)}">
                 <p:inputText value="#{item[col.property]}" style="width:100%" />
             </h:panelGroup>
