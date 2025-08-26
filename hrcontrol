@@ -1,3 +1,33 @@
+public void onAddNewRow() {
+    try {
+        Class<?> entityClass = sessionContext.getEntityClass();
+        T newItem = (T) entityClass.getDeclaredConstructor().newInstance();
+
+        // (opcional) inicializa campos que deban tener valor por defecto
+        items.add(newItem);
+
+        if (tableComponent != null) {
+            currentRowsPerPage = tableComponent.getRows();
+        }
+        lastPage = (items.size() - 1) / currentRowsPerPage;
+
+        PrimeFaces.current().ajax().update("tableForm:genericTable"); // asegúrate de actualizar la tabla
+        PrimeFaces.current().executeScript(
+            "var dt = PF('genericTable');" +
+            "dt.getPaginator().setPage(" + lastPage + ");" +
+            "dt.addRow();" + // trae el último row del backend y lo inserta
+            "var $last = dt.getTbody().children('tr:last');" +
+            "dt.switchToRowEdit($last);" +
+            "$last.find('.ui-inputfield:first').trigger('focus');"
+        );
+
+    } catch (Exception e) {
+        logger.error("Error creating empty row", e);
+        addMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "Could not add empty row");
+    }
+}
+
+
 <p:commandButton icon="pi pi-plus-circle"
     styleClass="ui-button-outlined ui-button-secondary button-search"
     action="#{genericCrudBean.onAddNewRow}"
