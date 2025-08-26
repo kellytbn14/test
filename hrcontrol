@@ -1,3 +1,24 @@
+PrimeFaces.current().executeScript(
+    """
+    var $currentRow = $('.ui-datatable-data > tr.ui-row-editing');
+    var $otherRows = $('.ui-datatable-data > tr').not('.ui-row-editing');
+
+    $otherRows.find('.ui-row-editor-init').each(function() {
+        $(this).addClass('ui-state-disabled').attr('disabled', 'disabled');
+    });
+    """
+);
+PrimeFaces.current().executeScript(
+    "$('.ui-row-editor-init').removeClass('ui-state-disabled').removeAttr('disabled');"
+);
+
+
+
+
+
+
+
+
 var $currentRow = $('.ui-datatable-data > tr.ui-row-editing');
 var $otherRows = $('.ui-datatable-data > tr').not('.ui-row-editing');
 
