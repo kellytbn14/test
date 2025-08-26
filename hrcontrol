@@ -1,3 +1,24 @@
+public void onRowEditInit(RowEditEvent<T> event) {
+    PrimeFaces.current().executeScript("""
+        $('.ui-row-editor-init').not('.ui-state-disabled').addClass('ui-state-disabled').prop('disabled', true);
+    """);
+}
+
+public void onRowEdit(RowEditEvent<T> event) {
+    PrimeFaces.current().executeScript("""
+        $('.ui-row-editor-init').removeClass('ui-state-disabled').prop('disabled', false);
+    """);
+    // ... tu lógica de guardado
+}
+
+public void onRowCancel(RowEditEvent<T> event) {
+    PrimeFaces.current().executeScript("""
+        $('.ui-row-editor-init').removeClass('ui-state-disabled').prop('disabled', false);
+    """);
+    // ... tu lógica de cancelación
+}
+
+
 <p:ajax event="rowEditInit" listener="#{bean.onRowEditInit}" process="@this" update="@none" />
 
 <!-- Si es nueva fila, usa un input genérico y seguro -->
