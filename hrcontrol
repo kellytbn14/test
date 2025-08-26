@@ -1,3 +1,14 @@
+var $currentRow = $('.ui-datatable-data > tr.ui-row-editing');
+var $otherRows = $('.ui-datatable-data > tr').not('.ui-row-editing');
+
+$otherRows.find('.ui-row-editor-init').each(function() {
+    $(this).addClass('ui-state-disabled').attr('disabled', 'disabled');
+});
+
+
+$('.ui-row-editor-init').removeClass('ui-state-disabled').removeAttr('disabled');
+
+
 public void onRowEditInit(RowEditEvent<T> event) {
     PrimeFaces.current().executeScript("""
         $('.ui-row-editor-init').not('.ui-state-disabled').addClass('ui-state-disabled').prop('disabled', true);
