@@ -1,3 +1,37 @@
+<p:inputText value="#{genericCrudBean.getPropertyValue(item, col.property)}"
+             readonly="#{!col.editable}"
+             style="width:100%">
+    <f:attribute name="propertyName" value="#{col.property}"/>
+</p:inputText>
+
+public Object getPropertyValue(Object item, String propertyName) {
+    try {
+        PropertyDescriptor pd = new PropertyDescriptor(propertyName, item.getClass());
+        return pd.getReadMethod().invoke(item);
+    } catch (Exception e) {
+        logger.error("Error reading property '{}' from item", propertyName, e);
+        return null;
+    }
+}
+
+public void setPropertyValue(Object item, String propertyName, Object value) {
+    try {
+        PropertyDescriptor pd = new PropertyDescriptor(propertyName, item.getClass());
+        pd.getWriteMethod().invoke(item, value);
+    } catch (Exception e) {
+        logger.error("Error setting property '{}' to item", propertyName, e);
+    }
+}
+
+
+
+
+
+
+
+
+
+
 var dt = PF('genericTable');
 dt.getPaginator().setPage(#{genericCrudBean.lastPage});
 setTimeout(function(){
