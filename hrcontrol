@@ -3,6 +3,57 @@ public void onAddNewRow() {
         Class<?> entityClass = sessionContext.getEntityClass();
         T newItem = (T) entityClass.getDeclaredConstructor().newInstance();
 
+        // Inicializa lo que necesites; por defecto, los campos quedan null
+        items.add(newItem);
+
+        if (tableComponent != null) {
+            currentRowsPerPage = tableComponent.getRows();
+        }
+        lastPage = (items.size() - 1) / currentRowsPerPage;
+
+        // Importante: NO ejecutes aquí scripts de paginación/edición.
+        // Solo actualiza la tabla.
+        PrimeFaces.current().ajax().update("tableForm:genericTable");
+
+    } catch (Exception e) {
+        logger.error("Error creating empty row", e);
+        addMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "Could not add empty row");
+    }
+}
+
+<p:commandButton icon="pi pi-plus-circle"
+    styleClass="ui-button-outlined ui-button-secondary button-search"
+    action="#{genericCrudBean.onAddNewRow}"
+    process="@this"
+    value="Add new row"
+    update="genericTable"
+    oncomplete="
+      (function(){
+        var dt = PF('genericTable');
+        // Ir a la última página calculada en el servidor
+        dt.getPaginator().setPage(#{genericCrudBean.lastPage});
+
+        // Espera a que se re-renderice el tbody de esa página y entra en edición
+        setTimeout(function(){
+          var $last = dt.getTbody().children('tr.ui-widget-content:visible:last');
+          dt.switchToRowEdit($last);
+          $last.find('.ui-inputfield:first').trigger('focus');
+        }, 0);
+      })();
+    "
+/>
+
+
+
+
+
+
+
+public void onAddNewRow() {
+    try {
+        Class<?> entityClass = sessionContext.getEntityClass();
+        T newItem = (T) entityClass.getDeclaredConstructor().newInstance();
+
         // (opcional) inicializa campos que deban tener valor por defecto
         items.add(newItem);
 
