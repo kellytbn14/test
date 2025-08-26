@@ -1,3 +1,15 @@
+ <!-- Si es nueva fila, usa un input genérico y seguro -->
+            <h:panelGroup rendered="#{genericCrudBean.isNewRow(item)}">
+                <p:inputText value="#{item[col.property]}" style="width:100%" />
+            </h:panelGroup>
+
+            <!-- Si es fila existente, usa el input normal -->
+            <h:panelGroup rendered="#{!genericCrudBean.isNewRow(item)}">
+                <p:inputText value="#{item[col.property]}" style="width:100%" />
+            </h:panelGroup>
+
+
+
 <p:inputText value="#{genericCrudBean.getPropertyValue(item, col.property)}"
              readonly="#{!col.editable}"
              style="width:100%">
