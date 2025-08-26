@@ -1,3 +1,33 @@
+<p:commandButton icon="pi pi-plus-circle"
+    styleClass="ui-button-outlined ui-button-secondary button-search"
+    action="#{genericCrudBean.onAddNewRow}"
+    process="@this"
+    value="Add new row"
+    update="genericTable"
+    oncomplete="
+      (function(){
+        var dt = PF('genericTable');
+        // si ya navegas a la última página desde el bean, no lo repitas aquí
+        dt.addRow(); // inserta el último row del backend en el DOM
+        var $last = dt.getTbody().children('tr:last'); // última fila visible
+        dt.switchToRowEdit($last); // activa los inputs de esa fila
+        $last.find('.ui-inputfield:first').trigger('focus'); // opcional
+      })();
+    "
+/>
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Actualizar tabla y redirigir a la última página
         PrimeFaces.current().ajax().update("tableForm:genericTable");
 
