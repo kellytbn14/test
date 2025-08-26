@@ -1,3 +1,18 @@
+var dt = PF('genericTable');
+dt.getPaginator().setPage(#{genericCrudBean.lastPage});
+setTimeout(function(){
+  var $last = dt.getTbody().children('tr.ui-widget-content:visible:last');
+  if (dt.showRowEditors)      dt.showRowEditors($last);
+  else if (dt.switchToRowEdit) dt.switchToRowEdit($last);
+  else {
+    var $btn = $last.find('.ui-row-editor .ui-row-editor-init,[data-pf-roweditor-init],.ui-row-editor .ui-icon-pencil').first();
+    if ($btn.length) $btn.trigger('click');
+  }
+  $last.find('.ui-inputfield:first').trigger('focus');
+}, 0);
+
+
+
 public void onAddNewRow() {
     try {
         Class<?> entityClass = sessionContext.getEntityClass();
