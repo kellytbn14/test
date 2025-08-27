@@ -1,3 +1,22 @@
+private static void focusLastEditableRow(int lastPage) {
+    PrimeFaces.current().ajax().update("tableForm:genericTable");
+
+    PrimeFaces.current().executeScript(
+        "var dt = PF('genericTable');" +
+        "dt.getPaginator().setPage(" + lastPage + ");" +
+        "setTimeout(function() {" +
+            // Activar edición por índice real (última fila en el modelo, no en la vista ordenada)
+            "var lastIndex = dt.getRowsCount() - 1;" +
+            "dt.startRowEdit(lastIndex);" +
+
+            // Enfocar el primer input de esa fila
+            "var row = dt.tbody.children().eq(lastIndex);" +
+            "row.find('.ui-inputfield:first').trigger('focus');" +
+        "}, 500);"
+    );
+}
+
+
 PrimeFaces.current().executeScript(
     "$('#tableForm\\\\:addNewRowButton').prop('disabled', true);"
 );
