@@ -5,6 +5,26 @@ private static void focusLastEditableRow(int lastPage) {
         "var dt = PF('genericTable');" +
         "dt.getPaginator().setPage(" + lastPage + ");" +
         "setTimeout(function() {" +
+            "var $lastRow = dt.tbody.children('tr[data-ri]:visible').last();" +
+            "var lastIndex = parseInt($lastRow.attr('data-ri'));" +
+            "if (!isNaN(lastIndex)) {" +
+                "dt.startRowEdit(lastIndex);" +
+                "$lastRow.find('.ui-inputfield:first').trigger('focus');" +
+            "} else {" +
+                "console.warn('No se encontró la última fila editable');" +
+            "}" +
+        "}, 500);"
+    );
+}
+
+
+private static void focusLastEditableRow(int lastPage) {
+    PrimeFaces.current().ajax().update("tableForm:genericTable");
+
+    PrimeFaces.current().executeScript(
+        "var dt = PF('genericTable');" +
+        "dt.getPaginator().setPage(" + lastPage + ");" +
+        "setTimeout(function() {" +
             "var lastIndex = dt.cfg.data.length - 1;" +  // Número total de filas - 1
             "dt.startRowEdit(lastIndex);" +
 
