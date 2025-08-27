@@ -1,4 +1,13 @@
 PrimeFaces.current().executeScript(
+    "$('#tableForm\\\\:addNewRowButton').prop('disabled', true);"
+);
+PrimeFaces.current().executeScript(
+    "$('#tableForm\\\\:addNewRowButton').prop('disabled', false);"
+);
+
+
+
+PrimeFaces.current().executeScript(
     "setTimeout(function() {" +
     "  var btn = document.getElementById('tableForm:addRowBtn');" +
     "  if (btn) btn.disabled = true;" +
