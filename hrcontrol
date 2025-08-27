@@ -1,3 +1,14 @@
+PrimeFaces.current().executeScript(
+    "setTimeout(function() {" +
+    "  var btn = document.getElementById('tableForm:addRowBtn');" +
+    "  if (btn) btn.disabled = true;" +
+    "}, 100);"
+);
+
+
+
+
+
 PrimeFaces.current().executeScript("document.getElementById('tableForm:addRowBtn').disabled = false;");
 
 
