@@ -1,3 +1,6 @@
+<p:ajax event="sort" listener="#{genericCrudBean.onSort}" oncomplete="handleSortComplete()" />
+
+
 private static void focusLastEditableRow(int lastPage) {
     PrimeFaces.current().ajax().update("tableForm:genericTable");
 
