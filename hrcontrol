@@ -1,3 +1,6 @@
+PrimeFaces.current().executeScript("document.getElementById('tableForm:addRowBtn').disabled = false;");
+
+
 PrimeFaces.current().executeScript("""
     var $editingRow = $('.ui-datatable-data > tr.ui-row-editing');
     var $allRows = $('.ui-datatable-data > tr');
