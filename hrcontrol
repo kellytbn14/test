@@ -1,3 +1,19 @@
+<p:dataTable ... rowStyleClass="#{item.newRow ? 'new-row' : ''}">
+
+var $new = dt.getTbody().children('tr.new-row:visible').first();
+
+if (dt.showRowEditors) {
+    dt.showRowEditors($new);
+} else if (dt.switchToRowEdit) {
+    dt.switchToRowEdit($new);
+} else {
+    var $btn = $new.find('.ui-row-editor.ui-row-editor-init, [data-pf-roweditor-init], .ui-row-editor.ui-icon-pencil').first();
+    if ($btn.length) $btn.trigger('click');
+}
+$new.find('.ui-inputfield:first').trigger('focus');
+
+
+
 <p:ajax event="sort" listener="#{genericCrudBean.onSort}" oncomplete="handleSortComplete()" />
 
 
