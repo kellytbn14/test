@@ -1,3 +1,11 @@
+int index = items.indexOf(newItem);
+int pageSize = 10;
+int page = index / pageSize;
+
+// Enviar ese número de página al cliente
+PrimeFaces.current().executeScript("PF('genericTable').getPaginator().setPage(" + page + ");");
+
+
 const dt = PF('genericTable');
 const $tbody = dt.getTbody();
 
