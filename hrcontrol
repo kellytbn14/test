@@ -1,4 +1,23 @@
 PrimeFaces.current().executeScript(
+    "PrimeFaces.onPostUpdate(function(cfg) {" +
+        "if(cfg && cfg.id && cfg.id.indexOf('genericTable') !== -1) {" +
+            "var dt = PF('genericTable');" +
+            "var $tbody = $('#tableForm\\\\:genericTable_data');" +
+            "var $new = $tbody.children('tr:last');" +
+            "$new.addClass('new-row');" +
+
+            "if (dt.showRowEditors) { dt.showRowEditors($new); }" +
+            "$new.find('.ui-inputfield:first').trigger('focus');" +
+
+            "var btn = document.getElementById('tableForm:addNewRowButton');" +
+            "if (btn) btn.disabled = true;" +
+        "}" +
+    "});"
+);
+
+
+
+PrimeFaces.current().executeScript(
     "var dt = PF('genericTable');" +
     "dt.getPaginator().setPage(" + page + ");" +
 
