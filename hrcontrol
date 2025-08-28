@@ -1,3 +1,17 @@
+<h:outputScript>
+    function activarNuevaFila() {
+        const dt = PF('genericTable');
+        const $rows = dt.getTbody().children('tr.new-row:visible');
+        if ($rows.length === 0) return;
+
+        const $row = $rows.first();
+        const $btn = $row.find('.ui-row-editor-init, [data-pf-roweditor-init], .ui-icon-pencil').first();
+        if ($btn.length) $btn.trigger('click');
+        $row.find('.ui-inputfield:first').trigger('focus');
+    }
+</h:outputScript>
+
+
 int index = items.indexOf(newItem);
 int pageSize = 10;
 int page = index / pageSize;
