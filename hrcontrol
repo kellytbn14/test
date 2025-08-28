@@ -1,6 +1,28 @@
 function focusLastEditableRow() {
     var dt = PF('carsTable');
 
+    // Ir a la última página
+    var paginator = dt.getPaginator();
+    var lastPage = paginator.cfg.pageCount - 1;
+    paginator.setPage(lastPage);
+
+    setTimeout(function() {
+        // Buscar la última fila visible con data-ri (atributo que pone PrimeFaces)
+        var $rows = dt.getTbody().children('tr[data-ri]');
+        var $lastRow = $rows.last();
+
+        if ($lastRow.length) {
+            // Forzar a modo edición
+            $lastRow.find('.ui-row-editor-pencil').click();
+        }
+    }, 300);
+}
+
+
+
+function focusLastEditableRow() {
+    var dt = PF('carsTable');
+
     // Navegar a la última página
     var paginator = dt.getPaginator();
     var lastPage = paginator.cfg.pageCount - 1;
