@@ -1,3 +1,23 @@
+function focusLastEditableRow() {
+    var dt = PF('carsTable');
+
+    // Navegar a la última página
+    var paginator = dt.getPaginator();
+    var lastPage = paginator.cfg.pageCount - 1;
+    paginator.setPage(lastPage);
+
+    // Esperar a que cargue la última página
+    setTimeout(function() {
+        var $lastRow = dt.getTbody().children('tr.ui-widget-content:last');
+        if ($lastRow.length) {
+            // Simular clic en el icono de edición
+            $lastRow.find('.ui-row-editor-pencil').click();
+        }
+    }, 300);
+}
+
+
+
 <h:outputScript>
     function activarNuevaFila() {
         const dt = PF('genericTable');
