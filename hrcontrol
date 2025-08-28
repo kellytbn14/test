@@ -1,3 +1,23 @@
+const dt = PF('genericTable');
+const $tbody = dt.getTbody();
+
+// Encuentra la fila que tenga la clase 'new-row' visible en la página actual
+const $newRow = $tbody.children('tr.new-row:visible').first();
+
+if ($newRow.length) {
+    if (dt.showRowEditors) {
+        dt.showRowEditors($newRow);
+    } else if (dt.switchToRowEdit) {
+        dt.switchToRowEdit($newRow);
+    } else {
+        const $btn = $newRow.find('.ui-row-editor-init, .ui-icon-pencil').first();
+        if ($btn.length) $btn.trigger('click');
+    }
+
+    $newRow.find('.ui-inputfield:first').trigger('focus');
+}
+
+
 <p:dataTable ... rowStyleClass="#{item.newRow ? 'new-row' : ''}">
 
 var $new = dt.getTbody().children('tr.new-row:visible').first();
