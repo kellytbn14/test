@@ -1,3 +1,24 @@
+PrimeFaces.current().executeScript(
+    "var dt = PF('genericTable');" +
+    "dt.getPaginator().setPage(" + page + ");" +
+
+    // suscribirse al Ajax que actualiza el tbody
+    "PrimeFaces.ajax.Queue.add({oncomplete: function() {" +
+        "var $tbody = $('#tableForm\\\\:genericTable_data');" +
+        "var $new = $tbody.children('tr:last');" +   // ahora sí es la nueva fila
+        "$new.addClass('new-row');" +
+        "console.log('new', $new);" +
+
+        "if (dt.showRowEditors) { dt.showRowEditors($new); }" +
+        "$new.find('.ui-inputfield:first').trigger('focus');" +
+
+        "var btn = document.getElementById('tableForm:addNewRowButton');" +
+        "if (btn) btn.disabled = true;" +
+    "}});"
+);
+
+
+
 function focusLastEditableRow() {
     var dt = PF('carsTable');
 
